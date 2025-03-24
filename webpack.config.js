@@ -6,7 +6,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    publicPath: '',
+    publicPath: '/',
+    clean: true
   },
   experiments: {
     asyncWebAssembly: true
@@ -23,6 +24,15 @@ module.exports = {
       {
         test: /\.wasm$/,
         type: 'asset/resource'
+      },
+      {
+        test: /\.worker\.(js|ts)$/,
+        use: { 
+          loader: 'worker-loader',
+          options: { 
+            inline: 'no-fallback'
+          }
+        }
       }
     ]
   },
@@ -41,8 +51,8 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: 'public', to: '' },
-        {
-          from: 'node_modules/@ffmpeg/core/dist/umd',
+        { 
+          from: path.resolve(__dirname, 'node_modules/@ffmpeg/core/dist/umd'),
           to: 'ffmpeg'
         }
       ],
