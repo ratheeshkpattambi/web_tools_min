@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --mode production",
-    "serve": "http-server dist -p 8080 --cors -c-1 -S -C ssl/cert.pem -K ssl/key.pem",
+    "build:netlify": "bash scripts/build.sh",
+    "serve": "http-server dist -p 8081 --cors -c-1 -S -C ssl/cert.pem -K ssl/key.pem",
     "dev:ssl": "bash scripts/generate-ssl.sh",
     "dev": "npm run dev:ssl && npm run build && npm run serve",
     "clean": "rm -rf dist ssl/*.pem"
@@ -22,5 +23,8 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "worker-loader": "^3.0.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

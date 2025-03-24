@@ -70,17 +70,25 @@ const load = async () => {
       updateProgress(percentage);
       addLog(`Processing: ${percentage}% complete`, logLevels.INFO);
     });
+
+    const baseURL = '/ffmpeg';
     
-    await ffmpeg.load({
-      coreURL: '/ffmpeg/ffmpeg-core.js',
-      wasmURL: '/ffmpeg/ffmpeg-core.wasm',
-      workerURL: '/ffmpeg/ffmpeg-core.worker.js'
-    });
+    try {
+      await ffmpeg.load({
+        coreURL: `${baseURL}/ffmpeg-core.js`,
+        wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+        workerURL: `${baseURL}/ffmpeg-core.worker.js`
+      });
+    } catch (loadError) {
+      console.error('FFmpeg load error:', loadError);
+      throw new Error(`Failed to load FFmpeg core files: ${loadError.message || 'Unknown error'}`);
+    }
     
     addLog('FFmpeg loaded successfully!', logLevels.SUCCESS);
     return ffmpeg;
   } catch (error) {
-    addLog(`Failed to load FFmpeg: ${error.message}`, logLevels.ERROR);
+    console.error('FFmpeg setup error:', error);
+    addLog(`Failed to load FFmpeg: ${error.message || 'Unknown error'}`, logLevels.ERROR);
     throw error;
   }
 };
@@ -98,14 +106,16 @@ const logToggle = document.getElementById('logToggle');
 // Toggle log visibility
 logHeader.addEventListener('click', () => {
   const isVisible = logContent.style.display === 'block';
-  showLogs(!isVisible);
+  logContent.style.display = isVisible ? 'none' : 'block';
+  logToggle.textContent = isVisible ? '▼' : '▲';
 });
 
 // Start loading FFmpeg when the page loads
 window.addEventListener('DOMContentLoaded', () => {
   addLog('Initializing video resizer...', logLevels.INFO);
   load().catch(error => {
-    addLog(`Initialization error: ${error.message}`, logLevels.ERROR);
+    console.error('Initialization error:', error);
+    addLog(`Initialization error: ${error.message || 'Unknown error'}`, logLevels.ERROR);
   });
 });
 
@@ -134,30 +144,35 @@ resizeBtn.addEventListener('click', async () => {
     
     addLog(`Processing video: ${inputFile.name} (${Math.round(inputFile.size / 1024 / 1024)}MB)`, logLevels.INFO);
     
-    // Write the file to FFmpeg's file system
-    await ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
-    addLog('Video loaded into FFmpeg', logLevels.INFO);
-    
-    // Run FFmpeg command
-    addLog(`Resizing to ${width}x${height}...`, logLevels.INFO);
-    await ffmpeg.exec([
-      '-i', inputFileName,
-      '-vf', `scale=${width}:${height}`,
-      '-c:a', 'copy',
-      outputFileName
-    ]);
-    
-    // Read the result
-    const data = await ffmpeg.readFile(outputFileName);
-    const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-    
-    // Display the result
-    preview.src = videoURL;
-    addLog('Video processing completed successfully!', logLevels.SUCCESS);
+    try {
+      // Write the file to FFmpeg's file system
+      await ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
+      addLog('Video loaded into FFmpeg', logLevels.INFO);
+      
+      // Run FFmpeg command
+      addLog(`Resizing to ${width}x${height}...`, logLevels.INFO);
+      await ffmpeg.exec([
+        '-i', inputFileName,
+        '-vf', `scale=${width}:${height}`,
+        '-c:a', 'copy',
+        outputFileName
+      ]);
+      
+      // Read the result
+      const data = await ffmpeg.readFile(outputFileName);
+      const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+      
+      // Display the result
+      preview.src = videoURL;
+      addLog('Video processing completed successfully!', logLevels.SUCCESS);
+    } catch (processError) {
+      console.error('Processing error:', processError);
+      throw new Error(`Error processing video: ${processError.message || 'Unknown error'}`);
+    }
     
   } catch (error) {
-    console.error(error);
-    addLog(`Error processing video: ${error.message}`, logLevels.ERROR);
+    console.error('Operation error:', error);
+    addLog(`Error processing video: ${error.message || 'Unknown error'}`, logLevels.ERROR);
   } finally {
     resizeBtn.disabled = false;
   }

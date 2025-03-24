@@ -23,14 +23,18 @@ module.exports = {
     rules: [
       {
         test: /\.wasm$/,
-        type: 'asset/resource'
+        type: 'asset/resource',
+        generator: {
+          filename: 'ffmpeg/[name][ext]'
+        }
       },
       {
         test: /\.worker\.(js|ts)$/,
         use: { 
           loader: 'worker-loader',
           options: { 
-            inline: 'no-fallback'
+            inline: 'no-fallback',
+            filename: 'ffmpeg/[name].js'
           }
         }
       }
@@ -53,7 +57,10 @@ module.exports = {
         { from: 'public', to: '' },
         { 
           from: path.resolve(__dirname, 'node_modules/@ffmpeg/core/dist/umd'),
-          to: 'ffmpeg'
+          to: 'ffmpeg',
+          globOptions: {
+            ignore: ['**/*.map']
+          }
         }
       ],
     }),
