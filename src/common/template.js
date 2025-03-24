@@ -29,6 +29,7 @@ export function generatePageHTML(title, content) {
             <a href="/">Home</a>
             <a href="/video">Video Tools</a>
             <a href="/image">Image Tools</a>
+            <a href="/text">Text Tools</a>
           </div>
         </nav>
       </header>
@@ -39,7 +40,17 @@ export function generatePageHTML(title, content) {
       </div>
       
       <footer>
-        <p>&copy; ${new Date().getFullYear()} WebTools - Simple Web-based Media Editing</p>
+        <div class="author-info">
+          <div class="author-details">
+            <img src="https://avatars.githubusercontent.com/u/8389908" alt="Ratheesh Kalarot" class="author-avatar">
+            <p>© Dr. Ratheesh Kalarot</p>
+            <p class="author-links">
+              <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank">Google Scholar</a>
+              <a href="https://github.com/ratheeshkpattambi/web_tools_min" target="_blank">GitHub</a>
+              <a href="https://www.linkedin.com/in/ratheesh-kalarot/" target="_blank">LinkedIn</a>
+            </p>
+          </div>
+        </div>
       </footer>
     </body>
     </html>
@@ -56,16 +67,10 @@ export function generatePageHTML(title, content) {
  */
 export function generateToolCard(title, description, icon, link) {
   return `
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <h2>${icon} ${title}</h2>
-      </div>
-      <div class="tool-card-body">
-        <p>${description}</p>
-      </div>
-      <div class="tool-card-footer">
-        <a href="${link}" class="btn">Open Tool</a>
-      </div>
-    </div>
+    <a href="${link}" class="tool-card">
+      <div class="tool-icon">${icon}</div>
+      <h2>${title}</h2>
+      <p>${description}</p>
+    </a>
   `;
 } 

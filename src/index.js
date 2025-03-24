@@ -3,55 +3,34 @@
  * Handles routing and page rendering
  */
 import { generatePageHTML, generateToolCard } from './common/template.js';
+import { pageHTML as videoResizeHTML, initPage as initVideoResize } from './video/resize.js';
+import { pageHTML as imageResizeHTML, initPage as initImageResize } from './image/resize.js';
+import { pageHTML as textEditorHTML, initPage as initTextEditor } from './text/editor.js';
 
 // Lazy-load module imports
 const loadVideoResize = () => import('./video/resize.js');
 const loadImageResize = () => import('./image/resize.js');
+const loadTextEditor = () => import('./text/editor.js');
 
 /**
  * Generate the home page HTML
  * @returns {string} - The home page HTML
  */
 function generateHomePage() {
-  const videoToolsSection = `
-    <section>
-      <h2>Video Tools</h2>
-      <div class="tool-cards">
-        ${generateToolCard(
-          'Video Resize',
-          'Resize any video file to your desired dimensions with high quality compression.',
-          '📹',
-          '/video/resize'
-        )}
-      </div>
-    </section>
-  `;
-
-  const imageToolsSection = `
-    <section>
-      <h2>Image Tools</h2>
-      <div class="tool-cards">
-        ${generateToolCard(
-          'Image Resize',
-          'Quickly resize images with options for format and quality.',
-          '🖼️',
-          '/image/resize'
-        )}
-      </div>
-    </section>
-  `;
-
   const content = `
     <div class="hero">
-      <h2>Online Media Editing Tools</h2>
-      <p>Free, browser-based tools for video and image editing - no uploads required!</p>
+      <h1>Web Tools</h1>
+      <p>Simple browser-based tools for your needs</p>
     </div>
     
-    ${videoToolsSection}
-    ${imageToolsSection}
+    <div class="tools-grid">
+      ${generateToolCard('Video Resize', 'Resize videos', '📹', '/video/resize')}
+      ${generateToolCard('Image Resize', 'Resize images', '🖼️', '/image/resize')}
+      ${generateToolCard('Text Editor', 'Edit text', '📝', '/text/editor')}
+    </div>
   `;
 
-  return generatePageHTML('Media Editing Tools', content);
+  return generatePageHTML('Web Tools', content);
 }
 
 /**
@@ -67,7 +46,7 @@ async function handleRoute() {
   try {
     if (path === '/' || path === '/index.html') {
       // Render home page
-      document.title = 'Media Editing Tools';
+      document.title = 'Web Tools';
       
       // Generate and set the home page HTML
       appContainer.innerHTML = generateHomePage();
@@ -76,34 +55,59 @@ async function handleRoute() {
       const style = document.createElement('style');
       style.textContent = `
         .hero {
-          background-color: var(--primary-color);
-          color: white;
-          padding: 40px 20px;
           text-align: center;
-          border-radius: 8px;
-          margin-bottom: 30px;
+          margin-bottom: 3rem;
         }
         
-        .hero h2 {
-          font-size: 28px;
-          margin-bottom: 10px;
+        .hero h1 {
+          font-size: 2.5rem;
+          margin-bottom: 0.5rem;
+          color: #333;
         }
         
-        .tool-cards {
+        .hero p {
+          color: #666;
+          font-size: 1.1rem;
+        }
+        
+        .tools-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 20px;
-          margin-bottom: 30px;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+          max-width: 800px;
+          margin: 0 auto;
         }
         
-        section {
-          margin-bottom: 40px;
+        .tool-card {
+          background: white;
+          border-radius: 8px;
+          padding: 1.5rem;
+          text-align: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          transition: transform 0.2s, box-shadow 0.2s;
+          cursor: pointer;
         }
         
-        section h2 {
-          margin-bottom: 20px;
-          border-bottom: 1px solid var(--border-color);
-          padding-bottom: 10px;
+        .tool-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tool-card h2 {
+          margin: 0.5rem 0;
+          font-size: 1.2rem;
+          color: #333;
+        }
+        
+        .tool-card p {
+          margin: 0;
+          color: #666;
+          font-size: 0.9rem;
+        }
+        
+        .tool-card a {
+          text-decoration: none;
+          color: inherit;
         }
       `;
       document.head.appendChild(style);
@@ -122,13 +126,20 @@ async function handleRoute() {
       document.title = 'Image Resize Tool';
       imageModule.initPage();
       
+    } else if (path === '/text/editor') {
+      // Load and render the text editor tool
+      const textModule = await loadTextEditor();
+      appContainer.innerHTML = textModule.pageHTML;
+      document.title = 'Text Editor Tool';
+      textModule.initPage();
+      
     } else if (path === '/video') {
       // Render video tools index page
       const content = `
         <div class="tool-cards">
           ${generateToolCard(
             'Video Resize',
-            'Resize any video file to your desired dimensions with high quality compression.',
+            'Resize videos',
             '📹',
             '/video/resize'
           )}
@@ -143,7 +154,7 @@ async function handleRoute() {
         <div class="tool-cards">
           ${generateToolCard(
             'Image Resize',
-            'Quickly resize images with options for format and quality.',
+            'Resize images',
             '🖼️',
             '/image/resize'
           )}
@@ -151,6 +162,21 @@ async function handleRoute() {
       `;
       
       appContainer.innerHTML = generatePageHTML('Image Tools', content);
+      
+    } else if (path === '/text') {
+      // Render text tools index page
+      const content = `
+        <div class="tool-cards">
+          ${generateToolCard(
+            'Text Editor',
+            'Edit text',
+            '📝',
+            '/text/editor'
+          )}
+        </div>
+      `;
+      
+      appContainer.innerHTML = generatePageHTML('Text Tools', content);
       
     } else {
       // 404 page
