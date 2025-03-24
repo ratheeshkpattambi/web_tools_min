@@ -10,20 +10,6 @@ const logLevels = {
   SUCCESS: 'success'
 };
 
-function showLogs(show = true) {
-  const logContent = document.getElementById('logContent');
-  const logToggle = document.getElementById('logToggle');
-  const logSection = document.querySelector('.log-section');
-  
-  logContent.style.display = show ? 'block' : 'none';
-  logToggle.textContent = show ? '▲' : '▼';
-  if (show) {
-    logSection.classList.add('expanded');
-  } else {
-    logSection.classList.remove('expanded');
-  }
-}
-
 function addLog(message, level = logLevels.INFO) {
   const logContent = document.getElementById('logContent');
   const entry = document.createElement('div');
@@ -32,9 +18,46 @@ function addLog(message, level = logLevels.INFO) {
   logContent.appendChild(entry);
   logContent.scrollTop = logContent.scrollHeight;
   
-  // Show logs when adding error messages or during initial loading
   if (level === logLevels.ERROR || message.includes('Loading FFmpeg')) {
     showLogs(true);
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function updateFileInfo(file) {
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const resizeBtn = document.getElementById('resizeBtn');
+  const preview = document.getElementById('preview');
+
+  if (file) {
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    fileInfo.classList.add('active');
+    resizeBtn.disabled = false;
+
+    // Show video preview
+    const videoURL = URL.createObjectURL(file);
+    preview.src = videoURL;
+    preview.classList.add('active');
+    preview.onloadedmetadata = () => {
+      // Auto-fill dimensions with video's original size
+      document.getElementById('width').value = preview.videoWidth;
+      document.getElementById('height').value = preview.videoHeight;
+    };
+  } else {
+    fileInfo.classList.remove('active');
+    preview.classList.remove('active');
+    preview.src = '';
+    resizeBtn.disabled = true;
   }
 }
 
@@ -47,11 +70,13 @@ function updateProgress(progress) {
   progressContainer.style.display = 'block';
   progressFill.style.width = `${progress}%`;
   progressText.textContent = `Processing: ${progress}%`;
-  
-  // Show logs during processing
-  if (progress > 0 && progress < 100) {
-    showLogs(true);
-  }
+}
+
+function showLogs(show = true) {
+  const logContent = document.getElementById('logContent');
+  const logToggle = document.getElementById('logToggle');
+  logContent.style.display = show ? 'block' : 'none';
+  logToggle.textContent = show ? '▲' : '▼';
 }
 
 const load = async () => {
@@ -93,6 +118,47 @@ const load = async () => {
   }
 };
 
+// Setup drag and drop
+const dropZone = document.getElementById('dropZone');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+  dropZone.classList.add('drag-over');
+}
+
+function unhighlight(e) {
+  dropZone.classList.remove('drag-over');
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+  const dt = e.dataTransfer;
+  const file = dt.files[0];
+  if (file && file.type.startsWith('video/')) {
+    document.getElementById('videoInput').files = dt.files;
+    updateFileInfo(file);
+  } else {
+    addLog('Please drop a video file', logLevels.ERROR);
+  }
+}
+
 // DOM elements
 const videoInput = document.getElementById('videoInput');
 const widthInput = document.getElementById('width');
@@ -100,14 +166,20 @@ const heightInput = document.getElementById('height');
 const resizeBtn = document.getElementById('resizeBtn');
 const preview = document.getElementById('preview');
 const logHeader = document.getElementById('logHeader');
-const logContent = document.getElementById('logContent');
-const logToggle = document.getElementById('logToggle');
+
+// File input change handler
+videoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    updateFileInfo(file);
+  }
+});
 
 // Toggle log visibility
 logHeader.addEventListener('click', () => {
+  const logContent = document.getElementById('logContent');
   const isVisible = logContent.style.display === 'block';
-  logContent.style.display = isVisible ? 'none' : 'block';
-  logToggle.textContent = isVisible ? '▼' : '▲';
+  showLogs(!isVisible);
 });
 
 // Start loading FFmpeg when the page loads
@@ -130,6 +202,7 @@ resizeBtn.addEventListener('click', async () => {
   
   try {
     resizeBtn.disabled = true;
+    dropZone.style.pointerEvents = 'none';
     const progressContainer = document.getElementById('progressContainer');
     progressContainer.style.display = 'block';
     updateProgress(0);
@@ -142,7 +215,7 @@ resizeBtn.addEventListener('click', async () => {
     const inputFileName = 'input.mp4';
     const outputFileName = 'output.mp4';
     
-    addLog(`Processing video: ${inputFile.name} (${Math.round(inputFile.size / 1024 / 1024)}MB)`, logLevels.INFO);
+    addLog(`Processing video: ${inputFile.name} (${formatFileSize(inputFile.size)})`, logLevels.INFO);
     
     try {
       // Write the file to FFmpeg's file system
@@ -164,6 +237,7 @@ resizeBtn.addEventListener('click', async () => {
       
       // Display the result
       preview.src = videoURL;
+      preview.classList.add('active');
       addLog('Video processing completed successfully!', logLevels.SUCCESS);
     } catch (processError) {
       console.error('Processing error:', processError);
@@ -175,5 +249,6 @@ resizeBtn.addEventListener('click', async () => {
     addLog(`Error processing video: ${error.message || 'Unknown error'}`, logLevels.ERROR);
   } finally {
     resizeBtn.disabled = false;
+    dropZone.style.pointerEvents = 'auto';
   }
 }); 
