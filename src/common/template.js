@@ -42,7 +42,7 @@ export function generatePageHTML(title, content) {
       <footer>
         <div class="author-info">
           <div class="author-details">
-            <img src="https://avatars.githubusercontent.com/u/8389908" alt="Ratheesh Kalarot" class="author-avatar">
+            <img src="https://avatars.githubusercontent.com/u/8389908" alt="Ratheesh Kalarot" class="author-avatar" loading="eager" fetchpriority="high" decoding="async">
             <p>© Dr. Ratheesh Kalarot</p>
             <p class="author-links">
               <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank">Google Scholar</a>
