@@ -3,274 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Resizer v1.0.0 (Build <%= Date.now() %>)</title>
+    <title>Media Editing Tools</title>
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --error-color: #d32f2f;
-            --info-color: #1976d2;
-            --success-color: #388e3c;
-            --border-radius: 8px;
-            --shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
+        /* Initial loading styles */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            padding-bottom: 60px;
-            background: #f9f9f9;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
         }
-
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .upload-container {
-            border: 2px dashed #ccc;
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            text-align: center;
-            margin: 1rem 0;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .upload-container:hover, .upload-container.drag-over {
-            border-color: var(--primary-color);
-            background: #f0f9f0;
-        }
-
-        .upload-container input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            color: #666;
-            margin-bottom: 1rem;
-        }
-
-        .dimensions-container {
+        
+        .loading {
             display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            align-items: center;
             justify-content: center;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        input[type="number"] {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100px;
-            font-size: 1rem;
-        }
-
-        button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            width: 100%;
-            margin: 1rem 0;
-        }
-
-        button:hover {
-            background: #388e3c;
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .video-preview {
-            max-width: 100%;
-            border-radius: var(--border-radius);
-            margin-top: 1rem;
-            background: #000;
-            display: none;
-        }
-
-        .video-preview.active {
-            display: block;
-        }
-
-        .progress-container {
-            display: none;
-            margin: 1rem 0;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            text-align: center;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .log-section {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .log-header {
-            background-color: #f8f8f8;
-            padding: 0.8rem 1.5rem;
-            cursor: pointer;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin: 0 auto;
-            max-width: 800px;
+            height: 100vh;
+            flex-direction: column;
         }
-
-        .log-content {
-            display: none;
-            background-color: #fff;
-            padding: 1rem 1.5rem;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
-            white-space: pre-wrap;
-            margin: 0 auto;
-            max-width: 800px;
-            border-top: 1px solid #eee;
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4a90e2;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
-
-        .log-entry {
-            margin: 0.3rem 0;
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .log-entry.error { background-color: #ffebee; color: var(--error-color); }
-        .log-entry.info { background-color: #e3f2fd; color: var(--info-color); }
-        .log-entry.success { background-color: #e8f5e9; color: var(--success-color); }
-
-        .version {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            font-size: 0.8rem;
-            color: #666;
-            background: white;
-            padding: 0.5rem 0.8rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .file-info {
-            display: none;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #f8f8f8;
-            border-radius: var(--border-radius);
-        }
-
-        .file-info.active {
-            display: block;
-        }
-
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            .container { padding: 1rem; }
-            .dimensions-container { flex-direction: column; }
-            .version { display: none; }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="version">v1.0.0 (Build <%= Date.now() %>)</div>
-    <div class="container">
-        <h1>Video Resizer</h1>
-        
-        <div class="upload-container" id="dropZone">
-            <div class="upload-icon">📁</div>
-            <p>Drag and drop your video here or click to browse</p>
-            <input type="file" id="videoInput" accept="video/*">
+    <div id="app">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading application...</p>
         </div>
-
-        <div class="file-info" id="fileInfo">
-            <strong>Selected file:</strong> <span id="fileName"></span>
-            <br>
-            <strong>Size:</strong> <span id="fileSize"></span>
-        </div>
-
-        <div class="dimensions-container">
-            <div class="input-group">
-                <label for="width">Width</label>
-                <input type="number" id="width" value="640" min="1">
-            </div>
-            <div class="input-group">
-                <label for="height">Height</label>
-                <input type="number" id="height" value="480" min="1">
-            </div>
-        </div>
-
-        <button id="resizeBtn" disabled>Resize Video</button>
-        
-        <div id="progressContainer" class="progress-container">
-            <div class="progress-bar">
-                <div id="progressFill" class="progress-fill"></div>
-            </div>
-            <div id="progressText" class="progress-text">Processing: 0%</div>
-        </div>
-
-        <video id="preview" class="video-preview" controls></video>
     </div>
-
-    <div class="log-section">
-        <div class="log-header" id="logHeader">
-            <span>Operation Logs</span>
-            <span id="logToggle">▼</span>
-        </div>
-        <div id="logContent" class="log-content"></div>
-    </div>
-    <script src="bundle.js"></script>
+    
+    <script type="module" src="/bundle.js"></script>
 </body>
 </html> 

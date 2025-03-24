@@ -1,64 +1,71 @@
-# Video Resizer
+# Web Media Tools
 
-A web application that uses FFmpeg.wasm to resize videos directly in the browser.
+A collection of browser-based media editing tools for video and image processing. The application is designed to be modular, allowing users to access only the tools they need without loading unnecessary dependencies.
 
 ## Features
 
-- Browser-based video resizing
-- No server-side processing required
-- Real-time progress tracking
-- Detailed operation logs
+- **Video Tools** - Tools that utilize WASM for advanced video processing
+  - **Video Resize** - Resize videos to any dimensions while maintaining quality
+
+- **Image Tools** - Lightweight tools that use browser APIs (no WASM)
+  - **Image Resize** - Resize images with options for format and quality
+
+## Architecture
+
+The application is structured to ensure efficient resource usage:
+
+- `/video` - Contains all video-related tools and WASM dependencies
+- `/image` - Contains all image-related tools (no WASM dependencies)
+- `/common` - Shared utilities and styles
+
+Each tool is accessible directly via URL (e.g., `/video/resize` or `/image/resize`). The application only loads the necessary dependencies for each tool, meaning WASM is only loaded when using video tools.
 
 ## Development
 
-1. Install dependencies:
-```bash
-npm install
-```
+### Prerequisites
 
-2. Start development server:
-```bash
-npm run build
-npm run serve
-```
+- Node.js (v20.0.0 or higher)
+- npm
 
-3. Visit https://localhost:8080
+### Setup
 
-## Production Deployment
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-### Local Build
+### Development Commands
 
-1. Build the project:
-```bash
-npm run build
-```
+- **Development server with hot reload**:
+  ```
+  npm run dev
+  ```
 
-2. The `dist` directory will contain the production-ready files.
+- **Build for production**:
+  ```
+  npm run build
+  ```
 
-### Netlify Deployment
+- **Preview production build**:
+  ```
+  npm run start
+  ```
 
-1. Push your code to a Git repository
+### Browser Requirements
 
-2. Connect to Netlify:
-   - Sign in to Netlify
-   - Click "New site from Git"
-   - Choose your repository
-   - Build command: `npm run build`
-   - Publish directory: `dist`
+This application requires a modern browser with the following features:
+- WebAssembly (for video tools)
+- SharedArrayBuffer (for video tools)
+- Canvas API (for image tools)
+- Web Workers
 
-3. The necessary headers for WASM support are configured in `netlify.toml`
+## Dependencies
 
-## Security Notes
-
-- SSL certificates (`cert.pem` and `key.pem`) are for local development only
-- Never commit SSL certificates to version control
-- Production SSL is handled by Netlify automatically
-
-## Environment Requirements
-
-- Node.js 20 or later
-- Modern browser with WebAssembly support
+- [@ffmpeg/core](https://github.com/ffmpegwasm/ffmpeg.wasm) - WebAssembly build of FFmpeg
+- [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm) - JavaScript interface to FFmpeg WASM
+- [@ffmpeg/util](https://github.com/ffmpegwasm/ffmpeg.wasm) - Utilities for FFmpeg WASM
 
 ## License
 
-MIT 
+This project is licensed under the MIT License - see the LICENSE file for details. 

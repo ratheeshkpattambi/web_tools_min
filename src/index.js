@@ -1,254 +1,209 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
+/**
+ * Main entry point for the application
+ * Handles routing and page rendering
+ */
+import { generatePageHTML, generateToolCard } from './common/template.js';
 
-let ffmpeg = null;
+// Lazy-load module imports
+const loadVideoResize = () => import('./video/resize.js');
+const loadImageResize = () => import('./image/resize.js');
 
-// Logging functionality
-const logLevels = {
-  INFO: 'info',
-  ERROR: 'error',
-  SUCCESS: 'success'
-};
+/**
+ * Generate the home page HTML
+ * @returns {string} - The home page HTML
+ */
+function generateHomePage() {
+  const videoToolsSection = `
+    <section>
+      <h2>Video Tools</h2>
+      <div class="tool-cards">
+        ${generateToolCard(
+          'Video Resize',
+          'Resize any video file to your desired dimensions with high quality compression.',
+          '📹',
+          '/video/resize'
+        )}
+      </div>
+    </section>
+  `;
 
-function addLog(message, level = logLevels.INFO) {
-  const logContent = document.getElementById('logContent');
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${level}`;
-  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-  logContent.appendChild(entry);
-  logContent.scrollTop = logContent.scrollHeight;
+  const imageToolsSection = `
+    <section>
+      <h2>Image Tools</h2>
+      <div class="tool-cards">
+        ${generateToolCard(
+          'Image Resize',
+          'Quickly resize images with options for format and quality.',
+          '🖼️',
+          '/image/resize'
+        )}
+      </div>
+    </section>
+  `;
+
+  const content = `
+    <div class="hero">
+      <h2>Online Media Editing Tools</h2>
+      <p>Free, browser-based tools for video and image editing - no uploads required!</p>
+    </div>
+    
+    ${videoToolsSection}
+    ${imageToolsSection}
+  `;
+
+  return generatePageHTML('Media Editing Tools', content);
+}
+
+/**
+ * Handle routing
+ */
+async function handleRoute() {
+  const path = window.location.pathname;
   
-  if (level === logLevels.ERROR || message.includes('Loading FFmpeg')) {
-    showLogs(true);
-  }
-}
-
-function formatFileSize(bytes) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function updateFileInfo(file) {
-  const fileInfo = document.getElementById('fileInfo');
-  const fileName = document.getElementById('fileName');
-  const fileSize = document.getElementById('fileSize');
-  const resizeBtn = document.getElementById('resizeBtn');
-  const preview = document.getElementById('preview');
-
-  if (file) {
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
-    fileInfo.classList.add('active');
-    resizeBtn.disabled = false;
-
-    // Show video preview
-    const videoURL = URL.createObjectURL(file);
-    preview.src = videoURL;
-    preview.classList.add('active');
-    preview.onloadedmetadata = () => {
-      // Auto-fill dimensions with video's original size
-      document.getElementById('width').value = preview.videoWidth;
-      document.getElementById('height').value = preview.videoHeight;
-    };
-  } else {
-    fileInfo.classList.remove('active');
-    preview.classList.remove('active');
-    preview.src = '';
-    resizeBtn.disabled = true;
-  }
-}
-
-// Progress bar functionality
-function updateProgress(progress) {
-  const progressContainer = document.getElementById('progressContainer');
-  const progressFill = document.getElementById('progressFill');
-  const progressText = document.getElementById('progressText');
-  
-  progressContainer.style.display = 'block';
-  progressFill.style.width = `${progress}%`;
-  progressText.textContent = `Processing: ${progress}%`;
-}
-
-function showLogs(show = true) {
-  const logContent = document.getElementById('logContent');
-  const logToggle = document.getElementById('logToggle');
-  logContent.style.display = show ? 'block' : 'none';
-  logToggle.textContent = show ? '▲' : '▼';
-}
-
-const load = async () => {
-  if (ffmpeg) return ffmpeg;
+  // Get the main content container
+  const appContainer = document.getElementById('app');
+  if (!appContainer) return;
   
   try {
-    addLog('Loading FFmpeg...', logLevels.INFO);
-    ffmpeg = new FFmpeg();
-    
-    ffmpeg.on('log', ({ message }) => {
-      addLog(message, logLevels.INFO);
-    });
-
-    ffmpeg.on('progress', ({ progress, time }) => {
-      const percentage = Math.round(progress * 100);
-      updateProgress(percentage);
-      addLog(`Processing: ${percentage}% complete`, logLevels.INFO);
-    });
-
-    const baseURL = '/ffmpeg';
-    
-    try {
-      await ffmpeg.load({
-        coreURL: `${baseURL}/ffmpeg-core.js`,
-        wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-        workerURL: `${baseURL}/ffmpeg-core.worker.js`
-      });
-    } catch (loadError) {
-      console.error('FFmpeg load error:', loadError);
-      throw new Error(`Failed to load FFmpeg core files: ${loadError.message || 'Unknown error'}`);
+    if (path === '/' || path === '/index.html') {
+      // Render home page
+      document.title = 'Media Editing Tools';
+      
+      // Generate and set the home page HTML
+      appContainer.innerHTML = generateHomePage();
+      
+      // Add styles for the home page
+      const style = document.createElement('style');
+      style.textContent = `
+        .hero {
+          background-color: var(--primary-color);
+          color: white;
+          padding: 40px 20px;
+          text-align: center;
+          border-radius: 8px;
+          margin-bottom: 30px;
+        }
+        
+        .hero h2 {
+          font-size: 28px;
+          margin-bottom: 10px;
+        }
+        
+        .tool-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+        
+        section {
+          margin-bottom: 40px;
+        }
+        
+        section h2 {
+          margin-bottom: 20px;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 10px;
+        }
+      `;
+      document.head.appendChild(style);
+      
+    } else if (path === '/video/resize') {
+      // Load and render the video resize tool
+      const videoModule = await loadVideoResize();
+      appContainer.innerHTML = videoModule.pageHTML;
+      document.title = 'Video Resize Tool';
+      videoModule.initPage();
+      
+    } else if (path === '/image/resize') {
+      // Load and render the image resize tool
+      const imageModule = await loadImageResize();
+      appContainer.innerHTML = imageModule.pageHTML;
+      document.title = 'Image Resize Tool';
+      imageModule.initPage();
+      
+    } else if (path === '/video') {
+      // Render video tools index page
+      const content = `
+        <div class="tool-cards">
+          ${generateToolCard(
+            'Video Resize',
+            'Resize any video file to your desired dimensions with high quality compression.',
+            '📹',
+            '/video/resize'
+          )}
+        </div>
+      `;
+      
+      appContainer.innerHTML = generatePageHTML('Video Tools', content);
+      
+    } else if (path === '/image') {
+      // Render image tools index page
+      const content = `
+        <div class="tool-cards">
+          ${generateToolCard(
+            'Image Resize',
+            'Quickly resize images with options for format and quality.',
+            '🖼️',
+            '/image/resize'
+          )}
+        </div>
+      `;
+      
+      appContainer.innerHTML = generatePageHTML('Image Tools', content);
+      
+    } else {
+      // 404 page
+      const content = `
+        <div style="text-align: center; padding: 50px 0;">
+          <h2>Page Not Found</h2>
+          <p>Sorry, the page you requested could not be found.</p>
+          <a href="/" class="btn">Return to Home</a>
+        </div>
+      `;
+      
+      appContainer.innerHTML = generatePageHTML('404 Not Found', content);
     }
-    
-    addLog('FFmpeg loaded successfully!', logLevels.SUCCESS);
-    return ffmpeg;
   } catch (error) {
-    console.error('FFmpeg setup error:', error);
-    addLog(`Failed to load FFmpeg: ${error.message || 'Unknown error'}`, logLevels.ERROR);
-    throw error;
-  }
-};
-
-// Setup drag and drop
-const dropZone = document.getElementById('dropZone');
-
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-  dropZone.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-  e.preventDefault();
-  e.stopPropagation();
-}
-
-['dragenter', 'dragover'].forEach(eventName => {
-  dropZone.addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-  dropZone.addEventListener(eventName, unhighlight, false);
-});
-
-function highlight(e) {
-  dropZone.classList.add('drag-over');
-}
-
-function unhighlight(e) {
-  dropZone.classList.remove('drag-over');
-}
-
-dropZone.addEventListener('drop', handleDrop, false);
-
-function handleDrop(e) {
-  const dt = e.dataTransfer;
-  const file = dt.files[0];
-  if (file && file.type.startsWith('video/')) {
-    document.getElementById('videoInput').files = dt.files;
-    updateFileInfo(file);
-  } else {
-    addLog('Please drop a video file', logLevels.ERROR);
+    console.error('Error handling route:', error);
+    appContainer.innerHTML = `
+      <div style="text-align: center; padding: 50px 0;">
+        <h2>Error</h2>
+        <p>Sorry, an error occurred: ${error.message}</p>
+        <a href="/" class="btn">Return to Home</a>
+      </div>
+    `;
   }
 }
 
-// DOM elements
-const videoInput = document.getElementById('videoInput');
-const widthInput = document.getElementById('width');
-const heightInput = document.getElementById('height');
-const resizeBtn = document.getElementById('resizeBtn');
-const preview = document.getElementById('preview');
-const logHeader = document.getElementById('logHeader');
-
-// File input change handler
-videoInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    updateFileInfo(file);
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+  // Create the app container if it doesn't exist
+  let appContainer = document.getElementById('app');
+  if (!appContainer) {
+    appContainer = document.createElement('div');
+    appContainer.id = 'app';
+    document.body.appendChild(appContainer);
   }
-});
-
-// Toggle log visibility
-logHeader.addEventListener('click', () => {
-  const logContent = document.getElementById('logContent');
-  const isVisible = logContent.style.display === 'block';
-  showLogs(!isVisible);
-});
-
-// Start loading FFmpeg when the page loads
-window.addEventListener('DOMContentLoaded', () => {
-  addLog('Initializing video resizer...', logLevels.INFO);
-  load().catch(error => {
-    console.error('Initialization error:', error);
-    addLog(`Initialization error: ${error.message || 'Unknown error'}`, logLevels.ERROR);
+  
+  // Initial route handling
+  handleRoute();
+  
+  // Handle navigation
+  window.addEventListener('popstate', handleRoute);
+  
+  // Intercept link clicks for SPA navigation
+  document.addEventListener('click', (e) => {
+    // Check if the clicked element is an anchor tag
+    if (e.target.tagName === 'A') {
+      const href = e.target.getAttribute('href');
+      
+      // Only intercept internal links
+      if (href && href.startsWith('/') && !href.startsWith('//')) {
+        e.preventDefault();
+        window.history.pushState(null, '', href);
+        handleRoute();
+      }
+    }
   });
-});
-
-resizeBtn.addEventListener('click', async () => {
-  if (!videoInput.files.length) {
-    addLog('Please select a video file first!', logLevels.ERROR);
-    return;
-  }
-
-  const width = widthInput.value;
-  const height = heightInput.value;
-  
-  try {
-    resizeBtn.disabled = true;
-    dropZone.style.pointerEvents = 'none';
-    const progressContainer = document.getElementById('progressContainer');
-    progressContainer.style.display = 'block';
-    updateProgress(0);
-    
-    // Load FFmpeg
-    const ffmpeg = await load();
-    
-    // Read the file
-    const inputFile = videoInput.files[0];
-    const inputFileName = 'input.mp4';
-    const outputFileName = 'output.mp4';
-    
-    addLog(`Processing video: ${inputFile.name} (${formatFileSize(inputFile.size)})`, logLevels.INFO);
-    
-    try {
-      // Write the file to FFmpeg's file system
-      await ffmpeg.writeFile(inputFileName, await fetchFile(inputFile));
-      addLog('Video loaded into FFmpeg', logLevels.INFO);
-      
-      // Run FFmpeg command
-      addLog(`Resizing to ${width}x${height}...`, logLevels.INFO);
-      await ffmpeg.exec([
-        '-i', inputFileName,
-        '-vf', `scale=${width}:${height}`,
-        '-c:a', 'copy',
-        outputFileName
-      ]);
-      
-      // Read the result
-      const data = await ffmpeg.readFile(outputFileName);
-      const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-      
-      // Display the result
-      preview.src = videoURL;
-      preview.classList.add('active');
-      addLog('Video processing completed successfully!', logLevels.SUCCESS);
-    } catch (processError) {
-      console.error('Processing error:', processError);
-      throw new Error(`Error processing video: ${processError.message || 'Unknown error'}`);
-    }
-    
-  } catch (error) {
-    console.error('Operation error:', error);
-    addLog(`Error processing video: ${error.message || 'Unknown error'}`, logLevels.ERROR);
-  } finally {
-    resizeBtn.disabled = false;
-    dropZone.style.pointerEvents = 'auto';
-  }
 }); 

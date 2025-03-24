@@ -22,10 +22,14 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
         test: /\.wasm$/,
         type: 'asset/resource',
         generator: {
-          filename: 'ffmpeg/[name][ext]'
+          filename: 'video/ffmpeg/[name][ext]'
         }
       },
       {
@@ -34,7 +38,7 @@ module.exports = {
           loader: 'worker-loader',
           options: { 
             inline: 'no-fallback',
-            filename: 'ffmpeg/[name].js'
+            filename: 'video/ffmpeg/[name].js'
           }
         }
       }
@@ -50,14 +54,19 @@ module.exports = {
     },
     compress: true,
     port: 3001,
+    historyApiFallback: true
   },
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
         { from: 'public', to: '' },
         { 
+          from: path.resolve(__dirname, 'src/common/styles.css'),
+          to: 'common/styles.css'
+        },
+        { 
           from: path.resolve(__dirname, 'node_modules/@ffmpeg/core/dist/umd'),
-          to: 'ffmpeg',
+          to: 'video/ffmpeg',
           globOptions: {
             ignore: ['**/*.map']
           }
