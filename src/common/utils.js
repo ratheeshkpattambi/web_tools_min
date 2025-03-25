@@ -10,18 +10,38 @@ export const logLevels = {
 };
 
 /**
- * Add a log message to the log content area
+ * Initialize log functionality
+ */
+export function showLogs() {
+  const logHeader = document.getElementById('logHeader');
+  const logContent = document.getElementById('logContent');
+  const logToggle = document.getElementById('logToggle');
+
+  if (logHeader && logContent && logToggle) {
+    // Set initial state
+    logContent.classList.remove('active');
+    logToggle.textContent = '▼';
+
+    logHeader.addEventListener('click', () => {
+      logContent.classList.toggle('active');
+      logToggle.textContent = logContent.classList.contains('active') ? '▲' : '▼';
+    });
+  }
+}
+
+/**
+ * Add a log message
  * @param {string} message - The message to log
- * @param {string} type - The type of message (info, success, error)
+ * @param {string} type - The type of log (info, success, error)
  */
 export function addLog(message, type = 'info') {
-  const logContent = document.querySelector('.log-content');
+  const logContent = document.getElementById('logContent');
   if (!logContent) return;
 
-  const logEntry = document.createElement('div');
-  logEntry.className = `log-entry ${type}`;
-  logEntry.textContent = message;
-  logContent.appendChild(logEntry);
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = message;
+  logContent.appendChild(entry);
   logContent.scrollTop = logContent.scrollHeight;
 }
 
@@ -54,22 +74,6 @@ export function updateProgress(percentage) {
   }
   if (progressText) {
     progressText.textContent = `${percentage}%`;
-  }
-}
-
-/**
- * Show/hide logs when header is clicked
- */
-export function showLogs() {
-  const logHeader = document.querySelector('.log-header');
-  const logContent = document.querySelector('.log-content');
-  const logToggle = document.querySelector('#logToggle');
-  
-  if (logHeader && logContent && logToggle) {
-    logHeader.addEventListener('click', () => {
-      logContent.style.display = logContent.style.display === 'none' ? 'block' : 'none';
-      logToggle.textContent = logContent.style.display === 'none' ? '▼' : '▲';
-    });
   }
 }
 

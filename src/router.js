@@ -260,6 +260,10 @@ function generateTextContent(path) {
 function generateHomeContent() {
   return `
     <div class="tool-container">
+      <div class="try-it-out">
+        <p>Try it out at: <a href="https://sparkly-boba-1be821.netlify.app/" target="_blank">https://sparkly-boba-1be821.netlify.app/</a></p>
+      </div>
+
       <section class="tools-section">
         <h2>Video Tools</h2>
         <p class="section-description">Process and convert your videos with ease</p>
