@@ -22,10 +22,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core']
-  },
-  resolve: {
-    alias: {
-      '@': '/src'
-    }
   }
 }); 
