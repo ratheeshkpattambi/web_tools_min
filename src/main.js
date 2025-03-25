@@ -1,7 +1,7 @@
 import { handleRoute } from './router.js';
 import './styles/main.css';
 
-// Initial route
+// Handle initial route
 handleRoute(window.location.pathname);
 
 // Handle navigation
@@ -11,10 +11,11 @@ window.addEventListener('popstate', () => {
 
 // Handle link clicks
 document.addEventListener('click', (e) => {
-  if (e.target.matches('a[href^="/"]')) {
+  const link = e.target.closest('a');
+  if (link && link.href.startsWith(window.location.origin)) {
     e.preventDefault();
-    const href = e.target.getAttribute('href');
-    window.history.pushState({}, '', href);
-    handleRoute(href);
+    const path = new URL(link.href).pathname;
+    window.history.pushState({}, '', path);
+    handleRoute(path);
   }
 }); 

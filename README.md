@@ -1,79 +1,34 @@
-# Web Media Tools
+# Web Tools
 
-A collection of browser-based media editing tools for video and image processing. Built with Vite and modern web technologies.
+A collection of browser-based tools for video, image, and text processing.
 
-## Features
+## Local Development
 
-- **Video Tools**
-  - Video Resize: Browser-based video resizing using WASM-powered FFmpeg
-- **Image Tools**
-  - Image Resize: Client-side image resizing with quality control
-- **Text Tools**
-  - Text Editor: Simple browser-based text editor
+```bash
+# Clean and reinstall
+rm -rf node_modules package-lock.json dist
+npm install
 
-## Tech Stack
+# Start dev server
+npm run dev
+```
 
-- Vite for build and development
-- FFmpeg.wasm for video processing
-- Modern JavaScript (ES Modules)
-- CSS Variables for theming
+## Critical Dependencies
+The video tools require FFmpeg WASM, which is loaded from:
+```
+https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm
+```
+This specific CDN and version must be maintained for video processing to work correctly.
 
-## Development
+## Deployment
 
-### Prerequisites
-
-- Node.js (v20.0.0 or higher)
-- npm
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ratheeshkpattambi/web_tools_min.git
-   cd web_tools_min
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start development server:
-   ```bash
-   npm run dev
-   ```
-
-### Build
-
-For production build:
+### Local Build
 ```bash
 npm run build
 ```
 
-For Netlify deployment:
-```bash
-npm run build:netlify
-```
-
-### Preview production build:
-```bash
-npm run preview
-```
-
-## Deployment
-
-The site is automatically deployed to Netlify. The `netlify.toml` configuration handles:
-- Build settings
-- CORS headers for FFmpeg.wasm
-- SPA routing
-
-## Browser Requirements
-
-This application requires a modern browser with:
-- WebAssembly support
-- SharedArrayBuffer support (requires secure context)
-- Cross-Origin Isolation support
-
-## License
-
-MIT License - See LICENSE file for details 
+### Netlify
+Automatic deployment on push to main branch:
+- Uses `npm ci` for clean install
+- Runs `vite build`
+- Deploys from `dist` folder 

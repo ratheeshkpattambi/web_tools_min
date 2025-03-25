@@ -12,25 +12,21 @@ export const logLevels = {
 /**
  * Add a log message to the log content area
  * @param {string} message - The message to log
- * @param {string} level - The log level (info, error, success)
+ * @param {string} type - The type of message (info, success, error)
  */
-export function addLog(message, level = logLevels.INFO) {
-  const logContent = document.getElementById('logContent');
+export function addLog(message, type = 'info') {
+  const logContent = document.querySelector('.log-content');
   if (!logContent) return;
-  
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${level}`;
-  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-  logContent.appendChild(entry);
+
+  const logEntry = document.createElement('div');
+  logEntry.className = `log-entry ${type}`;
+  logEntry.textContent = message;
+  logContent.appendChild(logEntry);
   logContent.scrollTop = logContent.scrollHeight;
-  
-  if (level === logLevels.ERROR || message.includes('Loading')) {
-    showLogs(true);
-  }
 }
 
 /**
- * Format a file size in bytes to a human-readable string
+ * Format file size in bytes to human readable format
  * @param {number} bytes - The file size in bytes
  * @returns {string} - The formatted file size
  */
@@ -44,32 +40,37 @@ export function formatFileSize(bytes) {
 
 /**
  * Update the progress bar
- * @param {number} progress - The progress percentage (0-100)
+ * @param {number} percentage - The progress percentage (0-100)
  */
-export function updateProgress(progress) {
-  const progressContainer = document.getElementById('progressContainer');
-  const progressFill = document.getElementById('progressFill');
-  const progressText = document.getElementById('progressText');
+export function updateProgress(percentage) {
+  const progress = document.querySelector('.progress');
+  if (!progress) return;
+
+  const progressFill = progress.querySelector('.progress-fill');
+  const progressText = progress.querySelector('.progress-text');
   
-  if (!progressContainer || !progressFill || !progressText) return;
-  
-  progressContainer.style.display = 'block';
-  progressFill.style.width = `${progress}%`;
-  progressText.textContent = `Processing: ${progress}%`;
+  if (progressFill) {
+    progressFill.style.width = `${percentage}%`;
+  }
+  if (progressText) {
+    progressText.textContent = `${percentage}%`;
+  }
 }
 
 /**
- * Show or hide the logs section
- * @param {boolean} show - Whether to show the logs
+ * Show/hide logs when header is clicked
  */
-export function showLogs(show = true) {
-  const logContent = document.getElementById('logContent');
-  const logToggle = document.getElementById('logToggle');
+export function showLogs() {
+  const logHeader = document.querySelector('.log-header');
+  const logContent = document.querySelector('.log-content');
+  const logToggle = document.querySelector('#logToggle');
   
-  if (!logContent || !logToggle) return;
-  
-  logContent.style.display = show ? 'block' : 'none';
-  logToggle.textContent = show ? '▲' : '▼';
+  if (logHeader && logContent && logToggle) {
+    logHeader.addEventListener('click', () => {
+      logContent.style.display = logContent.style.display === 'none' ? 'block' : 'none';
+      logToggle.textContent = logContent.style.display === 'none' ? '▼' : '▲';
+    });
+  }
 }
 
 /**
@@ -138,21 +139,12 @@ export function setupDropZone(dropZone, fileInput, onFileSelected, acceptType = 
 }
 
 /**
- * Create a download link for a processed file
- * @param {Blob} blob - The file blob
- * @param {string} fileName - The file name
- * @returns {HTMLAnchorElement} - The download link
+ * Create a download link for the processed file
  */
-export function createDownloadLink(blob, fileName) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.className = 'btn';
-  a.textContent = `Download ${fileName}`;
-  a.onclick = () => {
-    // Clean up the URL object after download
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-  };
-  return a;
+export function createDownloadLink(container, url, filename, text) {
+  container.innerHTML = `
+    <a href="${url}" download="${filename}" class="btn">
+      ${text}
+    </a>
+  `;
 } 

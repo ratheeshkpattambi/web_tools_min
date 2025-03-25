@@ -1,5 +1,5 @@
 /**
- * Video resize module using FFmpeg WASM
+ * Video re-encode module using FFmpeg WASM
  */
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
@@ -7,10 +7,9 @@ import { addLog, formatFileSize, updateProgress, showLogs } from '../common/util
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
 let inputVideo = null;
-let aspectRatio = 1;
 
 /**
- * Initialize the video resize tool
+ * Initialize the video re-encode tool
  */
 export async function initTool() {
   const elements = {
@@ -19,9 +18,9 @@ export async function initTool() {
     inputVideo: document.getElementById('input-video'),
     outputVideo: document.getElementById('output-video'),
     processBtn: document.getElementById('processBtn'),
-    width: document.getElementById('width'),
-    height: document.getElementById('height'),
-    keepRatio: document.getElementById('keepRatio'),
+    format: document.getElementById('format'),
+    quality: document.getElementById('quality'),
+    bitrate: document.getElementById('bitrate'),
     progress: document.getElementById('progress'),
     downloadContainer: document.getElementById('downloadContainer')
   };
@@ -38,14 +37,7 @@ export async function initTool() {
     elements.inputVideo.src = url;
     elements.inputVideo.style.display = 'block';
     elements.dropZone.style.display = 'none';
-
-    // Get video dimensions when metadata is loaded
-    elements.inputVideo.onloadedmetadata = () => {
-      aspectRatio = elements.inputVideo.videoWidth / elements.inputVideo.videoHeight;
-      elements.width.value = elements.inputVideo.videoWidth;
-      elements.height.value = elements.inputVideo.videoHeight;
-      elements.processBtn.disabled = false;
-    };
+    elements.processBtn.disabled = false;
 
     addLog(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
   }
@@ -77,19 +69,6 @@ export async function initTool() {
     if (file) handleFile(file);
   });
 
-  // Handle dimension changes
-  elements.width.addEventListener('input', () => {
-    if (elements.keepRatio.checked && elements.width.value) {
-      elements.height.value = Math.round(elements.width.value / aspectRatio);
-    }
-  });
-
-  elements.height.addEventListener('input', () => {
-    if (elements.keepRatio.checked && elements.height.value) {
-      elements.width.value = Math.round(elements.height.value * aspectRatio);
-    }
-  });
-
   // Process video
   elements.processBtn.addEventListener('click', async () => {
     if (!inputVideo) {
@@ -97,11 +76,12 @@ export async function initTool() {
       return;
     }
 
-    const width = parseInt(elements.width.value);
-    const height = parseInt(elements.height.value);
+    const format = elements.format.value;
+    const quality = elements.quality.value;
+    const bitrate = parseInt(elements.bitrate.value);
 
-    if (!width || !height || width <= 0 || height <= 0) {
-      addLog('Please enter valid dimensions', 'error');
+    if (!bitrate || bitrate < 500) {
+      addLog('Please enter a valid bitrate (minimum 500kb/s)', 'error');
       return;
     }
 
@@ -113,22 +93,47 @@ export async function initTool() {
       const ffmpeg = await loadFFmpeg();
 
       const inputFileName = 'input' + getExtension(inputVideo.name);
-      const outputFileName = 'output.mp4';
+      const outputFileName = `output.${format}`;
 
       addLog('Writing input file...', 'info');
       await writeInputFile(ffmpeg, inputFileName, inputVideo);
 
-      addLog(`Resizing to ${width}x${height}...`, 'info');
-      await executeFFmpeg(ffmpeg, [
-        '-i', inputFileName,
-        '-vf', `scale=${width}:${height}`,
-        '-c:a', 'copy',
-        outputFileName
-      ]);
+      // Build FFmpeg command based on format and quality
+      const ffmpegArgs = ['-i', inputFileName];
+
+      if (format === 'mp4') {
+        ffmpegArgs.push(
+          '-c:v', 'libx264',
+          '-preset', quality === 'high' ? 'slow' : quality === 'medium' ? 'medium' : 'fast',
+          '-crf', quality === 'high' ? '18' : quality === 'medium' ? '23' : '28',
+          '-c:a', 'aac',
+          '-b:a', '128k'
+        );
+      } else if (format === 'webm') {
+        ffmpegArgs.push(
+          '-c:v', 'libvpx-vp9',
+          '-b:v', `${bitrate}k`,
+          '-deadline', quality === 'high' ? 'best' : quality === 'medium' ? 'good' : 'realtime',
+          '-c:a', 'libopus'
+        );
+      } else if (format === 'mov') {
+        ffmpegArgs.push(
+          '-c:v', 'libx264',
+          '-preset', quality === 'high' ? 'slow' : quality === 'medium' ? 'medium' : 'fast',
+          '-crf', quality === 'high' ? '18' : quality === 'medium' ? '23' : '28',
+          '-c:a', 'aac',
+          '-b:a', '128k'
+        );
+      }
+
+      ffmpegArgs.push(outputFileName);
+
+      addLog(`Re-encoding video to ${format.toUpperCase()}...`, 'info');
+      await executeFFmpeg(ffmpeg, ffmpegArgs);
 
       addLog('Reading output file...', 'info');
       const data = await readOutputFile(ffmpeg, outputFileName);
-      const blob = new Blob([data], { type: 'video/mp4' });
+      const blob = new Blob([data], { type: `video/${format}` });
       const url = URL.createObjectURL(blob);
 
       elements.outputVideo.src = url;
@@ -136,8 +141,8 @@ export async function initTool() {
 
       // Add download button
       elements.downloadContainer.innerHTML = `
-        <a href="${url}" download="resized_video.mp4" class="btn">
-          Download Resized Video
+        <a href="${url}" download="reencoded_video.${format}" class="btn">
+          Download Re-encoded Video
         </a>
       `;
 
