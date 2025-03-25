@@ -6,192 +6,41 @@
     <!-- Required for SharedArrayBuffer -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-    <title>Minimal Video Resizer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .drop-zone {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .drop-zone.drag-over {
-            border-color: #007bff;
-            background-color: rgba(0,123,255,0.1);
-        }
-        #output-video {
-            max-width: 100%;
-            margin-top: 20px;
-        }
-        .progress {
-            display: none;
-            margin: 20px 0;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background-color: #007bff;
-            transition: width 0.3s ease;
-        }
-        #log {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
+    <title>Web Tools - Browser-based Content Creation</title>
+    <meta name="description" content="Free browser-based tools for video, image, and text editing">
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
 </head>
 <body>
-    <h1>Minimal Video Resizer</h1>
-    
-    <div class="drop-zone" id="dropZone">
-        <p>Drag and drop a video file here or click to select</p>
-        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+    <div id="app">
+        <header>
+            <h1>Web Tools</h1>
+            <nav>
+                <ul>
+                    <li><a href="/" class="active">Home</a></li>
+                    <li><a href="/video">Video</a></li>
+                    <li><a href="/image">Image</a></li>
+                    <li><a href="/text">Text</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main id="main-content">
+            <!-- Content will be loaded here -->
+        </main>
+        <footer>
+            <div class="author-info">
+                <div class="author-details">
+                    <img src="https://avatars.githubusercontent.com/u/8389908" alt="Ratheesh Kalarot" class="author-avatar">
+                    <p>© Dr. Ratheesh Kalarot</p>
+                    <div class="author-links">
+                        <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+                        <a href="https://github.com/ratheeshkpattambi/web_tools_min" target="_blank" rel="noopener">GitHub</a>
+                        <a href="https://www.linkedin.com/in/ratheesh-kalarot/" target="_blank" rel="noopener">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
-
-    <div class="progress" id="progress">
-        <div class="progress-bar">
-            <div class="progress-fill"></div>
-        </div>
-        <div class="progress-text">0%</div>
-    </div>
-
-    <video id="output-video" controls></video>
-
-    <div id="log"></div>
-
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
-    <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ 
-            log: true,
-            logger: ({ message }) => {
-                log(message);
-            }
-        });
-
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const outputVideo = document.getElementById('output-video');
-        const progress = document.getElementById('progress');
-        const progressFill = document.querySelector('.progress-fill');
-        const progressText = document.querySelector('.progress-text');
-        const logElement = document.getElementById('log');
-
-        function log(message) {
-            const time = new Date().toLocaleTimeString();
-            logElement.innerHTML += `[${time}] ${message}<br>`;
-            logElement.scrollTop = logElement.scrollHeight;
-        }
-
-        // Load FFmpeg
-        async function loadFFmpeg() {
-            try {
-                log('Loading FFmpeg...');
-                await ffmpeg.load();
-                log('FFmpeg loaded successfully');
-            } catch (error) {
-                log(`Error loading FFmpeg: ${error.message}`);
-                throw error;
-            }
-        }
-
-        // Process video
-        async function processVideo(file) {
-            try {
-                progress.style.display = 'block';
-                progressFill.style.width = '0%';
-                progressText.textContent = '0%';
-
-                log('Starting video processing...');
-                
-                // Write the file to FFmpeg's virtual filesystem
-                ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-
-                // Run FFmpeg command to resize video to 50% of original size
-                await ffmpeg.run(
-                    '-i', 'input.mp4',
-                    '-vf', 'scale=iw*0.5:ih*0.5',
-                    '-c:v', 'libx264',
-                    '-preset', 'medium',
-                    'output.mp4'
-                );
-
-                // Read the result
-                const data = ffmpeg.FS('readFile', 'output.mp4');
-
-                // Create a video URL from the processed data
-                const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
-                const videoUrl = URL.createObjectURL(videoBlob);
-                outputVideo.src = videoUrl;
-
-                // Clean up
-                ffmpeg.FS('unlink', 'input.mp4');
-                ffmpeg.FS('unlink', 'output.mp4');
-
-                log('Video processing completed');
-            } catch (error) {
-                log(`Error processing video: ${error.message}`);
-                throw error;
-            } finally {
-                progress.style.display = 'none';
-            }
-        }
-
-        // Handle file selection
-        async function handleFile(file) {
-            if (!file || !file.type.startsWith('video/')) {
-                log('Please select a valid video file');
-                return;
-            }
-
-            try {
-                await loadFFmpeg();
-                await processVideo(file);
-            } catch (error) {
-                log(`Error: ${error.message}`);
-            }
-        }
-
-        // Event listeners
-        dropZone.addEventListener('click', () => fileInput.click());
-        
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            handleFile(e.dataTransfer.files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
-        });
-
-        // Initialize
-        log('Ready to process videos');
-    </script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html> 

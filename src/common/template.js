@@ -69,7 +69,7 @@ export function generateToolCard(title, description, icon, link) {
   return `
     <a href="${link}" class="tool-card">
       <div class="tool-icon">${icon}</div>
-      <h2>${title}</h2>
+      <h3>${title}</h3>
       <p>${description}</p>
     </a>
   `;

@@ -1,24 +1,22 @@
 # Web Media Tools
 
-A collection of browser-based media editing tools for video and image processing. The application is designed to be modular, allowing users to access only the tools they need without loading unnecessary dependencies.
+A collection of browser-based media editing tools for video and image processing. Built with Vite and modern web technologies.
 
 ## Features
 
-- **Video Tools** - Tools that utilize WASM for advanced video processing
-  - **Video Resize** - Resize videos to any dimensions while maintaining quality
+- **Video Tools**
+  - Video Resize: Browser-based video resizing using WASM-powered FFmpeg
+- **Image Tools**
+  - Image Resize: Client-side image resizing with quality control
+- **Text Tools**
+  - Text Editor: Simple browser-based text editor
 
-- **Image Tools** - Lightweight tools that use browser APIs (no WASM)
-  - **Image Resize** - Resize images with options for format and quality
+## Tech Stack
 
-## Architecture
-
-The application is structured to ensure efficient resource usage:
-
-- `/video` - Contains all video-related tools and WASM dependencies
-- `/image` - Contains all image-related tools (no WASM dependencies)
-- `/common` - Shared utilities and styles
-
-Each tool is accessible directly via URL (e.g., `/video/resize` or `/image/resize`). The application only loads the necessary dependencies for each tool, meaning WASM is only loaded when using video tools.
+- Vite for build and development
+- FFmpeg.wasm for video processing
+- Modern JavaScript (ES Modules)
+- CSS Variables for theming
 
 ## Development
 
@@ -29,43 +27,53 @@ Each tool is accessible directly via URL (e.g., `/video/resize` or `/image/resiz
 
 ### Setup
 
-1. Clone the repository
-2. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ratheeshkpattambi/web_tools_min.git
+   cd web_tools_min
    ```
+
+2. Install dependencies:
+   ```bash
    npm install
    ```
 
-### Development Commands
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
 
-- **Development server with hot reload**:
-  ```
-  npm run dev
-  ```
+### Build
 
-- **Build for production**:
-  ```
-  npm run build
-  ```
+For production build:
+```bash
+npm run build
+```
 
-- **Preview production build**:
-  ```
-  npm run start
-  ```
+For Netlify deployment:
+```bash
+npm run build:netlify
+```
 
-### Browser Requirements
+### Preview production build:
+```bash
+npm run preview
+```
 
-This application requires a modern browser with the following features:
-- WebAssembly (for video tools)
-- SharedArrayBuffer (for video tools)
-- Canvas API (for image tools)
-- Web Workers
+## Deployment
 
-## Dependencies
+The site is automatically deployed to Netlify. The `netlify.toml` configuration handles:
+- Build settings
+- CORS headers for FFmpeg.wasm
+- SPA routing
 
-- [@ffmpeg/core](https://github.com/ffmpegwasm/ffmpeg.wasm) - WebAssembly build of FFmpeg
-- [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm) - JavaScript interface to FFmpeg WASM
-- [@ffmpeg/util](https://github.com/ffmpegwasm/ffmpeg.wasm) - Utilities for FFmpeg WASM
+## Browser Requirements
+
+This application requires a modern browser with:
+- WebAssembly support
+- SharedArrayBuffer support (requires secure context)
+- Cross-Origin Isolation support
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+MIT License - See LICENSE file for details 
