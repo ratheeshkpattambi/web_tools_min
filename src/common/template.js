@@ -17,6 +17,14 @@ export function generatePageHTML(title, content) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${title} | Web Tools</title>
       <link rel="stylesheet" href="/common/styles.css">
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK7DDP7ND6"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SK7DDP7ND6');
+      </script>
       <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
       <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
       <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
@@ -27,17 +35,18 @@ export function generatePageHTML(title, content) {
           <a href="/" class="logo">WebTools</a>
           <div class="nav-links">
             <a href="/">Home</a>
-            <a href="/video">Video Tools</a>
-            <a href="/image">Image Tools</a>
-            <a href="/text">Text Tools</a>
+            <a href="/video">Video</a>
+            <a href="/image">Image</a>
+            <a href="/text">Text</a>
           </div>
         </nav>
       </header>
       
-      <div class="container">
-        <h1>${title}</h1>
-        ${content}
-      </div>
+      <main>
+        <div class="container">
+          ${content}
+        </div>
+      </main>
       
       <footer>
         <div class="author-info">

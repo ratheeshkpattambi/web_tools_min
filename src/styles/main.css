@@ -505,4 +505,129 @@ footer {
 
 .try-it-out a:hover {
   color: #0d47a1;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.visitor-counter {
+  background: #f0f0f0;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #666;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.visitor-counter:hover {
+  background: #e0e0e0;
+  cursor: pointer;
+}
+
+/* Stats Page Styles */
+.privacy-notice {
+    background: #e3f2fd;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.privacy-notice h2 {
+    color: #1565c0;
+    margin-top: 0;
+}
+
+.privacy-notice p {
+    margin: 0.5rem 0;
+    color: #0d47a1;
+}
+
+.stats-grid {
+    display: none;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-card h3 {
+    color: #2c3e50;
+    margin: 0 0 1rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 1rem 0;
+}
+
+.stat-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.tool-usage {
+    margin: 2rem 0;
+}
+
+.usage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.usage-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.data-storage {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.data-storage h2 {
+    color: #2c3e50;
+    margin-top: 0;
+}
+
+.data-storage p {
+    color: #666;
+    margin: 0.5rem 0 1rem;
+}
+
+.btn-secondary {
+    background: white;
+    color: #2c3e50;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+
+.stats-link {
+    display: none;
 } 

@@ -260,10 +260,9 @@ function generateTextContent(path) {
 function generateHomeContent() {
   return `
     <div class="tool-container">
-      <div class="try-it-out">
-        <p>Try it out at: <a href="https://sparkly-boba-1be821.netlify.app/" target="_blank">https://sparkly-boba-1be821.netlify.app/</a></p>
-      </div>
-
+      <h1>Welcome to Web Tools</h1>
+      <p class="section-description">A collection of privacy-focused tools that process your data locally in your browser.</p>
+      
       <section class="tools-section">
         <h2>Video Tools</h2>
         <p class="section-description">Process and convert your videos with ease</p>
@@ -308,6 +307,59 @@ function generateHomeContent() {
   `;
 }
 
+function generateVideoCategoryContent() {
+  return `
+    <div class="tool-container">
+      <h1>Video Tools</h1>
+      <p class="section-description">Process and convert your videos with ease</p>
+      <div class="tool-grid">
+        <a href="/video/resize" class="tool-card">
+          <div class="tool-icon">📐</div>
+          <h3>Video Resize</h3>
+          <p>Resize videos while maintaining quality</p>
+        </a>
+        <a href="/video/reencode" class="tool-card">
+          <div class="tool-icon">🎥</div>
+          <h3>Video Re-encode</h3>
+          <p>Convert videos to different formats</p>
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function generateImageCategoryContent() {
+  return `
+    <div class="tool-container">
+      <h1>Image Tools</h1>
+      <p class="section-description">Edit and optimize your images</p>
+      <div class="tool-grid">
+        <a href="/image/resize" class="tool-card">
+          <div class="tool-icon">🖼️</div>
+          <h3>Image Resize</h3>
+          <p>Resize and optimize images while maintaining quality</p>
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function generateTextCategoryContent() {
+  return `
+    <div class="tool-container">
+      <h1>Text Tools</h1>
+      <p class="section-description">Simple text editing and formatting tools</p>
+      <div class="tool-grid">
+        <a href="/text/editor" class="tool-card">
+          <div class="tool-icon">📝</div>
+          <h3>Text Editor</h3>
+          <p>Simple text editing with formatting options</p>
+        </a>
+      </div>
+    </div>
+  `;
+}
+
 export async function handleRoute(path) {
   const main = document.querySelector('main');
   if (!main) return;
@@ -328,6 +380,12 @@ export async function handleRoute(path) {
   
   if (path === '/' || path === '/home') {
     content = generateHomeContent();
+  } else if (path === '/video') {
+    content = generateVideoCategoryContent();
+  } else if (path === '/image') {
+    content = generateImageCategoryContent();
+  } else if (path === '/text') {
+    content = generateTextCategoryContent();
   } else if (path.startsWith('/video')) {
     content = generateVideoContent(path);
   } else if (path.startsWith('/image')) {

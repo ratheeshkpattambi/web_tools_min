@@ -3,18 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Required for SharedArrayBuffer -->
+    <title>Web Tools</title>
+    <link rel="stylesheet" href="/common/styles.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK7DDP7ND6"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SK7DDP7ND6');
+        // Log when GA is loaded
+        gtag('event', 'page_view', {
+            'send_to': 'G-SK7DDP7ND6',
+            'callback': function() {
+                console.log('Google Analytics loaded and tracking');
+            }
+        });
+    </script>
+    <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-    <title>Web Tools - Browser-based Content Creation</title>
-    <meta name="description" content="Free browser-based tools for video, image, and text editing">
-    <link rel="stylesheet" href="/src/styles/main.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
 </head>
 <body>
     <div id="app">
         <header>
-            <h1>Web Tools</h1>
+            <div class="header-top">
+                <h1>Web Tools</h1>
+            </div>
             <nav>
                 <ul>
                     <li><a href="/" class="active">Home</a></li>
