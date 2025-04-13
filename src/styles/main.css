@@ -453,19 +453,34 @@ footer {
 .editor-footer {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem;
+  padding: 1rem;
   background: #f8f9fa;
   border: 1px solid #ddd;
   border-radius: 4px;
   margin: 1rem 0;
   font-size: 0.9rem;
   color: #666;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.word-count,
+.char-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .word-count span,
 .char-count span {
   color: #2c3e50;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 /* Try it out section */

@@ -11,18 +11,48 @@ import { addLog } from '../common/utils.js';
  * @returns {string} - The HTML content
  */
 const content = `
-  <div class="tool-description">
-    <p>A simple text editor for basic text editing needs.</p>
-  </div>
-  
-  <div class="editor-container">
-    <div class="editor-header">
-      <div class="editor-controls">
-        <button id="clearBtn" class="btn">Clear</button>
-        <button id="copyBtn" class="btn">Copy</button>
+  <div class="tool-container">
+    <h1>Text Editor</h1>
+    <div id="dropZone" class="drop-zone">
+      <p>Drop text file here or click to select</p>
+      <input type="file" id="fileInput" accept=".txt" style="display: none;">
+    </div>
+
+    <div class="editor-toolbar">
+      <button id="formatBold" class="btn-icon" title="Bold">
+        <span class="icon">B</span>
+      </button>
+      <button id="formatItalic" class="btn-icon" title="Italic">
+        <span class="icon">I</span>
+      </button>
+      <button id="formatUnderline" class="btn-icon" title="Underline">
+        <span class="icon">U</span>
+      </button>
+      <button id="clearFormat" class="btn-icon" title="Clear Formatting">
+        <span class="icon">T</span>
+      </button>
+      <div class="toolbar-separator"></div>
+      <button id="downloadBtn" class="btn-icon" title="Download">
+        <span class="icon">↓</span>
+      </button>
+    </div>
+
+    <textarea id="editor" class="text-editor" placeholder="Start typing or drop a text file..."></textarea>
+
+    <div class="editor-footer">
+      <div class="word-count">
+        Words: <span id="wordCount">0</span>
+      </div>
+      <div class="char-count">
+        Characters: <span id="charCount">0</span>
       </div>
     </div>
-    <textarea id="textEditor" class="text-editor" placeholder="Enter your text here..."></textarea>
+
+    <div id="logHeader" class="log-header">
+      <span>Logs</span>
+      <span id="logToggle">▼</span>
+    </div>
+    <div id="logContent" class="log-content"></div>
   </div>
 `;
 
@@ -32,7 +62,7 @@ export const pageHTML = generatePageHTML('Text Editor', content);
  * Initialize the text editor page
  */
 export function initPage() {
-  const editor = document.getElementById('textEditor');
+  const editor = document.getElementById('editor');
   const wordCount = document.getElementById('wordCount');
   const charCount = document.getElementById('charCount');
   const formatBold = document.getElementById('formatBold');
@@ -42,6 +72,12 @@ export function initPage() {
   const downloadBtn = document.getElementById('downloadBtn');
   const fileInput = document.getElementById('fileInput');
   const dropZone = document.getElementById('dropZone');
+
+  if (!editor || !wordCount || !charCount || !formatBold || !formatItalic || 
+      !formatUnderline || !clearFormat || !downloadBtn || !fileInput || !dropZone) {
+    console.error('Required elements not found in the DOM');
+    return;
+  }
 
   function updateCounts() {
     const text = editor.value;
