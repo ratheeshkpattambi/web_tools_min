@@ -94,6 +94,30 @@ function generateVideoContent(path) {
         <div id="downloadContainer"></div>
       </div>
     `;
+  } else if (path === '/video/info') {
+    return `
+      <div class="tool-container">
+        <h1>Video Information</h1>
+        <div id="videoDropZone" class="drop-zone">
+          <p>Drop video here or click to select</p>
+          <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+        </div>
+        <video id="video-preview" controls style="display: none;"></video>
+        
+        <div id="videoProgress" class="progress" style="display: none;">
+          <div class="progress-fill"></div>
+          <div class="progress-text">0%</div>
+        </div>
+
+        <div id="videoInfoContainer" class="info-container" style="display: none;"></div>
+
+        <div id="logHeader" class="log-header">
+          <span>Logs</span>
+          <span id="logToggle">▼</span>
+        </div>
+        <div id="logContent" class="log-content"></div>
+      </div>
+    `;
   } else {
     return `
       <div class="tool-container">
@@ -109,6 +133,11 @@ function generateVideoContent(path) {
             <div class="tool-icon">🎥</div>
             <h3>Video Re-encode</h3>
             <p>Convert videos to different formats</p>
+          </a>
+          <a href="/video/info" class="tool-card">
+            <div class="tool-icon">ℹ️</div>
+            <h3>Video Info</h3>
+            <p>View detailed video metadata and properties</p>
           </a>
         </div>
       </div>
@@ -277,6 +306,11 @@ function generateHomeContent() {
             <h3>Video Re-encode</h3>
             <p>Convert videos to different formats</p>
           </a>
+          <a href="/video/info" class="tool-card">
+            <div class="tool-icon">ℹ️</div>
+            <h3>Video Info</h3>
+            <p>View detailed video metadata and properties</p>
+          </a>
         </div>
       </section>
 
@@ -322,6 +356,11 @@ function generateVideoCategoryContent() {
           <div class="tool-icon">🎥</div>
           <h3>Video Re-encode</h3>
           <p>Convert videos to different formats</p>
+        </a>
+        <a href="/video/info" class="tool-card">
+          <div class="tool-icon">ℹ️</div>
+          <h3>Video Info</h3>
+          <p>View detailed video metadata and properties</p>
         </a>
       </div>
     </div>
@@ -369,6 +408,7 @@ export async function handleRoute(path) {
   if (path === '/video') pageTitle = 'Video Tools | SafeWebTool';
   else if (path === '/video/resize') pageTitle = 'Video Resize | SafeWebTool';
   else if (path === '/video/reencode') pageTitle = 'Video Re-encode | SafeWebTool';
+  else if (path === '/video/info') pageTitle = 'Video Info | SafeWebTool';
   else if (path === '/image') pageTitle = 'Image Tools | SafeWebTool';
   else if (path === '/image/resize') pageTitle = 'Image Resize | SafeWebTool';
   else if (path === '/text') pageTitle = 'Text Tools | SafeWebTool';
@@ -406,6 +446,10 @@ export async function handleRoute(path) {
     });
   } else if (path === '/video/reencode') {
     import('./video/reencode.js').then(module => {
+      module.initTool();
+    });
+  } else if (path === '/video/info') {
+    import('./video/info.js').then(module => {
       module.initTool();
     });
   } else if (path === '/image/resize') {
