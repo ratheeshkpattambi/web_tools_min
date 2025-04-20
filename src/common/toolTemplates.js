@@ -136,6 +136,82 @@ export const videoTemplates = {
       </div>
       <div id="logContent" class="log-content"></div>
     </div>
+  `,
+  'gif': `
+    <div class="tool-container">
+      <h1>Video to GIF</h1>
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
+        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="width">Width:</label>
+          <input type="number" id="width" placeholder="Width" value="320">
+        </div>
+        <div class="input-group">
+          <label for="height">Height:</label>
+          <input type="number" id="height" placeholder="Height" value="240">
+        </div>
+        <div class="input-group">
+          <label for="keepRatio">
+            <input type="checkbox" id="keepRatio" checked>
+            Keep Aspect Ratio
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="fps">FPS:</label>
+          <input type="number" id="fps" min="1" max="30" value="10">
+          <span class="small-note">Lower = smaller file</span>
+        </div>
+        <div class="input-group">
+          <label for="quality">Quality:</label>
+          <select id="quality">
+            <option value="high">High (more colors)</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low (smaller file)</option>
+          </select>
+        </div>
+        <div class="input-group time-range">
+          <label>Time Range:</label>
+          <div class="range-inputs">
+            <div>
+              <label for="startTime">Start:</label>
+              <input type="text" id="startTime" placeholder="0:00" value="0:00">
+            </div>
+            <div>
+              <label for="duration">Duration:</label>
+              <input type="text" id="duration" placeholder="5.0" value="5.0">
+              <span class="small-note">seconds</span>
+            </div>
+          </div>
+        </div>
+        <button id="processBtn" class="btn" disabled>Create GIF</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div class="output-wrapper" style="margin-top: 20px;">
+        <img id="output-gif" style="display: none; max-width: 100%;">
+      </div>
+      <div id="downloadContainer"></div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
   `
 };
 

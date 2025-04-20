@@ -827,4 +827,39 @@ footer {
   .drop-zone {
     min-height: 120px;
   }
+}
+
+/* Additional styles for video-to-GIF tool */
+.small-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.time-range .range-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.time-range .range-inputs > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-range input {
+  width: 5rem;
+}
+
+.output-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+#output-gif {
+  border: 1px solid #ddd;
+  background: #f8f8f8 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ccc"><path d="M21.17 2.06l.96.96-19.05 19.05-.96-.96 19.05-19.05zM19 11v2h-5.17l-2-2H19zm-7.83-2l-2-2H19V9h-7.83zM5 13v-2h2.17l2 2H5zm0-4h4.17l2 2H5V9z"/></svg>') center no-repeat;
+  max-height: 50vh;
+  object-fit: contain;
 } 

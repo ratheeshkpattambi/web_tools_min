@@ -34,6 +34,14 @@ const TOOLS_CONFIG = {
         description: 'View detailed video metadata and properties',
         modulePath: './video/info.js',
         initFunction: 'initTool'
+      },
+      {
+        id: 'gif',
+        name: 'Video to GIF',
+        icon: '🎞️',
+        description: 'Convert videos to optimized GIF animations',
+        modulePath: './video/gif.js',
+        initFunction: 'initTool'
       }
     ]
   },
