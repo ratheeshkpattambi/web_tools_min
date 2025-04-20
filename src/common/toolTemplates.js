@@ -9,7 +9,10 @@ export const videoTemplates = {
     <div class="tool-container">
       <h1>Video Resize</h1>
       <div id="dropZone" class="drop-zone">
-        <p>Drop video here or click to select</p>
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
         <input type="file" id="fileInput" accept="video/*" style="display: none;">
       </div>
       <div class="video-wrapper">
@@ -55,7 +58,10 @@ export const videoTemplates = {
     <div class="tool-container">
       <h1>Video Re-encode</h1>
       <div id="dropZone" class="drop-zone">
-        <p>Drop video here or click to select</p>
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
         <input type="file" id="fileInput" accept="video/*" style="display: none;">
       </div>
       <div class="video-wrapper">
@@ -107,7 +113,10 @@ export const videoTemplates = {
     <div class="tool-container">
       <h1>Video Information</h1>
       <div id="videoDropZone" class="drop-zone">
-        <p>Drop video here or click to select</p>
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
         <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
       </div>
       <div class="video-wrapper">

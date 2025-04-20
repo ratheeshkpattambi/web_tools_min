@@ -5,6 +5,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { addLog, formatFileSize, updateProgress, showLogs } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import { initFileUpload } from '../common/fileUpload.js';
 
 let inputVideo = null;
 
@@ -20,46 +21,48 @@ export async function initTool() {
     progress: document.getElementById('videoProgress')
   };
 
-  // Handle file selection
-  function handleFile(file) {
-    if (!file.type.startsWith('video/')) {
-      addLog('Please select a valid video file', 'error');
-      return;
+  // Handle file selection using the common utility
+  initFileUpload({
+    dropZoneId: 'videoDropZone',
+    fileInputId: 'videoFileInput',
+    acceptTypes: 'video/*',
+    onFileSelected: (file) => {
+      inputVideo = file;
+      const url = URL.createObjectURL(file);
+      elements.inputVideo.src = url;
+      elements.inputVideo.style.display = 'block';
+
+      // Display basic file info immediately
+      const basicInfo = document.createElement('div');
+      basicInfo.className = 'info-section';
+      basicInfo.innerHTML = `
+        <h3>Basic Info</h3>
+        <table class="info-table">
+          <tr>
+            <td>Filename:</td>
+            <td>${file.name}</td>
+          </tr>
+          <tr>
+            <td>Size:</td>
+            <td>${formatFileSize(file.size)}</td>
+          </tr>
+          <tr>
+            <td>Type:</td>
+            <td>${file.type}</td>
+          </tr>
+        </table>
+      `;
+      elements.infoContainer.innerHTML = '';
+      elements.infoContainer.appendChild(basicInfo);
+      elements.infoContainer.style.display = 'block';
+
+      // Process metadata with FFmpeg
+      getVideoMetadata(file);
     }
+  });
 
-    inputVideo = file;
-    const url = URL.createObjectURL(file);
-    elements.inputVideo.src = url;
-    elements.inputVideo.style.display = 'block';
-    elements.dropZone.style.display = 'none';
-
-    // Display basic file info immediately
-    const basicInfo = document.createElement('div');
-    basicInfo.className = 'info-section';
-    basicInfo.innerHTML = `
-      <h3>Basic Info</h3>
-      <table class="info-table">
-        <tr>
-          <td>Filename:</td>
-          <td>${file.name}</td>
-        </tr>
-        <tr>
-          <td>Size:</td>
-          <td>${formatFileSize(file.size)}</td>
-        </tr>
-        <tr>
-          <td>Type:</td>
-          <td>${file.type}</td>
-        </tr>
-      </table>
-    `;
-    elements.infoContainer.innerHTML = '';
-    elements.infoContainer.appendChild(basicInfo);
-    elements.infoContainer.style.display = 'block';
-
-    // Process metadata with FFmpeg
-    getVideoMetadata(file);
-  }
+  // Initialize log toggle
+  showLogs();
 
   async function getVideoMetadata(file) {
     try {
@@ -321,34 +324,4 @@ export async function initTool() {
     
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
-
-  // Set up drag and drop
-  elements.dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    elements.dropZone.classList.add('dragover');
-  });
-
-  elements.dropZone.addEventListener('dragleave', () => {
-    elements.dropZone.classList.remove('dragover');
-  });
-
-  elements.dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    elements.dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  });
-
-  // Handle file input click
-  elements.dropZone.addEventListener('click', () => {
-    elements.fileInput.click();
-  });
-
-  elements.fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) handleFile(file);
-  });
-
-  // Initialize log toggle
-  showLogs();
 } 

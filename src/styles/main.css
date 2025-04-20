@@ -224,16 +224,77 @@ main {
 .drop-zone {
   border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 2rem 1rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
   margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .drop-zone:hover, .drop-zone.dragover {
   border-color: #2c3e50;
   background-color: #f8f9fa;
+}
+
+.drop-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.drop-zone p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.drop-subtitle {
+  font-size: 0.9rem !important;
+  opacity: 0.7;
+}
+
+.file-select-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.file-select-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.file-select-btn:active {
+  transform: translateY(1px);
+}
+
+/* Mobile-specific drop zone improvements */
+@media (max-width: 768px) {
+  .drop-zone {
+    padding: 1.5rem 1rem;
+    min-height: 160px;
+  }
+  
+  .drop-icon {
+    font-size: 2rem;
+  }
+  
+  .file-select-btn {
+    width: 80%;
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+    font-size: 1.1rem;
+  }
 }
 
 /* Controls */

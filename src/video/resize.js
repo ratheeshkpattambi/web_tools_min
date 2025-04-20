@@ -5,6 +5,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { addLog, formatFileSize, updateProgress, showLogs } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import { initFileUpload } from '../common/fileUpload.js';
 
 let inputVideo = null;
 let aspectRatio = 1;
@@ -26,55 +27,27 @@ export async function initTool() {
     downloadContainer: document.getElementById('downloadContainer')
   };
 
-  // Handle file selection
-  function handleFile(file) {
-    if (!file.type.startsWith('video/')) {
-      addLog('Please select a video file', 'error');
-      return;
+  // Handle file selection using the common utility
+  initFileUpload({
+    dropZoneId: 'dropZone',
+    fileInputId: 'fileInput',
+    acceptTypes: 'video/*',
+    onFileSelected: (file) => {
+      inputVideo = file;
+      const url = URL.createObjectURL(file);
+      elements.inputVideo.src = url;
+      elements.inputVideo.style.display = 'block';
+
+      // Get video dimensions when metadata is loaded
+      elements.inputVideo.onloadedmetadata = () => {
+        aspectRatio = elements.inputVideo.videoWidth / elements.inputVideo.videoHeight;
+        elements.width.value = elements.inputVideo.videoWidth;
+        elements.height.value = elements.inputVideo.videoHeight;
+        elements.processBtn.disabled = false;
+      };
+
+      addLog(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
     }
-
-    inputVideo = file;
-    const url = URL.createObjectURL(file);
-    elements.inputVideo.src = url;
-    elements.inputVideo.style.display = 'block';
-    elements.dropZone.style.display = 'none';
-
-    // Get video dimensions when metadata is loaded
-    elements.inputVideo.onloadedmetadata = () => {
-      aspectRatio = elements.inputVideo.videoWidth / elements.inputVideo.videoHeight;
-      elements.width.value = elements.inputVideo.videoWidth;
-      elements.height.value = elements.inputVideo.videoHeight;
-      elements.processBtn.disabled = false;
-    };
-
-    addLog(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
-  }
-
-  // Set up drag and drop
-  elements.dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    elements.dropZone.classList.add('dragover');
-  });
-
-  elements.dropZone.addEventListener('dragleave', () => {
-    elements.dropZone.classList.remove('dragover');
-  });
-
-  elements.dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    elements.dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  });
-
-  // Handle file input click
-  elements.dropZone.addEventListener('click', () => {
-    elements.fileInput.click();
-  });
-
-  elements.fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) handleFile(file);
   });
 
   // Handle dimension changes
