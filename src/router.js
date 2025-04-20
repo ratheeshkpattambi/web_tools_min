@@ -70,6 +70,14 @@ const TOOLS_CONFIG = {
         description: 'Simple text editing with formatting options',
         modulePath: './text/editor.js',
         initFunction: 'initPage'
+      },
+      {
+        id: 'yaml',
+        name: 'YAML Validator',
+        icon: '🔍',
+        description: 'Validate and convert YAML to JSON with tree view',
+        modulePath: './text/yaml.js',
+        initFunction: 'initTool'
       }
     ]
   }
@@ -260,6 +268,9 @@ export async function handleRoute(path) {
                 break;
               case 'text/editor':
                 moduleToImport = await import('./text/editor.js');
+                break;
+              case 'text/yaml':
+                moduleToImport = await import('./text/yaml.js');
                 break;
               default:
                 throw new Error(`Unknown tool: ${category}/${toolId}`);

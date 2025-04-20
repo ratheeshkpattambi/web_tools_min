@@ -323,6 +323,80 @@ export const textTemplates = {
       </div>
       <div id="logContent" class="log-content"></div>
     </div>
+  `,
+  
+  'yaml': `
+    <div class="tool-container">
+      <h1>YAML Validator</h1>
+      <p class="section-description">Validate YAML and convert it to JSON or Python dictionary with interactive view</p>
+      
+      <div class="yaml-editor-container">
+        <div class="editor-panel">
+          <div class="panel-header">
+            <h3>YAML Input</h3>
+            <div class="panel-actions">
+              <button id="clearYamlBtn" class="btn-icon" title="Clear">
+                <span class="icon">❌</span>
+              </button>
+              <button id="loadSampleBtn" class="btn-icon" title="Load Sample">
+                <span class="icon">📋</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="yamlInput" class="yaml-editor" placeholder="Paste your YAML here..."></textarea>
+          <div id="yamlStatus" class="status-bar"></div>
+        </div>
+        
+        <div class="output-panel">
+          <div class="panel-header">
+            <h3>Output</h3>
+            <div class="panel-actions">
+              <button id="expandAllBtn" class="btn-icon" title="Expand All">
+                <span class="icon">🔽</span>
+              </button>
+              <button id="collapseAllBtn" class="btn-icon" title="Collapse All">
+                <span class="icon">◀</span>
+              </button>
+              <button id="copyOutputBtn" class="btn-icon" title="Copy">
+                <span class="icon">📋</span>
+              </button>
+            </div>
+          </div>
+          <div id="jsonOutput" class="json-output"></div>
+        </div>
+      </div>
+      
+      <div id="errorContainer" class="error-container">
+        <div class="error-header">Error</div>
+        <div id="errorContent" class="error-content"></div>
+      </div>
+      
+      <div class="tool-options">
+        <div class="option-group">
+          <label>
+            <input type="checkbox" id="autoValidate" checked>
+            Auto-validate
+          </label>
+        </div>
+        <div class="option-group">
+          <label>
+            <input type="checkbox" id="prettyPrint">
+            Pretty print
+          </label>
+        </div>
+        <div class="option-group format-selector">
+          <span>Format:</span>
+          <label class="radio-label">
+            <input type="radio" name="outputFormat" id="formatJson" checked>
+            JSON
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="outputFormat" id="formatPython">
+            Python Dict
+          </label>
+        </div>
+      </div>
+    </div>
   `
 };
 

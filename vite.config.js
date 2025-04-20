@@ -18,17 +18,24 @@ export default defineConfig({
       },
       output: {
         manualChunks: (id) => {
-          // FFmpeg core and related modules (keep these separate)
-          if (id.includes('@ffmpeg/core')) {
-            return 'ffmpeg-core';
-          }
-          if (id.includes('@ffmpeg/ffmpeg') || id.includes('@ffmpeg/util')) {
-            return 'ffmpeg-wasm';
+          // External libraries - keep these separate so they're only loaded when needed
+          if (id.includes('node_modules')) {
+            if (id.includes('@ffmpeg/core')) {
+              return 'vendor-ffmpeg-core';
+            }
+            if (id.includes('@ffmpeg/ffmpeg') || id.includes('@ffmpeg/util')) {
+              return 'vendor-ffmpeg-wasm';
+            }
+            if (id.includes('js-yaml')) {
+              return 'vendor-js-yaml';
+            }
+            // Group other third-party libraries
+            return 'vendor';
           }
           
-          // Video tools that use FFmpeg
+          // Tool utilities
           if (id.includes('/video/ffmpeg-utils.js')) {
-            return 'ffmpeg-utils';
+            return 'video-utils';
           }
           
           // Group tools by category
@@ -58,6 +65,6 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core']
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core', 'js-yaml']
   }
 }); 
