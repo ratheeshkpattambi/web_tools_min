@@ -1,34 +1,31 @@
 # SafeWebTool
 
-A collection of browser-based tools for video, image, and text processing.
+A collection of privacy-focused tools that process your data locally in your browser.
 
-## Local Development
+🌐 Visit the website: [https://safewebtool.com/](https://safewebtool.com/)
 
+## Philosophy
+- 🔒 **Privacy First**: Your data never leaves your computer. All processing happens locally in your browser.
+- 🚫 **No Ads**: Completely ad-free experience.
+- 🆓 **Free & Open Source**: Built with transparency and community in mind.
+- 🤝 **Community Driven**: Contributions and feedback are welcome!
+
+## Features
+- Video processing tools
+- Image editing capabilities
+- Text manipulation utilities
+
+## Development
 ```bash
-# Clean and reinstall
-rm -rf node_modules package-lock.json dist
+# Install dependencies
 npm install
-
-# Start dev server
+# Start development server
 npm run dev
-```
-
-## Critical Dependencies
-The video tools require FFmpeg WASM, which is loaded from:
-```
-https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm
-```
-This specific CDN and version must be maintained for video processing to work correctly.
-
-## Deployment
-
-### Local Build
-```bash
+# Build for production
 npm run build
 ```
 
-### Netlify
-Automatic deployment on push to main branch:
-- Uses `npm ci` for clean install
-- Runs `vite build`
-- Deploys from `dist` folder 
+## Deployment
+Automatically deployed to Netlify on push to main branch.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/1f7a6d52-4a4b-489c-9cd1-7131562cc8b1/deploy-status)](https://app.netlify.com/sites/safewebtool/deploys)
