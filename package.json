@@ -1,7 +1,7 @@
 {
-  "name": "web_tools_min",
-  "version": "1.0.0",
-  "description": "Web Tools with Vite",
+  "name": "safewebtool",
+  "version": "1.0.1",
+  "description": "SafeWebTool - A collection of browser-based tools for video, image, and text processing",
   "type": "module",
   "scripts": {
     "dev": "vite",

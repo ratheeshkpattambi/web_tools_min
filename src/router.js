@@ -260,7 +260,7 @@ function generateTextContent(path) {
 function generateHomeContent() {
   return `
     <div class="tool-container">
-      <h1>Welcome to Web Tools</h1>
+      <h1>Welcome to SafeWebTool</h1>
       <p class="section-description">A collection of privacy-focused tools that process your data locally in your browser.</p>
       
       <section class="tools-section">
@@ -365,15 +365,15 @@ export async function handleRoute(path) {
   if (!main) return;
 
   // Update page title based on route
-  let pageTitle = 'Web Tools';
-  if (path === '/video') pageTitle = 'Video Tools';
-  else if (path === '/video/resize') pageTitle = 'Video Resize';
-  else if (path === '/video/reencode') pageTitle = 'Video Re-encode';
-  else if (path === '/image') pageTitle = 'Image Tools';
-  else if (path === '/image/resize') pageTitle = 'Image Resize';
-  else if (path === '/text') pageTitle = 'Text Tools';
-  else if (path === '/text/editor') pageTitle = 'Text Editor';
-  document.title = `${pageTitle} | Web Tools`;
+  let pageTitle = 'SafeWebTool';
+  if (path === '/video') pageTitle = 'Video Tools | SafeWebTool';
+  else if (path === '/video/resize') pageTitle = 'Video Resize | SafeWebTool';
+  else if (path === '/video/reencode') pageTitle = 'Video Re-encode | SafeWebTool';
+  else if (path === '/image') pageTitle = 'Image Tools | SafeWebTool';
+  else if (path === '/image/resize') pageTitle = 'Image Resize | SafeWebTool';
+  else if (path === '/text') pageTitle = 'Text Tools | SafeWebTool';
+  else if (path === '/text/editor') pageTitle = 'Text Editor | SafeWebTool';
+  document.title = pageTitle;
 
   // Generate content based on route
   let content = '';
