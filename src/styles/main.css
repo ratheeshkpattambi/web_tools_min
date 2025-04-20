@@ -716,4 +716,54 @@ footer {
   font-weight: bold;
   width: 30%;
   color: #555;
+}
+
+/* Video responsive styling */
+.video-wrapper {
+  width: 100%;
+  margin: 1rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-wrapper video {
+  width: 100%;
+  display: block;
+  max-height: 60vh;
+  object-fit: contain;
+  background-color: #000;
+}
+
+/* Make controls more touch-friendly on mobile */
+@media (max-width: 768px) {
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .input-group input,
+  .input-group select {
+    width: 100%;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .video-wrapper video {
+    max-height: 50vh;
+  }
+  
+  .drop-zone {
+    min-height: 120px;
+  }
 } 

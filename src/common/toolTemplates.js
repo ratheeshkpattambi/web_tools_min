@@ -1,0 +1,286 @@
+/**
+ * Tool templates for all tools in the application
+ * This file centralizes all tool UI templates
+ */
+
+// Video tool templates
+export const videoTemplates = {
+  'resize': `
+    <div class="tool-container">
+      <h1>Video Resize</h1>
+      <div id="dropZone" class="drop-zone">
+        <p>Drop video here or click to select</p>
+        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="width">Width:</label>
+          <input type="number" id="width" placeholder="Width">
+        </div>
+        <div class="input-group">
+          <label for="height">Height:</label>
+          <input type="number" id="height" placeholder="Height">
+        </div>
+        <div class="input-group">
+          <label for="keepRatio">
+            <input type="checkbox" id="keepRatio" checked>
+            Keep Aspect Ratio
+          </label>
+        </div>
+        <button id="processBtn" class="btn" disabled>Resize Video</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+
+      <div class="video-wrapper">
+        <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      <div id="downloadContainer"></div>
+    </div>
+  `,
+  'reencode': `
+    <div class="tool-container">
+      <h1>Video Re-encode</h1>
+      <div id="dropZone" class="drop-zone">
+        <p>Drop video here or click to select</p>
+        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="format">Format:</label>
+          <select id="format">
+            <option value="mp4">MP4</option>
+            <option value="webm">WebM</option>
+            <option value="mov">MOV</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="quality">Quality:</label>
+          <select id="quality">
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="bitrate">Bitrate (kb/s):</label>
+          <input type="number" id="bitrate" value="2000" min="500">
+        </div>
+        <button id="processBtn" class="btn" disabled>Re-encode Video</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+
+      <div class="video-wrapper">
+        <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      <div id="downloadContainer"></div>
+    </div>
+  `,
+  'info': `
+    <div class="tool-container">
+      <h1>Video Information</h1>
+      <div id="videoDropZone" class="drop-zone">
+        <p>Drop video here or click to select</p>
+        <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="video-preview" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div id="videoProgress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="videoInfoContainer" class="info-container" style="display: none;"></div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+  `
+};
+
+// Image tool templates
+export const imageTemplates = {
+  'resize': `
+    <div class="tool-container">
+      <h1>Image Resize</h1>
+      <div id="dropZone" class="drop-zone">
+        <p>Drop image here or click to select</p>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+      </div>
+      
+      <div id="fileInfo" class="file-info">
+        <p>File: <span id="fileName"></span></p>
+        <p>Size: <span id="fileSize"></span></p>
+      </div>
+
+      <img id="preview" style="display: none; max-width: 100%; margin: 1rem 0;">
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="width">Width:</label>
+          <input type="number" id="width" placeholder="Width">
+        </div>
+        <div class="input-group">
+          <label for="height">Height:</label>
+          <input type="number" id="height" placeholder="Height">
+        </div>
+        <div class="input-group">
+          <label>
+            <input type="checkbox" id="keepRatio" checked>
+            Keep Aspect Ratio
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="format">Format:</label>
+          <select id="format">
+            <option value="jpeg">JPEG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="quality">Quality: <span id="qualityValue">0.8</span></label>
+          <input type="range" id="quality" min="0.1" max="1" step="0.1" value="0.8">
+        </div>
+      </div>
+
+      <button id="resizeBtn" class="btn" disabled>Resize Image</button>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+  `
+};
+
+// Text tool templates
+export const textTemplates = {
+  'editor': `
+    <div class="tool-container">
+      <h1>Text Editor</h1>
+      <div id="dropZone" class="drop-zone">
+        <p>Drop text file here or click to select</p>
+        <input type="file" id="fileInput" accept=".txt" style="display: none;">
+      </div>
+
+      <div class="editor-toolbar">
+        <button id="formatBold" class="btn-icon" title="Bold">
+          <span class="icon">B</span>
+        </button>
+        <button id="formatItalic" class="btn-icon" title="Italic">
+          <span class="icon">I</span>
+        </button>
+        <button id="formatUnderline" class="btn-icon" title="Underline">
+          <span class="icon">U</span>
+        </button>
+        <button id="clearFormat" class="btn-icon" title="Clear Formatting">
+          <span class="icon">T</span>
+        </button>
+        <div class="toolbar-separator"></div>
+        <button id="downloadBtn" class="btn-icon" title="Download">
+          <span class="icon">↓</span>
+        </button>
+      </div>
+
+      <textarea id="editor" class="text-editor" placeholder="Start typing or drop a text file..."></textarea>
+
+      <div class="editor-footer">
+        <div class="word-count">
+          Words: <span id="wordCount">0</span>
+        </div>
+        <div class="char-count">
+          Characters: <span id="charCount">0</span>
+        </div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+  `
+};
+
+/**
+ * Get the template for a specific tool
+ * @param {string} category - The category (video, image, text)
+ * @param {string} toolId - The tool ID
+ * @returns {string} The HTML template or null if not found
+ */
+export function getToolTemplate(category, toolId) {
+  const templates = {
+    'video': videoTemplates,
+    'image': imageTemplates,
+    'text': textTemplates
+  };
+  
+  if (!templates[category] || !templates[category][toolId]) {
+    return null;
+  }
+  
+  return templates[category][toolId];
+}
+
+/**
+ * Generic error template
+ */
+export function getErrorTemplate(title, message, details = '') {
+  return `
+    <div class="tool-container">
+      <h1>${title}</h1>
+      <p>${message}</p>
+      ${details ? `<div class="error-details">${details}</div>` : ''}
+      <a href="/" class="btn">Return to Home</a>
+    </div>
+  `;
+}
+
+/**
+ * 404 template
+ */
+export function get404Template() {
+  return getErrorTemplate(
+    '404 - Page Not Found',
+    'The requested page could not be found.'
+  );
+} 
