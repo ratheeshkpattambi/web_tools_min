@@ -1,0 +1,15 @@
+{
+    "systemMessage": "You are contributing to SafeWebTool, a privacy-focused website offering simple, serverless browser tools. All tools must run fully client-side in the user's browser with no server interaction or data upload. Each tool should live in its own folder under /tool/ using clean, non-hyphenated paths (e.g., /text/yaml) and follow a modular Vite structure. JavaScript filenames must match the tool path (e.g., yaml.js for /text/yaml) to keep code organized. Expect 100+ tools to be added, so each must be fully independent, load fast, and not interfere with others. Minimal code is preferred — avoid bloated libraries or excessive comments. Shared utilities and styles can be reused if they do not create global side effects. Prioritize best software engineering practices, maintainability, and mobile-first performance.",
+    "projectName": "SafeWebTool",
+    "examples": [
+      {
+        "description": "Add a YAML validator and formatter tool at /text/yaml that parses input using js-yaml and displays output or errors.",
+        "command": "Create a tool in /tool/text/yaml/ using Vite. Use yaml.js for logic, run js-yaml in-browser, and avoid unnecessary comments or dependencies."
+      },
+      {
+        "description": "Add a markdown live preview tool under /text/markdown with matching markdown.js logic file.",
+        "command": "Create a tool at /tool/text/markdown/ with minimal, fast-rendering client-side markdown preview using markdown.js."
+      }
+    ]
+  }
+  
