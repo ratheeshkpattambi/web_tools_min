@@ -86,6 +86,11 @@ export async function loadFFmpeg() {
   
   try {
     addLog('Loading FFmpeg...', 'info');
+    
+    // Update the loading indicator if it exists
+    updateLoadingIndicator(10, 'Initializing FFmpeg...');
+    
+    // Create a new FFmpeg instance
     ffmpeg = new FFmpeg();
     
     ffmpeg.on('log', ({ message }) => {
@@ -95,8 +100,21 @@ export async function loadFFmpeg() {
     ffmpeg.on('progress', ({ progress }) => {
       const percentage = Math.round(progress * 100);
       updateProgress(percentage);
+      
+      // Also update the loading indicator if it exists
+      updateLoadingIndicator(10 + percentage * 0.9, 'Loading FFmpeg WASM...');
     });
 
+    // Notify that we're fetching WASM files
+    updateLoadingIndicator(20, 'Fetching FFmpeg WASM components...');
+    
+    // Try to prefetch FFmpeg files to improve loading performance
+    try {
+      prefetchFFmpegResources();
+    } catch (e) {
+      console.warn('Prefetch failed, continuing with normal loading', e);
+    }
+    
     // Load from CDN - this is the only working solution, do not change
     await ffmpeg.load({
       coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
@@ -104,12 +122,56 @@ export async function loadFFmpeg() {
       workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
     });
     
+    updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
     addLog('FFmpeg loaded successfully!', 'success');
     return ffmpeg;
   } catch (error) {
     addLog(`Failed to load FFmpeg: ${error.message}`, 'error');
+    updateLoadingIndicator(100, `Error: ${error.message}`, true);
     throw error;
   }
+}
+
+/**
+ * Update the loading indicator if it exists
+ */
+function updateLoadingIndicator(percent, message, isError = false) {
+  const loadingEl = document.getElementById('ffmpeg-loading');
+  if (loadingEl) {
+    const progressFill = loadingEl.querySelector('.progress-fill');
+    if (progressFill) {
+      progressFill.style.width = `${percent}%`;
+      progressFill.style.backgroundColor = isError ? '#e74c3c' : '';
+    }
+    
+    const messageEl = loadingEl.querySelector('p');
+    if (messageEl && message) {
+      messageEl.textContent = message;
+      if (isError) {
+        messageEl.style.color = '#e74c3c';
+      }
+    }
+  }
+}
+
+/**
+ * Prefetch FFmpeg resources to improve loading performance
+ */
+function prefetchFFmpegResources() {
+  const resources = [
+    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
+  ];
+  
+  resources.forEach(url => {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = url;
+    link.as = url.endsWith('.wasm') ? 'fetch' : 'script';
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  });
 }
 
 /**

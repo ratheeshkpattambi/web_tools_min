@@ -862,4 +862,35 @@ footer {
   background: #f8f8f8 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ccc"><path d="M21.17 2.06l.96.96-19.05 19.05-.96-.96 19.05-19.05zM19 11v2h-5.17l-2-2H19zm-7.83-2l-2-2H19V9h-7.83zM5 13v-2h2.17l2 2H5zm0-4h4.17l2 2H5V9z"/></svg>') center no-repeat;
   max-height: 50vh;
   object-fit: contain;
+}
+
+/* FFmpeg loading indicator */
+.loading-ffmpeg {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.loading-ffmpeg p {
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.loading-ffmpeg .progress {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-ffmpeg .progress-fill {
+  background-color: #2563eb;
+  height: 100%;
+  transition: width 0.3s ease;
+  width: 0%;
 } 

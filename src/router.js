@@ -209,13 +209,74 @@ export async function handleRoute(path) {
         // Small delay to ensure DOM is fully updated
         setTimeout(async () => {
           try {
-            // Import the tool module
-            const modulePath = result.tool.modulePath;
-            const initFunctionName = result.tool.initFunction;
+            // Determine the correct import path
+            const category = path.split('/')[1];
+            const toolId = path.split('/')[2];
             
-            const module = await import(/* @vite-ignore */ modulePath);
-            if (module[initFunctionName]) {
-              module[initFunctionName]();
+            // Preload common styles and utilities first
+            await import('./common/utils.js');
+            
+            // Check if this is a video tool that requires FFmpeg
+            const needsFFmpeg = 
+              (category === 'video' && 
+              ['resize', 'reencode', 'gif', 'info'].includes(toolId));
+              
+            // Display loading indicator for FFmpeg tools
+            if (needsFFmpeg) {
+              const loadingHtml = `
+                <div class="loading-ffmpeg">
+                  <p>Loading FFmpeg components...</p>
+                  <div class="progress">
+                    <div class="progress-fill"></div>
+                  </div>
+                </div>
+              `;
+              const loadingEl = document.createElement('div');
+              loadingEl.innerHTML = loadingHtml;
+              loadingEl.style.textAlign = 'center';
+              loadingEl.style.padding = '20px';
+              loadingEl.id = 'ffmpeg-loading';
+              document.querySelector('.tool-container').appendChild(loadingEl);
+            }
+            
+            // Use more reliable import paths that work in production
+            let moduleToImport;
+            
+            switch (`${category}/${toolId}`) {
+              case 'video/resize':
+                moduleToImport = await import('./video/resize.js');
+                break;
+              case 'video/info':
+                moduleToImport = await import('./video/info.js');
+                break;
+              case 'video/reencode':
+                moduleToImport = await import('./video/reencode.js');
+                break;
+              case 'video/gif':
+                moduleToImport = await import('./video/gif.js');
+                break;
+              case 'image/resize':
+                moduleToImport = await import('./image/resize.js');
+                break;
+              case 'text/editor':
+                moduleToImport = await import('./text/editor.js');
+                break;
+              default:
+                throw new Error(`Unknown tool: ${category}/${toolId}`);
+            }
+            
+            // Remove loading indicator if it exists
+            const loadingEl = document.getElementById('ffmpeg-loading');
+            if (loadingEl) {
+              loadingEl.remove();
+            }
+            
+            // Call the initialization function
+            const initFunctionName = result.tool.initFunction;
+            if (moduleToImport && moduleToImport[initFunctionName]) {
+              moduleToImport[initFunctionName]();
+            } else {
+              throw new Error(`Init function '${initFunctionName}' not found in module`);
             }
           } catch (error) {
             console.error(`Failed to load tool module: ${error.message}`);
