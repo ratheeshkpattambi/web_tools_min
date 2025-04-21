@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeWebTool</title>
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/src/styles/main.css" as="style">
+    <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="/src/assets/kalarot.ico" as="image">
     <link rel="stylesheet" href="/src/styles/main.css">
-    <!-- Google tag (gtag.js) -->
+    <!-- Defer non-critical JavaScript -->
+    <script defer src="/src/main.js" type="module"></script>
+    <!-- Google Analytics with minimal impact on LCP -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK7DDP7ND6"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-SK7DDP7ND6');
-        // Log when GA is loaded
-        gtag('event', 'page_view', {
-            'send_to': 'G-SK7DDP7ND6',
-            'callback': function() {
-                console.log('Google Analytics loaded and tracking');
-            }
+        gtag('config', 'G-SK7DDP7ND6', {
+            'send_page_view': false // Defer page view until after LCP
         });
     </script>
     <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
@@ -29,7 +30,7 @@
         <header>
             <div class="header-container">
                 <div class="logo-container">
-                    <img src="/src/assets/logo.svg" alt="SafeWebTool Logo" class="logo">
+                    <img src="/src/assets/logo.svg" alt="SafeWebTool Logo" class="logo" width="32" height="32" fetchpriority="high" decoding="async">
                     <h1>SafeWebTool</h1>
                 </div>
                 <nav>
@@ -48,7 +49,7 @@
         <footer>
             <div class="author-info">
                 <div class="author-details">
-                    <img src="/src/assets/kalarot.ico" alt="Ratheesh Kalarot" class="author-avatar" width="32" height="32">
+                    <img src="/src/assets/kalarot.ico" alt="Ratheesh Kalarot" class="author-avatar" width="32" height="32" loading="lazy" decoding="async">
                     <div class="author-content">
                         <p>© Dr. Ratheesh Kalarot</p>
                         <div class="author-links">
@@ -57,13 +58,12 @@
                             <a href="https://www.linkedin.com/in/ratheesh-kalarot/" target="_blank" rel="noopener">LinkedIn</a>
                         </div>
                         <div class="deployment-info">
-                            <p>Version: 1.0.11</p>
+                            <p>Version: 1.0.12</p>
                         </div>
                     </div>
                 </div>
             </div>
         </footer>
     </div>
-    <script type="module" src="/src/main.js"></script>
 </body>
 </html> 
