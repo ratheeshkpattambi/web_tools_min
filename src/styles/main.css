@@ -441,55 +441,129 @@ main {
 /* Footer styles */
 footer {
   background: #fff;
-  padding: 1rem 2rem;
+  padding: 1.5rem 0;
   text-align: center;
   margin-top: auto;
   box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .author-info {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.author-details {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .author-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.author-details {
+.author-content {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.author-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4b5563;
 }
 
 .author-links {
   display: flex;
   gap: 1rem;
   margin: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .author-links a {
   color: #2c3e50;
   text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.95rem;
 }
 
 .author-links a:hover {
   text-decoration: underline;
+  color: var(--primary-color);
+}
+
+.deployment-info {
+  margin-left: 1rem;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 1rem;
+}
+
+.deployment-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 /* Update responsive design for footer */
 @media (max-width: 768px) {
-  .author-info {
-    flex-wrap: wrap;
+  footer {
+    padding: 1.25rem 1rem;
   }
 
   .author-details {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .author-content {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .author-links {
+    gap: 1rem;
+  }
+
+  .deployment-info {
+    margin-left: 0;
+    border-left: none;
+    padding-left: 0;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .author-details {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .author-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .author-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
   }
 }
 

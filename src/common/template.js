@@ -52,12 +52,14 @@ export function generatePageHTML(title, content) {
         <div class="author-info">
           <div class="author-details">
             <img src="/src/assets/kalarot.ico" alt="Ratheesh Kalarot" class="author-avatar" width="32" height="32" loading="eager" fetchpriority="high" decoding="async">
-            <p>© Dr. Ratheesh Kalarot</p>
-            <p class="author-links">
-              <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank">Google Scholar</a>
-              <a href="https://github.com/ratheeshkpattambi/web_tools_min" target="_blank">GitHub</a>
-              <a href="https://www.linkedin.com/in/ratheesh-kalarot/" target="_blank">LinkedIn</a>
-            </p>
+            <div class="author-content">
+              <p>© Dr. Ratheesh Kalarot</p>
+              <div class="author-links">
+                <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank">Google Scholar</a>
+                <a href="https://github.com/ratheeshkpattambi/web_tools_min" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/ratheesh-kalarot/" target="_blank">LinkedIn</a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
