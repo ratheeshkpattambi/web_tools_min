@@ -1,75 +1,99 @@
 /**
  * Video re-encode module using FFmpeg WASM
  */
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
-import { addLog, formatFileSize, updateProgress, showLogs } from '../common/utils.js';
+import { Tool } from '../common/base.js';
+import { formatFileSize } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
-import { initFileUpload } from '../common/fileUpload.js';
 
-let inputVideo = null;
+class VideoReencodeTool extends Tool {
+  constructor(config = {}) {
+    super({
+      ...config,
+      category: 'video',
+      needsFileUpload: true,
+      hasOutput: true,
+      needsProcessButton: true
+    });
+    
+    this.ffmpeg = null;
+    this.outputContainer = null;
+  }
 
-/**
- * Initialize the video re-encode tool
- */
-export async function initTool() {
-  const elements = {
-    dropZone: document.getElementById('dropZone'),
-    fileInput: document.getElementById('fileInput'),
-    inputVideo: document.getElementById('input-video'),
-    outputVideo: document.getElementById('output-video'),
-    processBtn: document.getElementById('processBtn'),
-    format: document.getElementById('format'),
-    quality: document.getElementById('quality'),
-    bitrate: document.getElementById('bitrate'),
-    progress: document.getElementById('progress'),
-    downloadContainer: document.getElementById('downloadContainer')
-  };
+  getElementsMap() {
+    return {
+      dropZone: 'dropZone',
+      fileInput: 'fileInput',
+      inputVideo: 'input-video',
+      outputVideo: 'output-video',
+      processBtn: 'processBtn',
+      format: 'format',
+      quality: 'quality',
+      bitrate: 'bitrate',
+      progress: 'progress',
+      outputContainer: 'outputContainer',
+      downloadContainer: 'downloadContainer',
+      logHeader: 'logHeader',
+      logContent: 'logContent'
+    };
+  }
 
-  // Handle file selection using the common utility
-  initFileUpload({
-    dropZoneId: 'dropZone',
-    fileInputId: 'fileInput',
-    acceptTypes: 'video/*',
-    onFileSelected: (file) => {
-      inputVideo = file;
-      const url = URL.createObjectURL(file);
-      elements.inputVideo.src = url;
-      elements.inputVideo.style.display = 'block';
-      elements.processBtn.disabled = false;
-
-      addLog(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+  async setup() {
+    // Ensure logs are at the bottom
+    this.ensureProperDOMOrder();
+    
+    this.initFileUpload({
+      acceptTypes: 'video/*',
+      onFileSelected: (file) => {
+        this.displayPreview(file, 'inputVideo');
+        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+      }
+    });
+  }
+  
+  /**
+   * Ensure DOM elements are in the correct order
+   */
+  ensureProperDOMOrder() {
+    // Find the container of log elements
+    const logHeader = document.getElementById('logHeader');
+    const logContent = document.getElementById('logContent');
+    
+    if (logHeader && logContent) {
+      // Get the parent container
+      const container = logHeader.closest('.tool-container');
+      
+      if (container) {
+        // Move logs to the end
+        container.appendChild(logHeader);
+        container.appendChild(logContent);
+      }
     }
-  });
+  }
 
-  // Process video
-  elements.processBtn.addEventListener('click', async () => {
-    if (!inputVideo) {
-      addLog('Please select a video file first', 'error');
-      return;
-    }
-
-    const format = elements.format.value;
-    const quality = elements.quality.value;
-    const bitrate = parseInt(elements.bitrate.value);
-
-    if (!bitrate || bitrate < 500) {
-      addLog('Please enter a valid bitrate (minimum 500kb/s)', 'error');
-      return;
-    }
-
+  async processFile(file) {
     try {
-      elements.processBtn.disabled = true;
-      elements.progress.style.display = 'block';
+      this.startProcessing();
+      this.updateProgress(10);
 
-      // Load FFmpeg if not already loaded
-      const ffmpeg = await loadFFmpeg();
+      const format = this.elements.format.value;
+      const quality = this.elements.quality.value;
+      const bitrate = parseInt(this.elements.bitrate.value);
 
-      const inputFileName = 'input' + getExtension(inputVideo.name);
+      if (!bitrate || bitrate < 500) {
+        this.log('Please enter a valid bitrate (minimum 500kb/s)', 'error');
+        this.endProcessing(false);
+        return;
+      }
+
+      this.ffmpeg = await loadFFmpeg();
+      this.updateProgress(30);
+
+      const inputFileName = 'input' + getExtension(file.name);
       const outputFileName = `output.${format}`;
 
-      addLog('Writing input file...', 'info');
-      await writeInputFile(ffmpeg, inputFileName, inputVideo);
+      this.log('Writing input file...', 'info');
+      await writeInputFile(this.ffmpeg, inputFileName, file);
+      this.updateProgress(50);
 
       // Build FFmpeg command based on format and quality
       const ffmpegArgs = ['-i', inputFileName];
@@ -101,34 +125,37 @@ export async function initTool() {
 
       ffmpegArgs.push(outputFileName);
 
-      addLog(`Re-encoding video to ${format.toUpperCase()}...`, 'info');
-      await executeFFmpeg(ffmpeg, ffmpegArgs);
+      this.log(`Re-encoding video to ${format.toUpperCase()}...`, 'info');
+      await executeFFmpeg(this.ffmpeg, ffmpegArgs);
+      this.updateProgress(80);
 
-      addLog('Reading output file...', 'info');
-      const data = await readOutputFile(ffmpeg, outputFileName);
+      this.log('Reading output file...', 'info');
+      const data = await readOutputFile(this.ffmpeg, outputFileName);
       const blob = new Blob([data], { type: `video/${format}` });
-      const url = URL.createObjectURL(blob);
-
-      elements.outputVideo.src = url;
-      elements.outputVideo.style.display = 'block';
-
-      // Add download button
-      elements.downloadContainer.innerHTML = `
-        <a href="${url}" download="reencoded_video.${format}" class="btn">
-          Download Re-encoded Video
-        </a>
-      `;
-
-      addLog('Processing complete!', 'success');
+      this.updateProgress(90);
+      
+      // Display output media and create download link using base helper
+      this.displayOutputMedia(blob, 'outputVideo', `reencoded_video.${format}`, 'downloadContainer');
+      
+      this.updateProgress(100);
+      this.log('Processing complete!', 'success');
+      this.endProcessing();
     } catch (error) {
-      addLog(`Error: ${error.message}`, 'error');
+      this.log(`Error: ${error.message}`, 'error');
       console.error('Processing error:', error);
-    } finally {
-      elements.processBtn.disabled = false;
-      elements.progress.style.display = 'none';
+      this.endProcessing(false);
     }
-  });
+  }
+}
 
-  // Initialize log toggle
-  showLogs();
+/**
+ * Initialize the video re-encode tool
+ */
+export function initTool() {
+  const tool = new VideoReencodeTool({
+    id: 'reencode',
+    name: 'Video Re-encode'
+  });
+  
+  return tool.init();
 } 

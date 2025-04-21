@@ -74,5 +74,9 @@ export function createSitemapFile(baseUrl = 'https://safewebtool.org/') {
  * This should be used when sitemap.xml is requested
  */
 export function serveSitemap(baseUrl = window.location.origin) {
-  return createSitemapFile(baseUrl);
+  if (!baseUrl.includes('://')) {
+    // Ensure we have a full URL with protocol
+    baseUrl = window.location.protocol + '//' + baseUrl.replace(/^\/\//, '');
+  }
+  return generateSitemap(baseUrl).trim();
 } 

@@ -1,129 +1,194 @@
 /**
- * Video resize module using FFmpeg WASM
+ * Video resizing module using FFmpeg WASM
  */
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
-import { addLog, formatFileSize, updateProgress, showLogs } from '../common/utils.js';
+import { Tool } from '../common/base.js';
+import { formatFileSize } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
-import { initFileUpload } from '../common/fileUpload.js';
 
-let inputVideo = null;
-let aspectRatio = 1;
+class VideoResizeTool extends Tool {
+  constructor(config = {}) {
+    super({
+      ...config,
+      category: 'video',
+      needsFileUpload: true,
+      hasOutput: true,
+      needsProcessButton: true
+    });
+    
+    this.ffmpeg = null;
+    this.videoAspectRatio = 1;
+    this.originalWidth = 0;
+    this.originalHeight = 0;
+  }
 
-/**
- * Initialize the video resize tool
- */
-export async function initTool() {
-  const elements = {
-    dropZone: document.getElementById('dropZone'),
-    fileInput: document.getElementById('fileInput'),
-    inputVideo: document.getElementById('input-video'),
-    outputVideo: document.getElementById('output-video'),
-    processBtn: document.getElementById('processBtn'),
-    width: document.getElementById('width'),
-    height: document.getElementById('height'),
-    keepRatio: document.getElementById('keepRatio'),
-    progress: document.getElementById('progress'),
-    downloadContainer: document.getElementById('downloadContainer')
-  };
+  getElementsMap() {
+    return {
+      dropZone: 'dropZone',
+      fileInput: 'fileInput',
+      inputVideo: 'input-video',
+      outputVideo: 'output-video',
+      processBtn: 'processBtn',
+      width: 'width',
+      height: 'height',
+      keepRatio: 'keepRatio',
+      quality: 'quality',
+      progress: 'progress',
+      downloadContainer: 'downloadContainer',
+      logHeader: 'logHeader',
+      logContent: 'logContent'
+    };
+  }
 
-  // Handle file selection using the common utility
-  initFileUpload({
-    dropZoneId: 'dropZone',
-    fileInputId: 'fileInput',
-    acceptTypes: 'video/*',
-    onFileSelected: (file) => {
-      inputVideo = file;
-      const url = URL.createObjectURL(file);
-      elements.inputVideo.src = url;
-      elements.inputVideo.style.display = 'block';
+  async setup() {
+    // Disable inputs until video is loaded
+    if (this.elements.width) this.elements.width.disabled = true;
+    if (this.elements.height) this.elements.height.disabled = true;
+    if (this.elements.keepRatio) this.elements.keepRatio.checked = true;
+    if (this.elements.processBtn) this.elements.processBtn.disabled = true;
 
-      // Get video dimensions when metadata is loaded
-      elements.inputVideo.onloadedmetadata = () => {
-        aspectRatio = elements.inputVideo.videoWidth / elements.inputVideo.videoHeight;
-        elements.width.value = elements.inputVideo.videoWidth;
-        elements.height.value = elements.inputVideo.videoHeight;
-        elements.processBtn.disabled = false;
-      };
+    this.initFileUpload({
+      acceptTypes: 'video/*',
+      onFileSelected: (file) => {
+        this.displayPreview(file, 'inputVideo');
+        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+        
+        // Get video dimensions when metadata is loaded
+        if (this.elements.inputVideo) {
+          this.elements.inputVideo.onloadedmetadata = () => {
+            this.originalWidth = this.elements.inputVideo.videoWidth;
+            this.originalHeight = this.elements.inputVideo.videoHeight;
+            this.videoAspectRatio = this.originalWidth / this.originalHeight;
+            
+            // Enable inputs and set initial values
+            this.elements.width.disabled = false;
+            this.elements.height.disabled = false;
+            this.elements.keepRatio.disabled = false;
+            this.elements.processBtn.disabled = false;
+            
+            // Set initial values to original dimensions
+            this.elements.width.value = this.originalWidth;
+            this.elements.height.value = this.originalHeight;
+            
+            // Set placeholders
+            this.elements.width.placeholder = 'Width';
+            this.elements.height.placeholder = 'Height';
+          };
+        }
+      }
+    });
 
-      addLog(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+    // Handle dimension changes
+    if (this.elements.width) {
+      this.elements.width.addEventListener('input', () => {
+        if (this.elements.keepRatio && this.elements.keepRatio.checked) {
+          this.updateHeight();
+        }
+      });
     }
-  });
-
-  // Handle dimension changes
-  elements.width.addEventListener('input', () => {
-    if (elements.keepRatio.checked && elements.width.value) {
-      elements.height.value = Math.round(elements.width.value / aspectRatio);
+    
+    if (this.elements.height) {
+      this.elements.height.addEventListener('input', () => {
+        if (this.elements.keepRatio && this.elements.keepRatio.checked) {
+          this.updateWidth();
+        }
+      });
     }
-  });
+  }
 
-  elements.height.addEventListener('input', () => {
-    if (elements.keepRatio.checked && elements.height.value) {
-      elements.width.value = Math.round(elements.height.value * aspectRatio);
-    }
-  });
+  updateHeight() {
+    if (!this.elements.width || !this.elements.height) return;
+    
+    const width = parseInt(this.elements.width.value) || 0;
+    if (width <= 0) return;
 
-  // Process video
-  elements.processBtn.addEventListener('click', async () => {
-    if (!inputVideo) {
-      addLog('Please select a video file first', 'error');
-      return;
-    }
+    this.elements.height.value = Math.round(width / this.videoAspectRatio);
+  }
 
-    const width = parseInt(elements.width.value);
-    const height = parseInt(elements.height.value);
+  updateWidth() {
+    if (!this.elements.width || !this.elements.height) return;
+    
+    const height = parseInt(this.elements.height.value) || 0;
+    if (height <= 0) return;
 
-    if (!width || !height || width <= 0 || height <= 0) {
-      addLog('Please enter valid dimensions', 'error');
-      return;
-    }
+    this.elements.width.value = Math.round(height * this.videoAspectRatio);
+  }
 
+  calculateDimensions() {
+    if (!this.elements.width || !this.elements.height) return { width: 0, height: 0 };
+    
+    const width = parseInt(this.elements.width.value) || this.originalWidth;
+    const height = parseInt(this.elements.height.value) || this.originalHeight;
+
+    return { width, height };
+  }
+
+  async processFile(file) {
     try {
-      elements.processBtn.disabled = true;
-      elements.progress.style.display = 'block';
+      this.startProcessing();
+      this.updateProgress(10);
 
-      // Load FFmpeg if not already loaded
-      const ffmpeg = await loadFFmpeg();
+      const dimensions = this.calculateDimensions();
+      const { width, height } = dimensions;
+      const quality = this.elements.quality ? this.elements.quality.value : 'medium';
 
-      const inputFileName = 'input' + getExtension(inputVideo.name);
-      const outputFileName = 'output.mp4';
+      if (width <= 0 || height <= 0) {
+        this.log('Please enter valid dimensions', 'error');
+        this.endProcessing(false);
+        return;
+      }
 
-      addLog('Writing input file...', 'info');
-      await writeInputFile(ffmpeg, inputFileName, inputVideo);
+      this.log(`Resizing to ${width}x${height} pixels...`, 'info');
 
-      addLog(`Resizing to ${width}x${height}...`, 'info');
-      await executeFFmpeg(ffmpeg, [
+      this.ffmpeg = await loadFFmpeg();
+      this.updateProgress(20);
+
+      const inputFileName = 'input' + getExtension(file.name);
+      const outputFileName = 'output' + getExtension(file.name);
+
+      this.log('Writing input file...', 'info');
+      await writeInputFile(this.ffmpeg, inputFileName, file);
+      this.updateProgress(30);
+
+      const scaleFilter = `scale=${width}:${height}:flags=lanczos`;
+      const qualityArgs = quality === 'high' ? ['-crf', '18'] :
+                         quality === 'medium' ? ['-crf', '23'] :
+                         ['-crf', '28'];
+
+      await executeFFmpeg(this.ffmpeg, [
         '-i', inputFileName,
-        '-vf', `scale=${width}:${height}`,
-        '-c:a', 'copy',
-        outputFileName
+        '-vf', scaleFilter,
+        ...qualityArgs,
+        '-preset', 'medium',
+        '-y', outputFileName
       ]);
+      this.updateProgress(80);
 
-      addLog('Reading output file...', 'info');
-      const data = await readOutputFile(ffmpeg, outputFileName);
-      const blob = new Blob([data], { type: 'video/mp4' });
-      const url = URL.createObjectURL(blob);
-
-      elements.outputVideo.src = url;
-      elements.outputVideo.style.display = 'block';
-
-      // Add download button
-      elements.downloadContainer.innerHTML = `
-        <a href="${url}" download="resized_video.mp4" class="btn">
-          Download Resized Video
-        </a>
-      `;
-
-      addLog('Processing complete!', 'success');
+      this.log('Reading output file...', 'info');
+      const data = await readOutputFile(this.ffmpeg, outputFileName);
+      
+      if (!data || data.byteLength === 0) {
+        throw new Error('Generated video is empty. Check video format or try different settings.');
+      }
+      
+      const blob = new Blob([data], { type: file.type });
+      this.displayOutputMedia(blob, 'outputVideo', `video_${width}x${height}${getExtension(file.name)}`, 'downloadContainer');
+      
+      this.updateProgress(100);
+      this.log('Resizing complete!', 'success');
+      this.endProcessing();
     } catch (error) {
-      addLog(`Error: ${error.message}`, 'error');
+      this.log(`Error: ${error.message}`, 'error');
       console.error('Processing error:', error);
-    } finally {
-      elements.processBtn.disabled = false;
-      elements.progress.style.display = 'none';
+      this.endProcessing(false);
     }
-  });
+  }
+}
 
-  // Initialize log toggle
-  showLogs();
+export function initTool() {
+  const tool = new VideoResizeTool({
+    id: 'resize',
+    name: 'Video Resize'
+  });
+  
+  return tool.init();
 } 

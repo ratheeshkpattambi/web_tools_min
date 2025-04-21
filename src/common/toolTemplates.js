@@ -42,16 +42,18 @@ export const videoTemplates = {
         <div class="progress-text">0%</div>
       </div>
 
+      <div id="outputContainer" class="output-container">
+        <div class="video-wrapper">
+          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+        </div>
+        <div id="downloadContainer"></div>
+      </div>
+
       <div id="logHeader" class="log-header">
         <span>Logs</span>
         <span id="logToggle">▼</span>
       </div>
       <div id="logContent" class="log-content"></div>
-
-      <div class="video-wrapper">
-        <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
-      </div>
-      <div id="downloadContainer"></div>
     </div>
   `,
   'reencode': `
@@ -97,16 +99,18 @@ export const videoTemplates = {
         <div class="progress-text">0%</div>
       </div>
 
+      <div id="outputContainer" class="output-container">
+        <div class="video-wrapper">
+          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+        </div>
+        <div id="downloadContainer"></div>
+      </div>
+
       <div id="logHeader" class="log-header">
         <span>Logs</span>
         <span id="logToggle">▼</span>
       </div>
       <div id="logContent" class="log-content"></div>
-
-      <div class="video-wrapper">
-        <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
-      </div>
-      <div id="downloadContainer"></div>
     </div>
   `,
   'info': `
@@ -201,10 +205,12 @@ export const videoTemplates = {
         <div class="progress-text">0%</div>
       </div>
 
-      <div class="output-wrapper" style="margin-top: 20px;">
-        <img id="output-gif" style="display: none; max-width: 100%;">
+      <div id="outputContainer" class="output-container">
+        <div class="output-wrapper">
+          <img id="output-gif" style="display: none; max-width: 100%;">
+        </div>
+        <div id="downloadContainer"></div>
       </div>
-      <div id="downloadContainer"></div>
 
       <div id="logHeader" class="log-header">
         <span>Logs</span>

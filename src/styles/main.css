@@ -881,8 +881,13 @@ footer {
 }
 
 .output-container {
-  margin: 1rem 0;
-  text-align: center;
+  margin: 1.5rem 0;
+  border-top: 1px solid #eaeaea;
+  padding-top: 1.5rem;
+}
+
+.output-wrapper {
+  margin-top: 20px;
 }
 
 #output-gif {

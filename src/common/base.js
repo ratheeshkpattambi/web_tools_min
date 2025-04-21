@@ -259,6 +259,25 @@ export class Tool {
   }
   
   /**
+   * Display output media (video/image/audio) and create a download link
+   * @param {Blob|File} blob - The output data blob
+   * @param {string} mediaKey - Key of the media element in this.elements
+   * @param {string} filename - Filename for downloading the blob
+   * @param {string} [containerKey='downloadContainer'] - Key of the download container
+   * @returns {string} The blob URL
+   */
+  displayOutputMedia(blob, mediaKey, filename, containerKey = 'downloadContainer') {
+    const url = URL.createObjectURL(blob);
+    const mediaEl = this.elements[mediaKey];
+    if (mediaEl && ['VIDEO', 'IMG', 'AUDIO'].includes(mediaEl.tagName)) {
+      mediaEl.src = url;
+      mediaEl.style.display = 'block';
+    }
+    this.createDownloadLink(blob, filename, containerKey);
+    return url;
+  }
+  
+  /**
    * Start processing and update UI accordingly
    */
   startProcessing() {

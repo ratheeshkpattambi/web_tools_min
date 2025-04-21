@@ -189,6 +189,22 @@ function generateCategoryContent(categoryConfig, categoryId) {
  * @param {string} path - The URL path
  */
 export async function handleRoute(path) {
+  // Handle sitemap.xml requests
+  if (path === '/sitemap.xml') {
+    import('./common/sitemap.js').then(({ serveSitemap }) => {
+      document.documentElement.innerHTML = `
+        <pre style="word-wrap: break-word; white-space: pre-wrap;">
+          ${serveSitemap()}
+        </pre>
+      `;
+      // Set the correct content type if possible
+      if (document.contentType) {
+        document.contentType = 'application/xml';
+      }
+    });
+    return;
+  }
+
   const main = document.querySelector('main');
   if (!main) return;
 

@@ -20,6 +20,7 @@ export function initPage() {
   const fileInfo = document.getElementById('fileInfo');
   const fileName = document.getElementById('fileName');
   const fileSize = document.getElementById('fileSize');
+  const sizeModeSelect = document.getElementById('size-mode');
 
   let originalImage = null;
   let aspectRatio = 1;
