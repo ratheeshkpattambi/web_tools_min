@@ -282,31 +282,9 @@ export const textTemplates = {
   'editor': `
     <div class="tool-container">
       <h1>Text Editor</h1>
-      <div id="dropZone" class="drop-zone">
-        <p>Drop text file here or click to select</p>
-        <input type="file" id="fileInput" accept=".txt" style="display: none;">
-      </div>
+      <p class="tool-description">The plainest text editor - just type and download</p>
 
-      <div class="editor-toolbar">
-        <button id="formatBold" class="btn-icon" title="Bold">
-          <span class="icon">B</span>
-        </button>
-        <button id="formatItalic" class="btn-icon" title="Italic">
-          <span class="icon">I</span>
-        </button>
-        <button id="formatUnderline" class="btn-icon" title="Underline">
-          <span class="icon">U</span>
-        </button>
-        <button id="clearFormat" class="btn-icon" title="Clear Formatting">
-          <span class="icon">T</span>
-        </button>
-        <div class="toolbar-separator"></div>
-        <button id="downloadBtn" class="btn-icon" title="Download">
-          <span class="icon">↓</span>
-        </button>
-      </div>
-
-      <textarea id="editor" class="text-editor" placeholder="Start typing or drop a text file..."></textarea>
+      <textarea id="editor" class="text-editor" placeholder="Start typing..."></textarea>
 
       <div class="editor-footer">
         <div class="word-count">
@@ -316,6 +294,8 @@ export const textTemplates = {
           Characters: <span id="charCount">0</span>
         </div>
       </div>
+
+      <div id="downloadContainer"></div>
 
       <div id="logHeader" class="log-header">
         <span>Logs</span>

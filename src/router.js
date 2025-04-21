@@ -77,7 +77,7 @@ const TOOLS_CONFIG = {
         icon: '📝',
         description: 'Simple text editing with formatting options',
         modulePath: './text/editor.js',
-        initFunction: 'initPage'
+        initFunction: 'initTool'
       },
       {
         id: 'yaml',
