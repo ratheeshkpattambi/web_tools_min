@@ -111,7 +111,7 @@ export const videoTemplates = {
   `,
   'info': `
     <div class="tool-container">
-      <h1>Video Information</h1>
+      <h1>Video Info</h1>
       <div id="videoDropZone" class="drop-zone">
         <div class="drop-icon">📁</div>
         <p>Drop video here</p>
@@ -122,13 +122,13 @@ export const videoTemplates = {
       <div class="video-wrapper">
         <video id="video-preview" controls style="display: none; max-width: 100%; height: auto;"></video>
       </div>
-      
+
       <div id="videoProgress" class="progress" style="display: none;">
         <div class="progress-fill"></div>
         <div class="progress-text">0%</div>
       </div>
 
-      <div id="videoInfoContainer" class="info-container" style="display: none;"></div>
+      <div id="videoInfoContainer" class="info-container"></div>
 
       <div id="logHeader" class="log-header">
         <span>Logs</span>

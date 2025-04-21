@@ -214,10 +214,32 @@ main {
 
 /* Tool container */
 .tool-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
   background: #fff;
   border-radius: 8px;
-  padding: 2rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Tool header styling */
+.tool-header {
+  margin-bottom: 1.5rem;
+}
+
+.tool-header h1 {
+  margin: 0 0 0.75rem 0;
+  color: #2c3e50;
+  font-size: 1.75rem;
+}
+
+.tool-description {
+  color: #505a68;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eaeaea;
 }
 
 /* Drop zone */
@@ -745,10 +767,12 @@ footer {
   padding: 20px;
   margin: 20px 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
 }
 
 .info-section {
   margin-bottom: 20px;
+  border: none;
 }
 
 .info-section h3 {
@@ -757,6 +781,10 @@ footer {
   color: #333;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
 }
 
 .info-table {
@@ -1167,6 +1195,71 @@ footer {
 }
 
 .python-none {
-  color: #94a3b8;
-  font-style: italic;
+  color: #6c757d;
+}
+
+/* Styled How To Use section */
+.tool-info-section {
+  margin-bottom: 2rem;
+  background-color: var(--card-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.how-to-use h2 {
+  margin-bottom: 1.25rem;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.steps-container {
+  margin-bottom: 1.5rem;
+}
+
+.steps-list {
+  padding-left: 2rem;
+}
+
+.steps-list li {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.step-content {
+  background-color: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--primary-color);
+}
+
+.use-case {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.use-case h3 {
+  font-size: 1.25rem;
+  color: var(--text-color);
+  margin-bottom: 0.75rem;
+}
+
+.use-case p {
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .tool-info-section {
+    padding: 1rem;
+  }
+  
+  .step-content {
+    padding: 0.5rem 0.75rem;
+  }
 } 
