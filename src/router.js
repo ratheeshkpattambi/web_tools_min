@@ -63,7 +63,7 @@ const TOOLS_CONFIG = {
         icon: '🖼️',
         description: 'Resize and optimize images while maintaining quality',
         modulePath: './image/resize.js',
-        initFunction: 'initPage'
+        initFunction: 'initTool'
       }
     ]
   },

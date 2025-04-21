@@ -227,16 +227,16 @@ export const imageTemplates = {
     <div class="tool-container">
       <h1>Image Resize</h1>
       <div id="dropZone" class="drop-zone">
-        <p>Drop image here or click to select</p>
-        <input type="file" id="imageInput" accept="image/*" style="display: none;">
-      </div>
-      
-      <div id="fileInfo" class="file-info">
-        <p>File: <span id="fileName"></span></p>
-        <p>Size: <span id="fileSize"></span></p>
+        <div class="drop-icon">📁</div>
+        <p>Drop image here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Image</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
       </div>
 
-      <img id="preview" style="display: none; max-width: 100%; margin: 1rem 0;">
+      <div class="image-wrapper">
+        <img id="preview" style="display: none; max-width: 100%; height: auto;">
+      </div>
       
       <div class="controls">
         <div class="input-group">
@@ -248,30 +248,24 @@ export const imageTemplates = {
           <input type="number" id="height" placeholder="Height">
         </div>
         <div class="input-group">
-          <label>
+          <label for="keepRatio">
             <input type="checkbox" id="keepRatio" checked>
             Keep Aspect Ratio
           </label>
         </div>
-        <div class="input-group">
-          <label for="format">Format:</label>
-          <select id="format">
-            <option value="jpeg">JPEG</option>
-            <option value="png">PNG</option>
-            <option value="webp">WebP</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="quality">Quality: <span id="qualityValue">0.8</span></label>
-          <input type="range" id="quality" min="0.1" max="1" step="0.1" value="0.8">
-        </div>
+        <button id="processBtn" class="btn" disabled>Resize Image</button>
       </div>
-
-      <button id="resizeBtn" class="btn" disabled>Resize Image</button>
 
       <div id="progress" class="progress" style="display: none;">
         <div class="progress-fill"></div>
         <div class="progress-text">0%</div>
+      </div>
+
+      <div id="outputContainer" class="output-container">
+        <div class="image-wrapper">
+          <img id="output-image" style="display: none; max-width: 100%; height: auto;">
+        </div>
+        <div id="downloadContainer"></div>
       </div>
 
       <div id="logHeader" class="log-header">
