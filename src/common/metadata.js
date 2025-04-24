@@ -101,6 +101,24 @@ export const tools = {
       'Download your new GIF animation'
     ],
     useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.'
+  },
+  'text/regex': {
+    id: 'regex',
+    category: 'text',
+    name: 'Regex Tester',
+    shortDescription: 'Test and validate regular expressions.',
+    description: 'Try out regular expressions with real-time matching and highlighting against your test text.',
+    metaDescription: 'Free online regex tester with syntax highlighting and real-time matching. Test regular expressions without leaving your browser.',
+    icon: '🔍',
+    keywords: ['regex tester', 'regular expression', 'regex validator', 'regex matcher'],
+    howToUse: [
+      'Enter your regular expression pattern in the top field',
+      'Add optional flags (like g, i, m) in the flags field',
+      'Type or paste your test text in the textarea below',
+      'See matches highlighted in real-time with match count',
+      'Use options to enable/disable highlighting and line numbers'
+    ],
+    useCase: 'Perfect for developing and debugging regular expressions for data validation, search patterns, or text processing tasks.'
   }
 };
 
@@ -208,4 +226,4 @@ export function generateStructuredData(path) {
       ${JSON.stringify(structuredData, null, 2)}
     </script>
   `;
-} 
+}

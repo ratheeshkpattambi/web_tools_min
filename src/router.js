@@ -75,16 +75,24 @@ const TOOLS_CONFIG = {
         id: 'editor',
         name: 'Text Editor',
         icon: '📝',
-        description: 'Simple text editing with formatting options',
+        description: 'Simple text editor with character and word counts',
         modulePath: './text/editor.js',
         initFunction: 'initTool'
       },
       {
         id: 'yaml',
         name: 'YAML Validator',
-        icon: '🔍',
-        description: 'Validate and convert YAML to JSON with tree view',
+        icon: '📋',
+        description: 'Validate YAML and convert to JSON or Python',
         modulePath: './text/yaml.js',
+        initFunction: 'initTool'
+      },
+      {
+        id: 'regex',
+        name: 'Regex Tester',
+        icon: '🔍',
+        description: 'Test and validate regular expressions',
+        modulePath: './text/regex.js',
         initFunction: 'initTool'
       }
     ]
@@ -334,6 +342,9 @@ export async function handleRoute(path) {
               case 'text/yaml':
                 moduleToImport = await import('./text/yaml.js');
                 break;
+              case 'text/regex':
+                moduleToImport = await import('./text/regex.js');
+                break;
               default:
                 throw new Error(`Unknown tool: ${category}/${toolId}`);
             }
@@ -405,4 +416,4 @@ function updateMetadata(path) {
   sitemapLink.href = '/sitemap.xml';
   sitemapLink.setAttribute('data-dynamic', 'true');
   head.appendChild(sitemapLink);
-} 
+}
