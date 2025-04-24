@@ -377,6 +377,75 @@ export const textTemplates = {
         </div>
       </div>
     </div>
+  `,
+
+  'regex': `
+    <div class="tool-container">
+      <h1>Regex Tester</h1>
+      <p class="tool-description">Test and validate regular expressions with real-time highlighting</p>
+      
+      <div class="regex-container">
+        <div class="panel-header">
+          <h3>Regular Expression</h3>
+          <div class="panel-actions">
+            <button id="wordModeBtn" class="btn-sm" title="Match Words">
+              Word Mode
+            </button>
+            <button id="copyRegexBtn" class="btn-sm" title="Copy Regex">
+              Copy
+            </button>
+            <button id="clearRegexBtn" class="btn-icon" title="Clear">
+              <span class="icon">❌</span>
+            </button>
+            <button id="loadSampleBtn" class="btn-icon" title="Load Sample">
+              <span class="icon">📋</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="regex-input-container">
+          <span class="regex-delimiter">/</span>
+          <input type="text" id="regexInput" class="regex-pattern" placeholder="Enter regex pattern" spellcheck="false">
+          <span class="regex-delimiter">/</span>
+          <input type="text" id="regexFlags" class="regex-flags" placeholder="flags" maxlength="6" spellcheck="false">
+        </div>
+        
+        <div id="errorDisplay" class="regex-error"></div>
+        
+        <div class="match-status">
+          <span id="matchCount">0 matches</span>
+        </div>
+        
+        <div class="regex-options">
+          <label>
+            <input type="checkbox" id="toggleHighlight" checked>
+            Highlight matches
+          </label>
+          <label>
+            <input type="checkbox" id="toggleLineNumbers" checked>
+            Show line numbers
+          </label>
+        </div>
+        
+        <div class="panel-header">
+          <h3>Test Text</h3>
+        </div>
+        
+        <textarea id="sampleText" class="text-editor" placeholder="Enter text to test your regex against..."></textarea>
+        
+        <div class="panel-header">
+          <h3>Matches</h3>
+        </div>
+        
+        <div id="highlightContainer" class="highlight-container"></div>
+      </div>
+      
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
   `
 };
 
@@ -422,4 +491,4 @@ export function get404Template() {
     '404 - Page Not Found',
     'The requested page could not be found.'
   );
-} 
+}
