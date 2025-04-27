@@ -101,6 +101,56 @@ export const tools = {
       'Download your new GIF animation'
     ],
     useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.'
+  },
+  'image/resize': {
+    id: 'resize',
+    category: 'image',
+    name: 'Image Resize',
+    shortDescription: 'Resize and optimize images while maintaining quality.',
+    description: 'Change the dimensions of your images while preserving the aspect ratio and optimizing for quality.',
+    metaDescription: 'Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.',
+    icon: '🖼️',
+    keywords: ['image resize', 'resize image', 'image dimensions', 'optimize images'],
+    howToUse: [
+      'Upload your image by dropping it or selecting from your device',
+      'Set the desired width and height (maintains aspect ratio by default)',
+      'Click "Resize Image" to process',
+      'Download the resized image when complete'
+    ],
+    useCase: 'Perfect for reducing image size for websites, social media, or email attachments.'
+  },
+  'text/editor': {
+    id: 'editor',
+    category: 'text',
+    name: 'Text Editor',
+    shortDescription: 'Simple text editing with formatting options.',
+    description: 'A simple browser-based text editor for writing and formatting text content.',
+    metaDescription: 'Free online text editor for writing and formatting text content. All processing happens locally in your browser.',
+    icon: '📝',
+    keywords: ['text editor', 'online editor', 'write text', 'edit text'],
+    howToUse: [
+      'Type or paste your text in the editor',
+      'Edit and format as needed',
+      'Download your text when complete'
+    ],
+    useCase: 'Use for quickly writing and saving text content without needing to install an app.'
+  },
+  'text/yaml': {
+    id: 'yaml',
+    category: 'text',
+    name: 'YAML Validator',
+    shortDescription: 'Validate and convert YAML to JSON with tree view.',
+    description: 'Validate your YAML syntax and convert it to JSON format with an interactive tree view.',
+    metaDescription: 'Free online YAML validator and converter. Check YAML syntax and convert to JSON with visual tree display, all processed in your browser.',
+    icon: '🔍',
+    keywords: ['yaml validator', 'yaml to json', 'validate yaml', 'yaml converter'],
+    howToUse: [
+      'Paste your YAML content in the editor',
+      'The tool automatically validates the syntax',
+      'View the parsed data in the tree view',
+      'Convert to JSON format with a click'
+    ],
+    useCase: 'Useful for developers working with YAML configuration files or data structures.'
   }
 };
 

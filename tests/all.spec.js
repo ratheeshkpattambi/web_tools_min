@@ -14,6 +14,42 @@ test.describe('SafeWebTool Tests', () => {
     await expect(page.locator('.author-content')).toContainText('Dr. Ratheesh Kalarot');
   });
   
+  // Test dynamic tool loading across all categories
+  test('dynamic tool loading across all categories', async ({ page }) => {
+    // Get a map of tools by category
+    const toolsByCategory = {};
+    
+    for (const [toolPath, toolInfo] of Object.entries(tools)) {
+      const [category] = toolPath.split('/');
+      if (!toolsByCategory[category]) {
+        toolsByCategory[category] = [];
+      }
+      toolsByCategory[category].push({ path: toolPath, info: toolInfo });
+    }
+    
+    // Test one tool from each category for proper loading
+    for (const category of Object.keys(categories)) {
+      const categoryTools = toolsByCategory[category] || [];
+      if (categoryTools.length > 0) {
+        // Test the first tool in this category
+        const testTool = categoryTools[0];
+        console.log(`Testing tool: ${testTool.path}`);
+        
+        await page.goto(`/${testTool.path}`);
+        
+        // Check that tool container loads
+        await expect(page.locator('.tool-container')).toBeVisible();
+        await expect(page.locator('.tool-container h1')).toContainText(testTool.info.name);
+        
+        // Just verify that the tool UI loaded - different tools may have different UI elements
+        // The most essential check is that the container and heading loaded
+        
+        // Log success
+        console.log(`✅ Tool ${testTool.path} loaded successfully`);
+      }
+    }
+  });
+  
   // Auto-generate tests for all tool pages
   for (const [toolPath, toolInfo] of Object.entries(tools)) {
     test(`tool: ${toolInfo.name}`, async ({ page }) => {

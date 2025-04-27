@@ -1,4 +1,3 @@
-import { generateToolCard } from './common/template.js';
 import { 
   getToolTemplate, 
   get404Template, 
@@ -13,83 +12,23 @@ import {
   getCategoryMetadata
 } from './common/metadata.js';
 
-// Central tool configuration - all tools defined in one place
-const TOOLS_CONFIG = {
-  video: {
-    name: categories.video.name,
-    description: categories.video.description,
-    tools: [
-      {
-        id: tools['video/resize'].id,
-        name: tools['video/resize'].name,
-        icon: tools['video/resize'].icon,
-        description: tools['video/resize'].shortDescription,
-        modulePath: './video/resize.js',
-        initFunction: 'initTool'
-      },
-      {
-        id: tools['video/reencode'].id,
-        name: tools['video/reencode'].name,
-        icon: tools['video/reencode'].icon,
-        description: tools['video/reencode'].shortDescription,
-        modulePath: './video/reencode.js',
-        initFunction: 'initTool'
-      },
-      {
-        id: tools['video/info'].id,
-        name: tools['video/info'].name,
-        icon: tools['video/info'].icon,
-        description: tools['video/info'].shortDescription,
-        modulePath: './video/info.js',
-        initFunction: 'initTool'
-      },
-      {
-        id: tools['video/gif'].id,
-        name: tools['video/gif'].name,
-        icon: tools['video/gif'].icon,
-        description: tools['video/gif'].shortDescription,
-        modulePath: './video/gif.js',
-        initFunction: 'initTool'
-      }
-    ]
-  },
-  image: {
-    name: categories.image.name,
-    description: categories.image.description,
-    tools: [
-      {
-        id: 'resize',
-        name: 'Image Resize',
-        icon: '🖼️',
-        description: 'Resize and optimize images while maintaining quality',
-        modulePath: './image/resize.js',
-        initFunction: 'initTool'
-      }
-    ]
-  },
-  text: {
-    name: categories.text.name,
-    description: categories.text.description,
-    tools: [
-      {
-        id: 'editor',
-        name: 'Text Editor',
-        icon: '📝',
-        description: 'Simple text editing with formatting options',
-        modulePath: './text/editor.js',
-        initFunction: 'initTool'
-      },
-      {
-        id: 'yaml',
-        name: 'YAML Validator',
-        icon: '🔍',
-        description: 'Validate and convert YAML to JSON with tree view',
-        modulePath: './text/yaml.js',
-        initFunction: 'initTool'
-      }
-    ]
+/**
+ * Updates the active class on navigation links
+ * @param {string} path - The current URL path
+ */
+function updateActiveNavigation(path) {
+  // Remove active class from all nav links
+  document.querySelectorAll('nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current path
+  const pathSegment = path === '/' ? '/' : `/${path.split('/')[1]}`;
+  const activeLink = document.querySelector(`nav a[href="${pathSegment}"]`);
+  if (activeLink) {
+    activeLink.classList.add('active');
   }
-};
+}
 
 /**
  * Find a tool based on the path
@@ -104,18 +43,31 @@ function findTool(path) {
   const category = pathParts[0];
   const toolId = pathParts.length > 1 ? pathParts[1] : null;
   
-  // Get the category config
-  const categoryConfig = TOOLS_CONFIG[category];
+  // Get the category metadata
+  const categoryConfig = categories[category];
   if (!categoryConfig) return null;
   
   // If no specific tool requested, return the category
   if (!toolId) return { category: categoryConfig, type: 'category', id: category };
   
-  // Find the specific tool
-  const tool = categoryConfig.tools.find(t => t.id === toolId);
-  if (!tool) return null;
+  // Find the specific tool in metadata
+  const toolPath = `${category}/${toolId}`;
+  const tool = tools[toolPath];
   
-  return { category: categoryConfig, tool, type: 'tool', id: category };
+  // Even if tool metadata is missing, return a basic tool object if the category is valid
+  // This ensures tools without complete metadata still work
+  return { 
+    category: categoryConfig, 
+    tool: tool || { 
+      id: toolId,
+      category,
+      name: toolId.charAt(0).toUpperCase() + toolId.slice(1),
+      shortDescription: ''
+    }, 
+    type: 'tool', 
+    id: category,
+    path: toolPath
+  };
 }
 
 /**
@@ -128,18 +80,23 @@ function generateHomeContent() {
       <h1>Welcome to SafeWebTool</h1>
       <p class="section-description">A collection of privacy-focused tools that process your data locally in your browser.</p>
       
-      ${Object.entries(TOOLS_CONFIG).map(([category, config]) => `
+      ${Object.entries(categories).map(([categoryId, config]) => `
         <section class="tools-section" itemscope itemtype="https://schema.org/SoftwareApplication">
           <h2 itemprop="applicationCategory">${config.name}</h2>
           <p class="section-description" itemprop="description">${config.description}</p>
           <div class="tool-grid">
-            ${config.tools.map(tool => `
-              <a href="/${category}/${tool.id}" class="tool-card">
-                <div class="tool-icon">${tool.icon}</div>
-                <h3 itemprop="name">${tool.name}</h3>
-                <p itemprop="description">${tool.description}</p>
-              </a>
-            `).join('')}
+            ${Object.entries(tools)
+              .filter(([path]) => path.startsWith(categoryId + '/'))
+              .map(([path, tool]) => {
+                const toolId = path.split('/')[1];
+                return `
+                  <a href="/${path}" class="tool-card">
+                    <div class="tool-icon">${tool.icon}</div>
+                    <h3 itemprop="name">${tool.name}</h3>
+                    <p itemprop="description">${tool.shortDescription}</p>
+                  </a>
+                `;
+              }).join('')}
           </div>
         </section>
       `).join('')}
@@ -168,38 +125,21 @@ function generateCategoryContent(categoryConfig, categoryId) {
       </div>
 
       <div class="tool-grid" itemscope itemtype="https://schema.org/ItemList">
-        ${categoryConfig.tools.map((tool, index) => {
-          const toolMeta = getToolMetadata(`${categoryId}/${tool.id}`);
-          return `
-            <a href="/${categoryId}/${tool.id}" class="tool-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-              <meta itemprop="position" content="${index + 1}">
-              <div class="tool-icon">${tool.icon}</div>
-              <h3 itemprop="name">${tool.name}</h3>
-              <p itemprop="description">${tool.description}</p>
-            </a>
-          `;
-        }).join('')}
+        ${Object.entries(tools)
+          .filter(([path]) => path.startsWith(categoryId + '/'))
+          .map(([path, tool], index) => {
+            return `
+              <a href="/${path}" class="tool-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <meta itemprop="position" content="${index + 1}">
+                <div class="tool-icon">${tool.icon}</div>
+                <h3 itemprop="name">${tool.name}</h3>
+                <p itemprop="description">${tool.shortDescription}</p>
+              </a>
+            `;
+          }).join('')}
       </div>
     </div>
   `;
-}
-
-/**
- * Updates the active class on navigation links
- * @param {string} path - The current URL path
- */
-function updateActiveNavigation(path) {
-  // Remove active class from all nav links
-  document.querySelectorAll('nav a').forEach(link => {
-    link.classList.remove('active');
-  });
-  
-  // Add active class to current path
-  const pathSegment = path === '/' ? '/' : `/${path.split('/')[1]}`;
-  const activeLink = document.querySelector(`nav a[href="${pathSegment}"]`);
-  if (activeLink) {
-    activeLink.classList.add('active');
-  }
 }
 
 /**
@@ -218,7 +158,6 @@ export async function handleRoute(path) {
           ${serveSitemap()}
         </pre>
       `;
-      // Set the correct content type if possible
       if (document.contentType) {
         document.contentType = 'application/xml';
       }
@@ -249,8 +188,7 @@ export async function handleRoute(path) {
       content = generateCategoryContent(result.category, result.id);
     } else {
       // Specific tool page (e.g., /video/resize)
-      const category = path.split('/')[1];
-      const toolId = path.split('/')[2];
+      const [category, toolId] = result.path.split('/');
       
       // Get the template for this tool
       const toolTemplate = getToolTemplate(category, toolId);
@@ -259,13 +197,8 @@ export async function handleRoute(path) {
         content = getErrorTemplate('Tool Not Found', `The tool "${toolId}" could not be found in category "${category}".`);
       } else {
         // Enhance template with SEO content and tool information
-        const toolInfo = getToolMetadata(`${category}/${toolId}`);
+        const toolInfo = result.tool;
         if (toolInfo) {
-          // Replace the entire content rather than just the h1 tag to ensure proper structure
-          // Add some debugging to verify the tool name
-          console.log('Tool Name:', toolInfo.name);
-          console.log('Tool Description:', toolInfo.description);
-          
           content = `
             <div class="tool-page" itemscope itemtype="https://schema.org/SoftwareApplication">
               <meta itemprop="applicationCategory" content="WebApplication">
@@ -276,7 +209,7 @@ export async function handleRoute(path) {
               <div class="tool-container">
                 <div class="tool-header">
                   <h1>${toolInfo.name}</h1>
-                  <p class="tool-description">${toolInfo.description}</p>
+                  <p class="tool-description">${toolInfo.description || ''}</p>
                 </div>
                 ${toolTemplate.replace(/<div class="tool-container">[\s\S]*?<h1>.*?<\/h1>/, '')}
               </div>
@@ -300,18 +233,15 @@ export async function handleRoute(path) {
         // Small delay to ensure DOM is fully updated
         setTimeout(async () => {
           try {
-            // Determine the correct import path
-            const category = path.split('/')[1];
-            const toolId = path.split('/')[2];
+            // Extract category and toolId from path
+            const [category, toolId] = result.path.split('/');
             
             // Preload common styles and utilities first
             await import('./common/utils.js');
             
             // Check if this is a video tool that requires FFmpeg
-            const needsFFmpeg = 
-              (category === 'video' && 
-              ['resize', 'reencode', 'gif', 'info'].includes(toolId));
-              
+            const needsFFmpeg = (category === 'video');
+            
             // Display loading indicator for FFmpeg tools
             if (needsFFmpeg) {
               const loadingHtml = `
@@ -330,44 +260,24 @@ export async function handleRoute(path) {
               document.querySelector('.tool-container')?.appendChild(loadingEl);
             }
             
-            // Use more reliable import paths that work in production
-            let moduleToImport;
-            
-            switch (`${category}/${toolId}`) {
-              case 'video/resize':
-                moduleToImport = await import('./video/resize.js');
-                break;
-              case 'video/info':
-                moduleToImport = await import('./video/info.js');
-                break;
-              case 'video/reencode':
-                moduleToImport = await import('./video/reencode.js');
-                break;
-              case 'video/gif':
-                moduleToImport = await import('./video/gif.js');
-                break;
-              case 'image/resize':
-                moduleToImport = await import('./image/resize.js');
-                break;
-              case 'text/editor':
-                moduleToImport = await import('./text/editor.js');
-                break;
-              case 'text/yaml':
-                moduleToImport = await import('./text/yaml.js');
-                break;
-              default:
-                throw new Error(`Unknown tool: ${category}/${toolId}`);
-            }
-            
-            // Remove loading indicator if it exists
-            document.getElementById('ffmpeg-loading')?.remove();
-            
-            // Call the initialization function
-            const initFunctionName = result.tool.initFunction;
-            if (moduleToImport && moduleToImport[initFunctionName]) {
-              moduleToImport[initFunctionName]();
-            } else {
-              throw new Error(`Init function '${initFunctionName}' not found in module`);
+            // Dynamically import the tool module based on path
+            const modulePath = `./${category}/${toolId}.js`;
+            try {
+              const moduleToImport = await import(modulePath);
+              
+              // Remove loading indicator if it exists
+              document.getElementById('ffmpeg-loading')?.remove();
+              
+              // Call the initialization function - default to 'initTool'
+              const initFunctionName = 'initTool';
+              if (moduleToImport && moduleToImport[initFunctionName]) {
+                moduleToImport[initFunctionName]();
+              } else {
+                throw new Error(`Init function '${initFunctionName}' not found in module ${modulePath}`);
+              }
+            } catch (importError) {
+              console.error(`Failed to import tool module: ${importError.message}`);
+              throw importError;
             }
           } catch (error) {
             console.error(`Failed to load tool module: ${error.message}`);
@@ -426,4 +336,4 @@ function updateMetadata(path) {
   sitemapLink.href = '/sitemap.xml';
   sitemapLink.setAttribute('data-dynamic', 'true');
   head.appendChild(sitemapLink);
-} 
+}
