@@ -43,3 +43,22 @@ npm run test:chrome
 Automatically deployed to Netlify on push to main branch.
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/1f7a6d52-4a4b-489c-9cd1-7131562cc8b1/deploy-status)](https://app.netlify.com/sites/safewebtool/deploys)
+
+## How to Contribute
+
+```bash
+# Get started
+git clone https://github.com/ratheeshkpattambi/safewebtool.git
+cd safewebtool
+npm install
+
+# Development
+npm run dev
+
+# Test
+npm run test:chrome
+```
+
+1. Create branch and implement your feature
+2. Submit PR - Netlify will create a preview automatically
+3. We'll review your PR within 2 days
