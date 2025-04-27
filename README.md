@@ -5,7 +5,7 @@ A collection of privacy-focused tools that process your data locally in your bro
 🌐 Visit the website: [https://safewebtool.com/](https://safewebtool.com/)
 
 ## Philosophy
-- 🔒 **Privacy First**: Your data never leaves your computer. All processing happens locally in your browser.
+- 🔒 **Privacy First**: Your media never leaves your computer. All processing happens locally in your browser.
 - 🚫 **No Ads**: Completely ad-free experience.
 - 🆓 **Free & Open Source**: Built with transparency and community in mind.
 - 🤝 **Community Driven**: Contributions and feedback are welcome!

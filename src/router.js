@@ -9,7 +9,8 @@ import {
   categories,
   tools,
   getToolMetadata,
-  getCategoryMetadata
+  getCategoryMetadata,
+  getWelcomeContent
 } from './common/metadata.js';
 
 /**
@@ -62,51 +63,12 @@ function findTool(path) {
       id: toolId,
       category,
       name: toolId.charAt(0).toUpperCase() + toolId.slice(1),
-      shortDescription: ''
+      description: ''
     }, 
     type: 'tool', 
     id: category,
     path: toolPath
   };
-}
-
-/**
- * Generate content for the home page
- * @returns {string} HTML for the home page
- */
-function generateHomeContent() {
-  return `
-    <div class="tool-container">
-      <h1>Welcome to SafeWebTool</h1>
-      <p class="section-description">A collection of privacy-focused tools that process your data locally in your browser.</p>
-      
-      <div class="philosophy-section">
-        <h2>Our Philosophy</h2>
-        <p>SafeWebTool is built on the principle that your data should remain private. All processing happens directly in your browser - we never see or store your files. Free, secure, and accessible tools for everyone.</p>
-      </div>
-      
-      ${Object.entries(categories).map(([categoryId, config]) => `
-        <section class="tools-section" itemscope itemtype="https://schema.org/SoftwareApplication">
-          <h2 itemprop="applicationCategory">${config.name}</h2>
-          <p class="section-description" itemprop="description">${config.description}</p>
-          <div class="tool-grid">
-            ${Object.entries(tools)
-              .filter(([path]) => path.startsWith(categoryId + '/'))
-              .map(([path, tool]) => {
-                const toolId = path.split('/')[1];
-                return `
-                  <a href="/${path}" class="tool-card">
-                    <div class="tool-icon">${tool.icon}</div>
-                    <h3 itemprop="name">${tool.name}</h3>
-                    <p itemprop="description">${tool.shortDescription}</p>
-                  </a>
-                `;
-              }).join('')}
-          </div>
-        </section>
-      `).join('')}
-    </div>
-  `;
 }
 
 /**
@@ -116,18 +78,10 @@ function generateHomeContent() {
  * @returns {string} HTML for the category page
  */
 function generateCategoryContent(categoryConfig, categoryId) {
-  const categoryMeta = getCategoryMetadata(categoryId);
-
   return `
     <div class="tool-container">
       <h1>${categoryConfig.name}</h1>
       <p class="section-description">${categoryConfig.description}</p>
-      
-      <div class="category-header">
-        <div class="category-description">
-          <p>${categoryMeta?.metaDescription || ''}</p>
-        </div>
-      </div>
 
       <div class="tool-grid" itemscope itemtype="https://schema.org/ItemList">
         ${Object.entries(tools)
@@ -138,7 +92,7 @@ function generateCategoryContent(categoryConfig, categoryId) {
                 <meta itemprop="position" content="${index + 1}">
                 <div class="tool-icon">${tool.icon}</div>
                 <h3 itemprop="name">${tool.name}</h3>
-                <p itemprop="description">${tool.shortDescription}</p>
+                <p itemprop="description">${tool.description}</p>
               </a>
             `;
           }).join('')}
@@ -180,7 +134,7 @@ export async function handleRoute(path) {
   
   // Handle root path
   if (path === '/' || path === '/home') {
-    content = generateHomeContent();
+    content = getWelcomeContent();
   } else {
     // Find the requested tool or category
     const result = findTool(path);

@@ -3,29 +3,35 @@
  * Used for SEO, tool descriptions, and site structure
  */
 
+// Site-wide information
+export const siteInfo = {
+  name: 'SafeWebTool',
+  tagline: 'A collection of privacy-focused tools that process your media locally in your browser.',
+  philosophy: 'Your media stays private - processing happens in your browser. **No uploads, no login, no ads**. Free, secure tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool).',
+  description: 'Free browser-based tools for working with videos, images, and text. No uploads - all processing happens locally in your browser.',
+  keywords: ['online tools', 'privacy tools', 'browser tools', 'no upload tools', 'local processing', 'ad-free tools', 'no login']
+};
+
 // Tool categories metadata
 export const categories = {
   video: {
     id: 'video',
     name: 'Video Tools',
-    description: 'Process and convert your videos with ease directly in your browser, no upload needed.',
-    metaDescription: 'Free online video tools for resizing, converting, and analyzing videos. No upload required - all processing happens in your browser.',
+    description: 'Free online video tools for resizing, converting, and analyzing videos. No upload required - all processing happens in your browser.',
     icon: '🎥',
     keywords: ['video tools', 'video converter', 'video processor', 'browser video tools']
   },
   image: {
     id: 'image',
     name: 'Image Tools',
-    description: 'Edit and optimize your images with our browser-based tools.',
-    metaDescription: 'Free online image editing and optimization tools. Resize, crop, and convert images without uploading them to a server.',
+    description: 'Free online image editing and optimization tools. Resize, crop, and convert images without uploading them to a server.',
     icon: '🖼️',
     keywords: ['image tools', 'image editor', 'resize images', 'optimize images']
   },
   text: {
     id: 'text',
     name: 'Text Tools',
-    description: 'Simple text manipulation and formatting tools.',
-    metaDescription: 'Free online text editing and formatting tools. Edit, validate, and convert text and code formats in your browser.',
+    description: 'Free online text editing and formatting tools. Edit, validate, and convert text and code formats in your browser.',
     icon: '📝',
     keywords: ['text tools', 'text editor', 'text formatter', 'code validator']
   }
@@ -37,9 +43,7 @@ export const tools = {
     id: 'info',
     category: 'video',
     name: 'Extract Video Metadata',
-    shortDescription: 'Analyze video metadata and properties.',
-    description: 'Extract detailed information about your videos including resolution, codec, bitrate, and audio properties.',
-    metaDescription: 'Extract metadata (codec, resolution, duration, bitrate) from MP4 and other video files. All in your browser, no uploads.',
+    description: 'Extract metadata (codec, resolution, duration, bitrate) from MP4 and other video files. All in your browser, no uploads.',
     icon: '📊',
     keywords: ['video info', 'video metadata', 'video properties', 'video analyzer'],
     howToUse: [
@@ -53,9 +57,7 @@ export const tools = {
     id: 'resize',
     category: 'video',
     name: 'Video Resize',
-    shortDescription: 'Resize videos while maintaining quality.',
-    description: 'Change the dimensions of your videos while preserving the aspect ratio and optimizing for quality.',
-    metaDescription: 'Free online video resizer. Change video dimensions and resolution while maintaining quality, all processed locally in your browser.',
+    description: 'Free online video resizer. Change video dimensions and resolution while maintaining quality, all processed locally in your browser.',
     icon: '🔄',
     keywords: ['video resize', 'resize video', 'change video resolution', 'video dimensions'],
     howToUse: [
@@ -70,9 +72,7 @@ export const tools = {
     id: 'reencode',
     category: 'video',
     name: 'Video Re-encode',
-    shortDescription: 'Convert videos to different formats.',
-    description: 'Re-encode videos to different formats like MP4, WebM, or MOV with customizable quality settings.',
-    metaDescription: 'Free online video converter. Convert videos between MP4, WebM, and MOV formats with adjustable quality settings, processed entirely in your browser.',
+    description: 'Free online video converter. Convert videos between MP4, WebM, and MOV formats with adjustable quality settings, processed entirely in your browser.',
     icon: '🔄',
     keywords: ['video converter', 'video format converter', 'mp4 converter', 'webm converter'],
     howToUse: [
@@ -88,9 +88,7 @@ export const tools = {
     id: 'gif',
     category: 'video',
     name: 'Video to GIF',
-    shortDescription: 'Convert videos to optimized GIF animations.',
-    description: 'Transform videos into GIF animations with customizable size, quality, and duration settings.',
-    metaDescription: 'Free online video to GIF converter. Create optimized GIF animations from video files with custom settings, all processed locally in your browser.',
+    description: 'Free online video to GIF converter. Create optimized GIF animations from video files with custom settings, all processed locally in your browser.',
     icon: '🎞️',
     keywords: ['video to gif', 'gif maker', 'convert video to gif', 'create gif from video'],
     howToUse: [
@@ -106,9 +104,7 @@ export const tools = {
     id: 'resize',
     category: 'image',
     name: 'Image Resize',
-    shortDescription: 'Resize and optimize images while maintaining quality.',
-    description: 'Change the dimensions of your images while preserving the aspect ratio and optimizing for quality.',
-    metaDescription: 'Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.',
+    description: 'Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.',
     icon: '🖼️',
     keywords: ['image resize', 'resize image', 'image dimensions', 'optimize images'],
     howToUse: [
@@ -123,9 +119,7 @@ export const tools = {
     id: 'editor',
     category: 'text',
     name: 'Text Editor',
-    shortDescription: 'Simple text editing with formatting options.',
-    description: 'A simple browser-based text editor for writing and formatting text content.',
-    metaDescription: 'Free online text editor for writing and formatting text content. All processing happens locally in your browser.',
+    description: 'Free online text editor for writing and formatting text content. All processing happens locally in your browser.',
     icon: '📝',
     keywords: ['text editor', 'online editor', 'write text', 'edit text'],
     howToUse: [
@@ -139,9 +133,7 @@ export const tools = {
     id: 'yaml',
     category: 'text',
     name: 'YAML Validator',
-    shortDescription: 'Validate and convert YAML to JSON with tree view.',
-    description: 'Validate your YAML syntax and convert it to JSON format with an interactive tree view.',
-    metaDescription: 'Free online YAML validator and converter. Check YAML syntax and convert to JSON with visual tree display, all processed in your browser.',
+    description: 'Free online YAML validator and converter. Check YAML syntax and convert to JSON with visual tree display, all processed in your browser.',
     icon: '🔍',
     keywords: ['yaml validator', 'yaml to json', 'validate yaml', 'yaml converter'],
     howToUse: [
@@ -181,9 +173,9 @@ export function generateMetaTags(path) {
   const parts = path.split('/').filter(p => p);
   
   // Default metadata for home page
-  let title = 'SafeWebTool - Online Privacy-First Tools';
-  let description = 'Free browser-based tools for working with videos, images, and text. No uploads - all processing happens locally in your browser.';
-  let keywords = ['online tools', 'privacy tools', 'browser tools', 'no upload tools'];
+  let title = `${siteInfo.name} - Online Privacy-First Tools`;
+  let description = siteInfo.description;
+  let keywords = siteInfo.keywords;
   
   if (parts.length > 0) {
     const categoryId = parts[0];
@@ -192,8 +184,8 @@ export function generateMetaTags(path) {
     if (category) {
       if (parts.length === 1) {
         // Category page
-        title = `${category.name} | SafeWebTool`;
-        description = category.metaDescription;
+        title = `${category.name} | ${siteInfo.name}`;
+        description = category.description;
         keywords = category.keywords;
       } else if (parts.length === 2) {
         // Tool page
@@ -202,8 +194,8 @@ export function generateMetaTags(path) {
         const tool = getToolMetadata(toolPath);
         
         if (tool) {
-          title = `${tool.name} | SafeWebTool`;
-          description = tool.metaDescription;
+          title = `${tool.name} | ${siteInfo.name}`;
+          description = tool.description;
           keywords = tool.keywords;
         }
       }
@@ -217,7 +209,7 @@ export function generateMetaTags(path) {
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://safewebtool.com${path === '/' ? '' : path}">
+    <meta property="og:url" content="https://safewebtool.com${path === '/' ? '' : `/${path}`}">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
@@ -241,8 +233,8 @@ export function generateStructuredData(path) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": `${tool.name} | SafeWebTool`,
-    "description": tool.metaDescription,
+    "name": `${tool.name} | ${siteInfo.name}`,
+    "description": tool.description,
     "applicationCategory": "WebApplication",
     "operatingSystem": "Any",
     "offers": {
@@ -257,5 +249,48 @@ export function generateStructuredData(path) {
     <script type="application/ld+json">
       ${JSON.stringify(structuredData, null, 2)}
     </script>
+  `;
+}
+
+/**
+ * Generate welcome content for the landing page
+ * @returns {string} HTML for the home page
+ */
+export function getWelcomeContent() {
+  // Convert markdown bold and links to HTML
+  const formattedPhilosophy = siteInfo.philosophy
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+  return `
+    <div class="tool-container">
+      <h1>Welcome to ${siteInfo.name}</h1>
+      <p class="section-description">${siteInfo.tagline}</p>
+      
+      <div class="philosophy-section">
+        <h2>Our Philosophy</h2>
+        <p>${formattedPhilosophy}</p>
+      </div>
+      
+      ${Object.entries(categories).map(([categoryId, config]) => `
+        <section class="tools-section" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <h2 itemprop="applicationCategory">${config.name}</h2>
+          <p class="section-description" itemprop="description">${config.description}</p>
+          <div class="tool-grid">
+            ${Object.entries(tools)
+              .filter(([path]) => path.startsWith(categoryId + '/'))
+              .map(([path, tool]) => {
+                return `
+                  <a href="/${path}" class="tool-card">
+                    <div class="tool-icon">${tool.icon}</div>
+                    <h3 itemprop="name">${tool.name}</h3>
+                    <p itemprop="description">${tool.description}</p>
+                  </a>
+                `;
+              }).join('')}
+          </div>
+        </section>
+      `).join('')}
+    </div>
   `;
 } 
