@@ -68,6 +68,22 @@ export const tools = {
     ],
     useCase: 'Perfect for reducing video size for sharing on social media or adjusting dimensions for specific platforms.'
   },
+  'video/trim': {
+    id: 'trim',
+    category: 'video',
+    name: 'Video Trimmer',
+    description: 'Free online video trimmer. Cut videos to specific start and end points without losing quality, all processed in your browser.',
+    icon: '✂️',
+    keywords: ['video trim', 'trim video', 'cut video', 'video editor', 'clip video'],
+    howToUse: [
+      'Upload your video by dropping it or selecting from your device',
+      'Use the slider to set start and end points',
+      'Preview your trimmed video',
+      'Click "Trim Video" to process',
+      'Download the trimmed video when complete'
+    ],
+    useCase: 'Perfect for removing unwanted parts from videos or creating short clips for sharing.'
+  },
   'video/reencode': {
     id: 'reencode',
     category: 'video',

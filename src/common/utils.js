@@ -143,6 +143,20 @@ export function setupDropZone(dropZone, fileInput, onFileSelected, acceptType = 
 }
 
 /**
+ * Format seconds to MM:SS format
+ * @param {number} seconds - Time in seconds
+ * @returns {string} - Formatted time string (MM:SS)
+ */
+export function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+/**
  * Create a download link for the processed file
  */
 export function createDownloadLink(container, url, filename, text) {

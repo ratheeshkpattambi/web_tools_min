@@ -387,4 +387,63 @@ footer {
   .author-links {
     gap: 0.75rem;
   }
+}
+
+/* Trim slider styles */
+.slider-container {
+  margin: 20px 0;
+  padding: 10px 0;
+}
+
+.trim-slider {
+  position: relative;
+  height: 30px;
+  background: #eee;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.slider-handle {
+  position: absolute;
+  width: 14px;
+  height: 30px;
+  background: var(--primary-color);
+  cursor: pointer;
+  top: 0;
+  border-radius: 3px;
+}
+
+.start-handle {
+  left: 0;
+}
+
+.end-handle {
+  right: 0;
+}
+
+.slider-range {
+  position: absolute;
+  height: 100%;
+  background: rgba(74, 144, 226, 0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.time-range {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.range-inputs {
+  display: flex;
+  gap: 20px;
+}
+
+.range-inputs input {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 } 

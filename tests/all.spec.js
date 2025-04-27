@@ -50,6 +50,60 @@ test.describe('SafeWebTool Tests', () => {
     }
   });
   
+  // Test for specific import errors in all tools
+  test('verify all tool modules import correctly', async ({ page }) => {
+    // This test will verify that each tool module can be imported correctly
+    for (const [toolPath, toolInfo] of Object.entries(tools)) {
+      console.log(`Testing imports for tool: ${toolPath}`);
+      
+      await page.goto(`/${toolPath}`);
+      
+      // Wait for tool to load (longer timeout to accommodate FFmpeg tools)
+      await page.waitForTimeout(2000);
+      
+      // Check that no import error message is shown
+      const errorLocator = page.locator('text=Failed to load tool module');
+      const errorCount = await errorLocator.count();
+      
+      if (errorCount > 0) {
+        // Get the error message content
+        const errorMessage = await page.locator('.error-details').textContent();
+        console.error(`❌ Import error in ${toolPath}: ${errorMessage}`);
+      }
+      
+      expect(errorCount).toBe(0);
+      
+      // Check that the tool's interface elements are present based on category
+      const category = toolPath.split('/')[0];
+      
+      // Generic UI checks based on tool category
+      if (category === 'video') {
+        // Check for common video tool UI elements
+        await expect(page.locator('.video-wrapper')).toBeVisible();
+        await expect(page.locator('.controls')).toBeVisible();
+        
+        // Verify control elements based on tool functionality pattern
+        if (toolPath.includes('trim') || toolPath.includes('gif')) {
+          // Time-based editing tools typically have time inputs
+          await expect(page.locator('.range-inputs, .time-range')).toBeVisible();
+        }
+      } else if (category === 'image') {
+        // For image tools, verify image preview or controls
+        await expect(page.locator('.image-wrapper, .controls')).toBeVisible();
+      } else if (category === 'text') {
+        // For text tools, verify text editing elements
+        await expect(page.locator('textarea, .yaml-editor, .json-output')).toBeVisible();
+      }
+      
+      // Ensure process button exists for tools that need it
+      if (toolInfo.id !== 'info') {
+        await expect(page.locator('#processBtn, button.btn')).toBeVisible();
+      }
+      
+      console.log(`✅ Tool ${toolPath} imports verified`);
+    }
+  });
+  
   // Auto-generate tests for all tool pages
   for (const [toolPath, toolInfo] of Object.entries(tools)) {
     test(`tool: ${toolInfo.name}`, async ({ page }) => {
@@ -96,6 +150,40 @@ test.describe('SafeWebTool Tests', () => {
     await page.goto('/invalid-route');
     await expect(page.locator('.tool-container h1')).toContainText('Not Found');
     await expect(page.locator('.tool-container a[href="/"]')).toBeVisible();
+  });
+  
+  // Console error test - check for JavaScript errors
+  test('verify no console errors on all tools', async ({ page }) => {
+    // Track console errors 
+    const consoleErrors = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(`${msg.text()}`);
+      }
+    });
+    
+    // Check each tool page for console errors
+    for (const [toolPath, toolInfo] of Object.entries(tools)) {
+      console.log(`Testing console errors for: ${toolPath}`);
+      
+      // Reset error array for this tool
+      consoleErrors.length = 0;
+      
+      await page.goto(`/${toolPath}`);
+      await page.waitForTimeout(1000);
+      
+      // Fail test if there are console errors specifically related to imports
+      const importErrors = consoleErrors.filter(err => 
+        err.includes('import') || 
+        err.includes('Failed to load') || 
+        err.includes('Cannot find module') ||
+        err.includes('Unknown variable dynamic import')
+      );
+      
+      expect(importErrors).toEqual([]);
+      
+      console.log(`✅ No critical console errors in ${toolPath}`);
+    }
   });
   
   // SEO tests

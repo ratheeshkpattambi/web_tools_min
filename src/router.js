@@ -222,9 +222,9 @@ export async function handleRoute(path) {
             // Dynamically import the tool module using direct import from src
             let moduleImport;
             try {
-              // Import directly from the source directory
-              moduleImport = await import(`../src/${category}/${toolId}.js`);
-              console.log(`Successfully loaded module from src/${category}/${toolId}.js`);
+              // Import directly from the current directory structure
+              moduleImport = await import(`./${category}/${toolId}.js`);
+              console.log(`Successfully loaded module from ./${category}/${toolId}.js`);
             } catch (error) {
               console.error(`Failed to load tool module: ${error.message}`);
               main.innerHTML = getErrorTemplate(
