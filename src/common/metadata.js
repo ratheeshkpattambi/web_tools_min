@@ -10,7 +10,7 @@ export const categories = {
     name: 'Video Tools',
     description: 'Process and convert your videos with ease directly in your browser, no upload needed.',
     metaDescription: 'Free online video tools for resizing, converting, and analyzing videos. No upload required - all processing happens in your browser.',
-    icon: '🎬',
+    icon: '🎥',
     keywords: ['video tools', 'video converter', 'video processor', 'browser video tools']
   },
   image: {
@@ -40,7 +40,7 @@ export const tools = {
     shortDescription: 'Analyze video metadata and properties.',
     description: 'Extract detailed information about your videos including resolution, codec, bitrate, and audio properties.',
     metaDescription: 'Extract metadata (codec, resolution, duration, bitrate) from MP4 and other video files. All in your browser, no uploads.',
-    icon: 'ℹ️',
+    icon: '📊',
     keywords: ['video info', 'video metadata', 'video properties', 'video analyzer'],
     howToUse: [
       'Drop your video file into the upload area or click to select a file',
@@ -56,7 +56,7 @@ export const tools = {
     shortDescription: 'Resize videos while maintaining quality.',
     description: 'Change the dimensions of your videos while preserving the aspect ratio and optimizing for quality.',
     metaDescription: 'Free online video resizer. Change video dimensions and resolution while maintaining quality, all processed locally in your browser.',
-    icon: '📐',
+    icon: '🔄',
     keywords: ['video resize', 'resize video', 'change video resolution', 'video dimensions'],
     howToUse: [
       'Upload your video by dropping it or selecting from your device',
@@ -73,7 +73,7 @@ export const tools = {
     shortDescription: 'Convert videos to different formats.',
     description: 'Re-encode videos to different formats like MP4, WebM, or MOV with customizable quality settings.',
     metaDescription: 'Free online video converter. Convert videos between MP4, WebM, and MOV formats with adjustable quality settings, processed entirely in your browser.',
-    icon: '🎥',
+    icon: '🔄',
     keywords: ['video converter', 'video format converter', 'mp4 converter', 'webm converter'],
     howToUse: [
       'Upload your video using the drop area or file selector',

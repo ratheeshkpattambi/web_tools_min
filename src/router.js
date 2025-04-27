@@ -80,6 +80,11 @@ function generateHomeContent() {
       <h1>Welcome to SafeWebTool</h1>
       <p class="section-description">A collection of privacy-focused tools that process your data locally in your browser.</p>
       
+      <div class="philosophy-section">
+        <h2>Our Philosophy</h2>
+        <p>SafeWebTool is built on the principle that your data should remain private. All processing happens directly in your browser - we never see or store your files. Free, secure, and accessible tools for everyone.</p>
+      </div>
+      
       ${Object.entries(categories).map(([categoryId, config]) => `
         <section class="tools-section" itemscope itemtype="https://schema.org/SoftwareApplication">
           <h2 itemprop="applicationCategory">${config.name}</h2>
@@ -262,7 +267,7 @@ export async function handleRoute(path) {
             
             // Dynamically import the tool module
             // The path is relative to the src directory due to preserveModulesRoot in vite.config.js
-            const moduleImport = await import(/* @vite-ignore */ `./${category}/${toolId}.js`);
+            const moduleImport = await import(/* @vite-ignore */ `/${category}/${toolId}.js`);
             
             // Remove loading indicator if it exists
             document.getElementById('ffmpeg-loading')?.remove();
