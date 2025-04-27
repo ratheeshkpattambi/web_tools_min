@@ -18,6 +18,18 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
+        // Use a custom format that respects category directory structure
+        entryFileNames: (chunkInfo) => {
+          const id = chunkInfo.facadeModuleId || '';
+          // Match tool paths and preserve their structure
+          if (id.match(/\/src\/(video|image|text)\/[a-z-]+\.js$/)) {
+            const path = id.split('/src/')[1].replace(/\.js$/, '');
+            return `${path}.js`;
+          }
+          return 'assets/[name]-[hash].js';
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: (id) => {
           if (id.includes('/tests/') || id.includes('.spec.js') || id.includes('.test.js')) {
             return undefined;
@@ -41,16 +53,6 @@ export default defineConfig({
           
           if (id.includes('/video/ffmpeg-utils.js')) {
             return 'video-utils';
-          }
-          
-          if (id.includes('/video/')) {
-            return 'video-tools';
-          }
-          if (id.includes('/image/')) {
-            return 'image-tools';
-          }
-          if (id.includes('/text/')) {
-            return 'text-tools';
           }
           
           if (id.includes('/common/')) {

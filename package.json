@@ -1,17 +1,19 @@
 {
   "name": "safewebtool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SafeWebTool - A collection of browser-based tools for video, image, and text processing",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:prod": "NODE_ENV=production vite build",
-    "build:netlify": "NODE_ENV=production vite build",
+    "build": "vite build && npm run copy-tool-files && npm run copy-ffmpeg-files",
+    "build:prod": "NODE_ENV=production vite build && npm run copy-tool-files && npm run copy-ffmpeg-files",
+    "build:netlify": "NODE_ENV=production vite build && npm run copy-tool-files && npm run copy-ffmpeg-files",
     "preview": "vite preview",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:chrome": "playwright test --project=chromium-desktop chromium-mobile"
+    "test:chrome": "playwright test --project=chromium-desktop chromium-mobile",
+    "copy-tool-files": "mkdir -p dist/video dist/image dist/text && cp -f src/video/*.js dist/video/ && cp -f src/image/*.js dist/image/ && cp -f src/text/*.js dist/text/",
+    "copy-ffmpeg-files": "mkdir -p dist/ffmpeg && curl -L -o dist/ffmpeg/ffmpeg-core.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js && curl -L -o dist/ffmpeg/ffmpeg-core.wasm https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm && curl -L -o dist/ffmpeg/ffmpeg-core.worker.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",

@@ -260,24 +260,18 @@ export async function handleRoute(path) {
               document.querySelector('.tool-container')?.appendChild(loadingEl);
             }
             
-            // Dynamically import the tool module based on path
-            const modulePath = `./${category}/${toolId}.js`;
-            try {
-              const moduleToImport = await import(modulePath);
-              
-              // Remove loading indicator if it exists
-              document.getElementById('ffmpeg-loading')?.remove();
-              
-              // Call the initialization function - default to 'initTool'
-              const initFunctionName = 'initTool';
-              if (moduleToImport && moduleToImport[initFunctionName]) {
-                moduleToImport[initFunctionName]();
-              } else {
-                throw new Error(`Init function '${initFunctionName}' not found in module ${modulePath}`);
-              }
-            } catch (importError) {
-              console.error(`Failed to import tool module: ${importError.message}`);
-              throw importError;
+            // Dynamically import the tool module
+            // The path is relative to the src directory due to preserveModulesRoot in vite.config.js
+            const moduleImport = await import(/* @vite-ignore */ `./${category}/${toolId}.js`);
+            
+            // Remove loading indicator if it exists
+            document.getElementById('ffmpeg-loading')?.remove();
+            
+            // Call the initialization function
+            if (moduleImport && moduleImport.initTool) {
+              moduleImport.initTool();
+            } else {
+              throw new Error(`Init function 'initTool' not found in module for ${category}/${toolId}`);
             }
           } catch (error) {
             console.error(`Failed to load tool module: ${error.message}`);
