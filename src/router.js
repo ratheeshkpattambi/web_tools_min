@@ -265,9 +265,21 @@ export async function handleRoute(path) {
               document.querySelector('.tool-container')?.appendChild(loadingEl);
             }
             
-            // Dynamically import the tool module
-            // The path is relative to the src directory due to preserveModulesRoot in vite.config.js
-            const moduleImport = await import(/* @vite-ignore */ `/${category}/${toolId}.js`);
+            // Dynamically import the tool module using direct import from src
+            let moduleImport;
+            try {
+              // Import directly from the source directory
+              moduleImport = await import(`../src/${category}/${toolId}.js`);
+              console.log(`Successfully loaded module from src/${category}/${toolId}.js`);
+            } catch (error) {
+              console.error(`Failed to load tool module: ${error.message}`);
+              main.innerHTML = getErrorTemplate(
+                'Error Loading Tool', 
+                'The requested tool could not be loaded.', 
+                error.message
+              );
+              return;
+            }
             
             // Remove loading indicator if it exists
             document.getElementById('ffmpeg-loading')?.remove();
@@ -276,15 +288,14 @@ export async function handleRoute(path) {
             if (moduleImport && moduleImport.initTool) {
               moduleImport.initTool();
             } else {
-              throw new Error(`Init function 'initTool' not found in module for ${category}/${toolId}`);
+              main.innerHTML = getErrorTemplate(
+                'Error Loading Tool', 
+                `The tool "${toolId}" could not be initialized.`,
+                `Init function 'initTool' not found in module for ${category}/${toolId}`
+              );
             }
           } catch (error) {
-            console.error(`Failed to load tool module: ${error.message}`);
-            main.innerHTML = getErrorTemplate(
-              'Error Loading Tool', 
-              'The requested tool could not be loaded.', 
-              error.message
-            );
+            console.error('Error initializing tool:', error);
           }
         }, 100);
       } catch (error) {

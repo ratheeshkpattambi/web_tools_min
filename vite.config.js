@@ -18,13 +18,14 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
-        // Use a custom format that respects category directory structure
+        // Preserve source directory structure for tool files
         entryFileNames: (chunkInfo) => {
           const id = chunkInfo.facadeModuleId || '';
           // Match tool paths and preserve their structure
           if (id.match(/\/src\/(video|image|text)\/[a-z-]+\.js$/)) {
-            const path = id.split('/src/')[1].replace(/\.js$/, '');
-            return `${path}.js`;
+            // Preserve the full path including src
+            const path = id.includes('/src/') ? id.split('/src/')[1] : id;
+            return `src/${path}`;
           }
           return 'assets/[name]-[hash].js';
         },
@@ -62,7 +63,9 @@ export default defineConfig({
           return null;
         }
       }
-    }
+    },
+    // Ensure source files are copied to the build output
+    copyPublicDir: true,
   },
   resolve: {
     alias: {
