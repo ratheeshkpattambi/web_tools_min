@@ -12,7 +12,7 @@ test.describe('SafeWebTool Navigation Tests', () => {
     
     // Verify logo and heading
     await expect(page.locator('.logo')).toBeVisible();
-    await expect(page.locator('h1')).toContainText('SafeWebTool');
+    await expect(page.locator('header h1')).toContainText('SafeWebTool');
     
     // Verify navigation links
     await expect(page.locator('nav a[href="/"]')).toBeVisible();

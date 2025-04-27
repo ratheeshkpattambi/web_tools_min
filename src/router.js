@@ -185,10 +185,31 @@ function generateCategoryContent(categoryConfig, categoryId) {
 }
 
 /**
+ * Updates the active class on navigation links
+ * @param {string} path - The current URL path
+ */
+function updateActiveNavigation(path) {
+  // Remove active class from all nav links
+  document.querySelectorAll('nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current path
+  const pathSegment = path === '/' ? '/' : `/${path.split('/')[1]}`;
+  const activeLink = document.querySelector(`nav a[href="${pathSegment}"]`);
+  if (activeLink) {
+    activeLink.classList.add('active');
+  }
+}
+
+/**
  * Main route handler
  * @param {string} path - The URL path
  */
 export async function handleRoute(path) {
+  // Update active navigation
+  updateActiveNavigation(path);
+  
   // Handle sitemap.xml requests
   if (path === '/sitemap.xml') {
     import('./common/sitemap.js').then(({ serveSitemap }) => {
