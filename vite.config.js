@@ -12,13 +12,17 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     assetsDir: 'assets',
+    exclude: ['tests/**', '**/*.spec.js', '**/*.test.js', 'playwright.config.js'],
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
       },
       output: {
         manualChunks: (id) => {
-          // External libraries - keep these separate so they're only loaded when needed
+          if (id.includes('/tests/') || id.includes('.spec.js') || id.includes('.test.js')) {
+            return undefined;
+          }
+          
           if (id.includes('node_modules')) {
             if (id.includes('@ffmpeg/core')) {
               return 'vendor-ffmpeg-core';
@@ -29,16 +33,16 @@ export default defineConfig({
             if (id.includes('js-yaml')) {
               return 'vendor-js-yaml';
             }
-            // Group other third-party libraries
+            if (id.includes('@playwright')) {
+              return undefined;
+            }
             return 'vendor';
           }
           
-          // Tool utilities
           if (id.includes('/video/ffmpeg-utils.js')) {
             return 'video-utils';
           }
           
-          // Group tools by category
           if (id.includes('/video/')) {
             return 'video-tools';
           }
@@ -49,7 +53,6 @@ export default defineConfig({
             return 'text-tools';
           }
           
-          // Group common utilities
           if (id.includes('/common/')) {
             return 'common';
           }
@@ -65,6 +68,6 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core', 'js-yaml']
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core', 'js-yaml', '@playwright/test']
   }
 }); 

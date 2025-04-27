@@ -1,13 +1,17 @@
 {
   "name": "safewebtool",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "SafeWebTool - A collection of browser-based tools for video, image, and text processing",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:netlify": "vite build",
-    "preview": "vite preview"
+    "build:prod": "NODE_ENV=production vite build",
+    "build:netlify": "NODE_ENV=production vite build",
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:chrome": "playwright test --project=chromium-desktop chromium-mobile"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -16,6 +20,7 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "vite": "^5.1.4"
   }
 }

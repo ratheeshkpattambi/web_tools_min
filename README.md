@@ -19,10 +19,24 @@ A collection of privacy-focused tools that process your data locally in your bro
 ```bash
 # Install dependencies
 npm install
+
 # Start development server
 npm run dev
-# Build for production
+
+# Build for production (standard)
 npm run build
+
+# Build for production (optimized, excludes test files)
+npm run build:prod
+```
+
+## Testing
+```bash
+# Install Playwright browsers
+npx playwright install
+
+# Run tests (Chrome desktop and mobile only)
+npm run test:chrome
 ```
 
 ## Deployment

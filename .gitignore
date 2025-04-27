@@ -26,4 +26,12 @@ dist/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# Playwright specific
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/blob-report/
+/playwright/.auth/ 
