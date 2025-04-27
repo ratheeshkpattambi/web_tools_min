@@ -401,25 +401,33 @@ export function getToolTemplate(category, toolId) {
 }
 
 /**
- * Generic error template
+ * Generate a 404 Not Found template
+ * @returns {string} HTML for a 404 page
  */
-export function getErrorTemplate(title, message, details = '') {
+export function get404Template() {
   return `
     <div class="tool-container">
-      <h1>${title}</h1>
-      <p>${message}</p>
-      ${details ? `<div class="error-details">${details}</div>` : ''}
-      <a href="/" class="btn">Return to Home</a>
+      <h1>404 - Page Not Found</h1>
+      <p>Sorry, the page you requested does not exist.</p>
+      <a href="/" class="button primary">Back to Home</a>
     </div>
   `;
 }
 
 /**
- * 404 template
+ * Generate an error template
+ * @param {string} title - The error title
+ * @param {string} message - The error message
+ * @param {string} [details] - Additional error details
+ * @returns {string} HTML for an error page
  */
-export function get404Template() {
-  return getErrorTemplate(
-    '404 - Page Not Found',
-    'The requested page could not be found.'
-  );
+export function getErrorTemplate(title, message, details = '') {
+  return `
+    <div class="tool-container">
+      <h1>Error: ${title}</h1>
+      <p>${message}</p>
+      ${details ? `<pre class="error-details">${details}</pre>` : ''}
+      <a href="/" class="button primary">Back to Home</a>
+    </div>
+  `;
 } 
