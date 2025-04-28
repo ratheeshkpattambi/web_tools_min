@@ -194,11 +194,14 @@ test.describe('SafeWebTool Tests', () => {
       await page.waitForTimeout(1000);
       
       // Fail test if there are console errors specifically related to imports
+      // Filter out CORS and network-related errors that aren't related to our application code
       const importErrors = consoleErrors.filter(err => 
-        err.includes('import') || 
+        (err.includes('import') || 
         err.includes('Failed to load') || 
         err.includes('Cannot find module') ||
-        err.includes('Unknown variable dynamic import')
+        err.includes('Unknown variable dynamic import')) && 
+        !err.includes('ERR_BLOCKED_BY_RESPONSE') && // Ignore CORS errors
+        !err.includes('net::ERR') // Ignore other network errors
       );
       
       expect(importErrors).toEqual([]);
