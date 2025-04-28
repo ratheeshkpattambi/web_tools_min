@@ -219,7 +219,7 @@ export async function handleRoute(path) {
               document.querySelector('.tool-container')?.appendChild(loadingEl);
             }
             
-            // Dynamically import the tool module using direct import from src
+            // Import directly from the current directory structure
             let moduleImport;
             try {
               // Import directly from the current directory structure
@@ -240,6 +240,12 @@ export async function handleRoute(path) {
             
             // Call the initialization function
             if (moduleImport && moduleImport.initTool) {
+              // Check if the module exports a template
+              if (moduleImport.template) {
+                // Replace the HTML content with template from module
+                document.querySelector('.tool-container').outerHTML = moduleImport.template;
+              }
+              
               moduleImport.initTool();
             } else {
               main.innerHTML = getErrorTemplate(

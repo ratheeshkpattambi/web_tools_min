@@ -5,57 +5,6 @@
 
 // Video tool templates
 export const videoTemplates = {
-  'resize': `
-    <div class="tool-container">
-      <h1>Video Resize</h1>
-      <div id="dropZone" class="drop-zone">
-        <div class="drop-icon">📁</div>
-        <p>Drop video here</p>
-        <p class="drop-subtitle">or</p>
-        <button type="button" class="file-select-btn">Select Video</button>
-        <input type="file" id="fileInput" accept="video/*" style="display: none;">
-      </div>
-      <div class="video-wrapper">
-        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
-      </div>
-      
-      <div class="controls">
-        <div class="input-group">
-          <label for="width">Width:</label>
-          <input type="number" id="width" placeholder="Width">
-        </div>
-        <div class="input-group">
-          <label for="height">Height:</label>
-          <input type="number" id="height" placeholder="Height">
-        </div>
-        <div class="input-group">
-          <label for="keepRatio">
-            <input type="checkbox" id="keepRatio" checked>
-            Keep Aspect Ratio
-          </label>
-        </div>
-        <button id="processBtn" class="btn" disabled>Resize Video</button>
-      </div>
-
-      <div id="progress" class="progress" style="display: none;">
-        <div class="progress-fill"></div>
-        <div class="progress-text">0%</div>
-      </div>
-
-      <div id="outputContainer" class="output-container">
-        <div class="video-wrapper">
-          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
-        </div>
-        <div id="downloadContainer"></div>
-      </div>
-
-      <div id="logHeader" class="log-header">
-        <span>Logs</span>
-        <span id="logToggle">▼</span>
-      </div>
-      <div id="logContent" class="log-content"></div>
-    </div>
-  `,
   'trim': `
     <div class="tool-container">
       <h1>Video Trimmer</h1>
@@ -443,6 +392,12 @@ export const textTemplates = {
  * @returns {string} The HTML template or null if not found
  */
 export function getToolTemplate(category, toolId) {
+  // Special case for video resize which has its template in its own module
+  if (category === 'video' && toolId === 'resize') {
+    // Return null so the template from the module will be used
+    return null;
+  }
+  
   const templates = {
     'video': videoTemplates,
     'image': imageTemplates,

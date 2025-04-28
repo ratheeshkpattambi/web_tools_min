@@ -13,6 +13,7 @@ export class Tool {
    * @param {boolean} config.needsFileUpload - Whether this tool needs file upload (default: true)
    * @param {boolean} config.hasOutput - Whether this tool produces downloadable output (default: false)
    * @param {boolean} config.needsProcessButton - Whether this tool needs a process button (default: false)
+   * @param {string} config.template - Optional HTML template for this tool
    */
   constructor(config = {}) {
     this.id = config.id || '';
@@ -21,11 +22,20 @@ export class Tool {
     this.needsFileUpload = config.hasOwnProperty('needsFileUpload') ? config.needsFileUpload : true;
     this.hasOutput = config.hasOwnProperty('hasOutput') ? config.hasOutput : false;
     this.needsProcessButton = config.hasOwnProperty('needsProcessButton') ? config.needsProcessButton : false;
+    this.template = config.template || null; // Store the tool's template
     
     this.elements = {};
     this.initialized = false;
     this.isProcessing = false;
     this.inputFile = null;
+  }
+
+  /**
+   * Get the tool's template, if provided in the constructor
+   * @returns {string|null} The HTML template or null
+   */
+  getTemplate() {
+    return this.template;
   }
 
   /**
