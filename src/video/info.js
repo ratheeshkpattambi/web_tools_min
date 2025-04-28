@@ -5,6 +5,36 @@ import { Tool } from '../common/base.js';
 import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 import { formatFileSize } from '../common/utils.js';
 
+// Video info tool template
+export const template = `
+    <div class="tool-container">
+      <h1>Extract Video Metadata</h1>
+      <div id="videoDropZone" class="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
+        <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="video-preview" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+
+      <div id="videoProgress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="videoInfoContainer" class="info-container"></div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+`;
+
 class VideoInfoTool extends Tool {
   constructor(config = {}) {
     super({
@@ -12,7 +42,8 @@ class VideoInfoTool extends Tool {
       category: 'video',
       needsFileUpload: true,
       hasOutput: false,
-      needsProcessButton: false
+      needsProcessButton: false,
+      template // Use the local template
     });
     
     this.ffmpeg = null;

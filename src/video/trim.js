@@ -5,6 +5,64 @@ import { Tool } from '../common/base.js';
 import { formatFileSize, formatTime } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
+// Video trim tool template
+export const template = `
+    <div class="tool-container">
+      <h1>Video Trimmer</h1>
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
+        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div class="controls">
+        <div class="slider-container">
+          <div id="trim-slider" class="trim-slider">
+            <div class="slider-handle start-handle"></div>
+            <div class="slider-range"></div>
+            <div class="slider-handle end-handle"></div>
+          </div>
+        </div>
+        <div class="input-group time-range">
+          <div class="range-inputs">
+            <div>
+              <label for="startTime">Start Time:</label>
+              <input type="text" id="startTime" placeholder="0:00">
+            </div>
+            <div>
+              <label for="endTime">End Time:</label>
+              <input type="text" id="endTime" placeholder="0:00">
+            </div>
+          </div>
+        </div>
+        <button id="processBtn" class="btn" disabled>Trim Video</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="outputContainer" class="output-container">
+        <div class="video-wrapper">
+          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+        </div>
+        <div id="downloadContainer"></div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+`;
+
 class VideoTrimTool extends Tool {
   constructor(config = {}) {
     super({
@@ -12,7 +70,8 @@ class VideoTrimTool extends Tool {
       category: 'video',
       needsFileUpload: true,
       hasOutput: true,
-      needsProcessButton: true
+      needsProcessButton: true,
+      template // Use the local template
     });
     
     this.ffmpeg = null;

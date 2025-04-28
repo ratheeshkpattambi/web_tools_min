@@ -5,6 +5,65 @@ import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
+// Video reencode tool template
+export const template = `
+    <div class="tool-container">
+      <h1>Video Re-encode</h1>
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Drop video here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Video</button>
+        <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      </div>
+      <div class="video-wrapper">
+        <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+      </div>
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="format">Format:</label>
+          <select id="format">
+            <option value="mp4">MP4</option>
+            <option value="webm">WebM</option>
+            <option value="mov">MOV</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="quality">Quality:</label>
+          <select id="quality">
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="bitrate">Bitrate (kb/s):</label>
+          <input type="number" id="bitrate" value="2000" min="500">
+        </div>
+        <button id="processBtn" class="btn" disabled>Re-encode Video</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="outputContainer" class="output-container">
+        <div class="video-wrapper">
+          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
+        </div>
+        <div id="downloadContainer"></div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+`;
+
 class VideoReencodeTool extends Tool {
   constructor(config = {}) {
     super({
@@ -12,7 +71,8 @@ class VideoReencodeTool extends Tool {
       category: 'video',
       needsFileUpload: true,
       hasOutput: true,
-      needsProcessButton: true
+      needsProcessButton: true,
+      template // Use the local template
     });
     
     this.ffmpeg = null;
