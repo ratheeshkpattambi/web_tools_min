@@ -4,6 +4,33 @@
  */
 import { Tool } from '../common/base.js';
 
+// Text editor tool template
+export const template = `
+    <div class="tool-container">
+      <h1>Text Editor</h1>
+      <p class="tool-description">The plainest text editor - just type and download</p>
+
+      <textarea id="editor" class="text-editor" placeholder="Start typing..."></textarea>
+
+      <div class="editor-footer">
+        <div class="word-count">
+          Words: <span id="wordCount">0</span>
+        </div>
+        <div class="char-count">
+          Characters: <span id="charCount">0</span>
+        </div>
+      </div>
+
+      <div id="downloadContainer"></div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+`;
+
 class TextEditorTool extends Tool {
   constructor(config = {}) {
     super({
@@ -11,7 +38,8 @@ class TextEditorTool extends Tool {
       category: 'text',
       needsFileUpload: false,
       hasOutput: true,
-      needsProcessButton: false
+      needsProcessButton: false,
+      template // Use the local template
     });
     
     this.wordCount = 0;

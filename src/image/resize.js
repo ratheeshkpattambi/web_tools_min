@@ -4,6 +4,60 @@
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
 
+// Image resize tool template
+export const template = `
+    <div class="tool-container">
+      <h1>Image Resize</h1>
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>Drop image here</p>
+        <p class="drop-subtitle">or</p>
+        <button type="button" class="file-select-btn">Select Image</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
+
+      <div class="image-wrapper">
+        <img id="preview" style="display: none; max-width: 100%; height: auto;">
+      </div>
+      
+      <div class="controls">
+        <div class="input-group">
+          <label for="width">Width:</label>
+          <input type="number" id="width" placeholder="Width">
+        </div>
+        <div class="input-group">
+          <label for="height">Height:</label>
+          <input type="number" id="height" placeholder="Height">
+        </div>
+        <div class="input-group">
+          <label for="keepRatio">
+            <input type="checkbox" id="keepRatio" checked>
+            Keep Aspect Ratio
+          </label>
+        </div>
+        <button id="processBtn" class="btn" disabled>Resize Image</button>
+      </div>
+
+      <div id="progress" class="progress" style="display: none;">
+        <div class="progress-fill"></div>
+        <div class="progress-text">0%</div>
+      </div>
+
+      <div id="outputContainer" class="output-container">
+        <div class="image-wrapper">
+          <img id="output-image" style="display: none; max-width: 100%; height: auto;">
+        </div>
+        <div id="downloadContainer"></div>
+      </div>
+
+      <div id="logHeader" class="log-header">
+        <span>Logs</span>
+        <span id="logToggle">▼</span>
+      </div>
+      <div id="logContent" class="log-content"></div>
+    </div>
+`;
+
 class ImageResizeTool extends Tool {
   constructor(config = {}) {
     super({
@@ -11,7 +65,8 @@ class ImageResizeTool extends Tool {
       category: 'image',
       needsFileUpload: true,
       hasOutput: true,
-      needsProcessButton: true
+      needsProcessButton: true,
+      template // Use the local template
     });
     
     this.originalImage = null;
