@@ -1,16 +1,14 @@
 import { 
-  getToolTemplate, 
-  get404Template, 
-  getErrorTemplate 
-} from './common/toolTemplates.js';
-import { 
   generateMetaTags, 
   generateStructuredData,
   categories,
   tools,
   getToolMetadata,
   getCategoryMetadata,
-  getWelcomeContent
+  getWelcomeContent,
+  getToolTemplate,
+  get404Template,
+  getErrorTemplate
 } from './common/metadata.js';
 
 /**
