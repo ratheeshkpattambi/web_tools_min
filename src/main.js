@@ -5,6 +5,7 @@ import './styles/main.css';
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize routing
   handleRoute(window.location.pathname);
+  document.body.classList.add('js-loaded');
 
   // Handle navigation
   window.addEventListener('popstate', () => {

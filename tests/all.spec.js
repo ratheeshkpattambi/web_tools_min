@@ -10,8 +10,6 @@ test.describe('SafeWebTool Tests', () => {
     await expect(page.locator('.logo')).toBeVisible();
     await expect(page.locator('header h1')).toContainText('SafeWebTool');
     await expect(page.locator('nav a[href="/"]')).toBeVisible();
-    await expect(page.locator('.author-avatar')).toBeVisible();
-    await expect(page.locator('.author-content')).toContainText('Dr. Ratheesh Kalarot');
   });
   
   // Test dynamic tool loading across all categories

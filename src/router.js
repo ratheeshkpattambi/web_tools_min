@@ -124,6 +124,7 @@ export async function handleRoute(path) {
 
   const main = document.querySelector('main');
   if (!main) return;
+  main.innerHTML = '';
 
   let content = '';
   
@@ -150,32 +151,24 @@ export async function handleRoute(path) {
       // Get the template for this tool
       const toolTemplate = getToolTemplate(category, toolId);
       
-      if (!toolTemplate) {
-        content = getErrorTemplate('Tool Not Found', `The tool "${toolId}" could not be found in category "${category}".`);
-      } else {
-        // Enhance template with SEO content and tool information
-        const toolInfo = result.tool;
-        if (toolInfo) {
-          content = `
-            <div class="tool-page" itemscope itemtype="https://schema.org/SoftwareApplication">
-              <meta itemprop="applicationCategory" content="WebApplication">
-              <meta itemprop="offers" itemscope itemtype="https://schema.org/Offer">
-              <meta itemprop="price" content="0">
-              <meta itemprop="priceCurrency" content="USD">
-              
-              <div class="tool-container">
-                <div class="tool-header">
-                  <h1>${toolInfo.name}</h1>
-                  <p class="tool-description">${toolInfo.description || ''}</p>
-                </div>
-                ${toolTemplate.replace(/<div class="tool-container">[\s\S]*?<h1>.*?<\/h1>/, '')}
-              </div>
+      // Enhance template with SEO content and tool information
+      const toolInfo = result.tool;
+      content = `
+        <div class="tool-page" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <meta itemprop="applicationCategory" content="WebApplication">
+          <meta itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+          <meta itemprop="price" content="0">
+          <meta itemprop="priceCurrency" content="USD">
+          
+          <div class="tool-container">
+            <div class="tool-header">
+              <h1>${toolInfo.name}</h1>
+              <p class="tool-description">${toolInfo.description || ''}</p>
             </div>
-          `;
-        } else {
-          content = toolTemplate;
-        }
-      }
+            ${toolTemplate ? toolTemplate.replace(/<div class="tool-container">[\s\S]*?<h1>.*?<\/h1>/, '') : ''}
+          </div>
+        </div>
+      `;
     }
   }
   

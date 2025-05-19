@@ -1335,4 +1335,13 @@ footer {
   .step-content {
     padding: 0.5rem 0.75rem;
   }
+}
+
+body:not(.js-loaded) main {
+  display: none;
+}
+
+.loading {
+  min-height: 200px;
+  /* Optionally add a spinner or just leave blank */
 } 
