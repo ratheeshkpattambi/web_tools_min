@@ -11,6 +11,9 @@ import {
   getErrorTemplate
 } from './common/metadata.js';
 
+// Eagerly discover all tool modules
+const toolModules = import.meta.glob('./(video|image|text)/*.js');
+
 /**
  * Updates the active class on navigation links
  * @param {string} path - The current URL path
@@ -214,10 +217,23 @@ export async function handleRoute(path) {
             // Import directly from the current directory structure
             let moduleImport;
             try {
-              // Import directly from the current directory structure
               const modulePath = `./${category}/${toolId}.js`;
-              moduleImport = await import(modulePath);
-              console.log(`Successfully loaded module from ${modulePath}`);
+              // console.log(`Attempting to load module from path: ${modulePath}`);
+
+              if (toolModules[modulePath]) {
+                moduleImport = await toolModules[modulePath]();
+                console.log(`Successfully loaded module from ${modulePath} using import.meta.glob`);
+              } else {
+                console.error(`Module not found in import.meta.glob cache: ${modulePath}`);
+                // Attempt direct dynamic import as a fallback (might not work in prod if not analyzed)
+                try {
+                    moduleImport = await import(modulePath);
+                    console.warn(`Loaded module ${modulePath} via fallback dynamic import.`);
+                } catch (fallbackError) {
+                    console.error(`Fallback dynamic import for ${modulePath} also failed:`, fallbackError);
+                    throw new Error(`Module ${modulePath} not found.`);
+                }
+              }
             } catch (error) {
               console.error(`Failed to load tool module: ${error.message}`);
               main.innerHTML = getErrorTemplate(
