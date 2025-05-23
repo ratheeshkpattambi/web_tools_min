@@ -141,7 +141,7 @@ test.describe('SafeWebTool Tests', () => {
       }
       
       if (toolPath.startsWith('text/')) {
-        await expect(page.locator('textarea')).toBeVisible();
+        await expect(page.locator('textarea').first()).toBeVisible();
       }
     });
   }

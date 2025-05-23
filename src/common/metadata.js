@@ -159,6 +159,21 @@ export const tools = {
       'Convert to JSON format with a click'
     ],
     useCase: 'Useful for developers working with YAML configuration files or data structures.'
+  },
+  'text/remove-extra-spaces': {
+    id: 'remove-extra-spaces',
+    category: 'text',
+    name: 'Remove Extra Spaces',
+    description: 'Remove extra spaces from text, such as leading/trailing spaces and multiple spaces between words. All processing happens in your browser.',
+    icon: '✂️',
+    keywords: ['text tools', 'remove spaces', 'trim text', 'text cleanup'],
+    howToUse: [
+      'Paste your text into the input area',
+      'Click the "Remove Extra Spaces" button',
+      'The cleaned text will appear in the output area',
+      'Copy the cleaned text to your clipboard'
+    ],
+    useCase: 'Clean up text by removing unnecessary spaces, making it ready for use in documents, code, or other applications.'
   }
 };
 
