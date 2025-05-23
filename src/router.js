@@ -22,7 +22,9 @@ function updateActiveNavigation(path) {
   });
   
   // Add active class to current path
-  const pathSegment = path === '/' ? '/' : `/${path.split('/')[1]}`;
+  const pathSegment = (path === '/' || path === '/home')
+    ? '/'
+    : `/${path.split('/')[1]}`;
   const activeLink = document.querySelector(`nav a[href="${pathSegment}"]`);
   if (activeLink) {
     activeLink.classList.add('active');
