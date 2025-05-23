@@ -227,7 +227,7 @@ export async function handleRoute(path) {
                 console.error(`Module not found in import.meta.glob cache: ${modulePath}`);
                 // Attempt direct dynamic import as a fallback (might not work in prod if not analyzed)
                 try {
-                    moduleImport = await import(modulePath);
+                    moduleImport = await import(/* @vite-ignore */ modulePath);
                     console.warn(`Loaded module ${modulePath} via fallback dynamic import.`);
                 } catch (fallbackError) {
                     console.error(`Fallback dynamic import for ${modulePath} also failed:`, fallbackError);

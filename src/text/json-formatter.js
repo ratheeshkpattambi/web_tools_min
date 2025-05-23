@@ -1,0 +1,643 @@
+import { Tool } from '../common/base.js';
+
+// JSON Formatter tool template - following YAML tool patterns
+export const template = `
+    <div class="tool-container">
+      <h1>JSON Formatter & Converter</h1>
+      <p class="section-description">Format, validate, and convert JSON data with multiple output options</p>
+      
+      <div class="yaml-editor-container">
+        <div class="editor-panel">
+          <div class="panel-header">
+            <h3>JSON Input</h3>
+            <div class="panel-actions">
+              <button id="clearJsonBtn" class="btn-icon" title="Clear">
+                <span class="icon">❌</span>
+              </button>
+              <button id="uploadDataBtn" class="btn-icon" title="Upload File">
+                <span class="icon">📁</span>
+              </button>
+              <button id="loadSampleBtn" class="btn-icon" title="Load Sample">
+                <span class="icon">📋</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="jsonInput" class="yaml-editor" placeholder="Paste your JSON here or upload a file..."></textarea>
+          <div id="jsonStatus" class="status-bar"></div>
+        </div>
+        
+        <div class="output-panel">
+          <div class="panel-header">
+            <h3>Output</h3>
+            <div class="panel-actions">
+              <button id="copyOutputBtn" class="btn-icon" title="Copy Output">
+                <span class="icon">📋</span>
+              </button>
+              <button id="downloadBtn" class="btn-icon" title="Download">
+                <span class="icon">💾</span>
+              </button>
+            </div>
+          </div>
+          <div id="jsonOutput" class="json-output"></div>
+        </div>
+      </div>
+      
+      <div id="errorContainer" class="error-container">
+        <div class="error-header">Error</div>
+        <div id="errorContent" class="error-content"></div>
+      </div>
+      
+      <div class="tool-options">
+        <div class="option-group">
+          <label>
+            <input type="checkbox" id="prettyPrint" checked>
+            Pretty Print
+          </label>
+        </div>
+        <div class="option-group">
+          <button id="validateBtn" class="file-select-btn" style="margin-right: 0.5rem;">Validate</button>
+          <button id="formatBtn" class="file-select-btn" style="margin-right: 0.5rem;">Format / Beautify</button>
+          <button id="minifyBtn" class="file-select-btn">Minify / Compact</button>
+        </div>
+        <div class="option-group format-selector">
+          <span>Convert to:</span>
+          <label class="radio-label">
+            <input type="radio" name="outputFormat" id="formatXml">
+            XML
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="outputFormat" id="formatCsv">
+            CSV
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="outputFormat" id="formatYaml">
+            YAML
+          </label>
+          <button id="convertBtn" class="file-select-btn">Convert</button>
+        </div>
+      </div>
+      
+      <input type="file" id="fileInput" accept=".json" style="display: none;">
+    </div>
+`;
+
+// Sample JSON for demonstration
+const SAMPLE_JSON = `{
+  "name": "SafeWebTool Project",
+  "version": "1.0.0",
+  "description": "A comprehensive web tool collection for developers",
+  "author": {
+    "name": "Developer",
+    "email": "dev@example.com"
+  },
+  "features": [
+    "JSON Formatter",
+    "YAML Validator", 
+    "Text Processing",
+    "Data Conversion"
+  ],
+  "config": {
+    "debug": false,
+    "maxFileSize": "10MB",
+    "supportedFormats": ["json", "yaml", "xml", "csv"]
+  },
+  "metadata": {
+    "created": "2023-06-15T10:30:00Z",
+    "lastModified": "2023-12-01T14:22:33Z",
+    "tags": ["web", "tool", "converter", "formatter"]
+  }
+}`;
+
+class JsonFormatterTool extends Tool {
+  constructor(config = {}) {
+    super({
+      ...config,
+      category: 'text',
+      needsFileUpload: true,
+      hasOutput: true,
+      needsProcessButton: false,
+      template
+    });
+
+    this.lastValidJson = null;
+    this.validationTimeout = null;
+    this.lastAction = 'init';
+  }
+
+  getElementsMap() {
+    return {
+      jsonInput: 'jsonInput',
+      jsonOutput: 'jsonOutput',
+      jsonStatus: 'jsonStatus',
+      errorContainer: 'errorContainer',
+      errorContent: 'errorContent',
+      clearJsonBtn: 'clearJsonBtn',
+      uploadDataBtn: 'uploadDataBtn',
+      loadSampleBtn: 'loadSampleBtn',
+      copyOutputBtn: 'copyOutputBtn',
+      downloadBtn: 'downloadBtn',
+      fileInput: 'fileInput',
+      prettyPrint: 'prettyPrint',
+      validateBtn: 'validateBtn',
+      formatBtn: 'formatBtn',
+      minifyBtn: 'minifyBtn',
+      formatXml: 'formatXml',
+      formatCsv: 'formatCsv',
+      formatYaml: 'formatYaml',
+      convertBtn: 'convertBtn'
+    };
+  }
+
+  async setup() {
+    const elements = this.elements;
+
+    // Set tab key behavior for JSON input
+    if (elements.jsonInput) {
+      elements.jsonInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = e.target.selectionStart;
+          const end = e.target.selectionEnd;
+          e.target.value = e.target.value.substring(0, start) + '  ' + e.target.value.substring(end);
+          e.target.selectionStart = e.target.selectionEnd = start + 2;
+        }
+      });
+
+      // Auto-validate on input
+      elements.jsonInput.addEventListener('input', () => {
+        clearTimeout(this.validationTimeout);
+        this.updateCharCount();
+        
+        // Always auto-validate (removed checkbox)
+        this.validationTimeout = setTimeout(() => {
+          this.validateJson();
+        }, 300);
+      });
+
+      // Load sample JSON by default if input is empty
+      if (!elements.jsonInput.value) {
+        this.loadSample();
+      }
+    }
+
+    // File upload handling
+    if (elements.uploadDataBtn) {
+      elements.uploadDataBtn.addEventListener('click', () => {
+        elements.fileInput.click();
+      });
+    }
+
+    if (elements.fileInput) {
+      elements.fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            elements.jsonInput.value = e.target.result;
+            this.updateCharCount();
+            // Always auto-validate (removed checkbox)
+            this.validateJson();
+            this.lastAction = 'upload';
+          };
+          reader.onerror = () => {
+            this.showError('Error reading file');
+          };
+          reader.readAsText(file);
+        }
+      });
+    }
+
+    // Button handlers
+    if (elements.clearJsonBtn) {
+      elements.clearJsonBtn.addEventListener('click', () => this.clearJson());
+    }
+    if (elements.loadSampleBtn) {
+      elements.loadSampleBtn.addEventListener('click', () => this.loadSample());
+    }
+    if (elements.copyOutputBtn) {
+      elements.copyOutputBtn.addEventListener('click', () => this.copyOutput());
+    }
+    if (elements.downloadBtn) {
+      elements.downloadBtn.addEventListener('click', () => this.downloadOutput());
+    }
+
+    // Action buttons
+    if (elements.validateBtn) {
+      elements.validateBtn.addEventListener('click', () => this.validateJson());
+    }
+    if (elements.formatBtn) {
+      elements.formatBtn.addEventListener('click', () => this.formatJson());
+    }
+    if (elements.minifyBtn) {
+      elements.minifyBtn.addEventListener('click', () => this.minifyJson());
+    }
+    if (elements.convertBtn) {
+      elements.convertBtn.addEventListener('click', () => this.convertJson());
+    }
+
+    this.log('JSON formatter ready', 'info');
+  }
+
+  clearJson() {
+    const elements = this.elements;
+    elements.jsonInput.value = '';
+    elements.jsonOutput.textContent = '';
+    elements.jsonStatus.textContent = '';
+    elements.jsonStatus.className = 'status-bar';
+    elements.errorContainer.classList.remove('active');
+    this.lastValidJson = null;
+    this.lastAction = 'clear';
+    this.updateCharCount();
+  }
+
+  loadSample() {
+    this.elements.jsonInput.value = SAMPLE_JSON;
+    this.updateCharCount();
+    // Always auto-validate (removed checkbox)
+    this.validateJson();
+    this.lastAction = 'sample';
+  }
+
+  copyOutput() {
+    const output = this.elements.jsonOutput.textContent;
+    if (!output) return;
+    
+    navigator.clipboard.writeText(output).then(() => {
+      const originalIcon = this.elements.copyOutputBtn.querySelector('.icon').textContent;
+      this.elements.copyOutputBtn.querySelector('.icon').textContent = '✓';
+      setTimeout(() => {
+        this.elements.copyOutputBtn.querySelector('.icon').textContent = originalIcon;
+      }, 1000);
+    });
+  }
+
+  downloadOutput() {
+    const content = this.elements.jsonOutput.textContent;
+    if (!content || content.includes('Error') || content.includes('Invalid')) {
+      this.showError('No valid data to download');
+      return;
+    }
+
+    let filename = 'data.json';
+    let mimeType = 'application/json';
+
+    // Determine file type based on last action
+    if (this.lastAction === 'convert') {
+      if (this.elements.formatXml.checked) {
+        filename = 'data.xml';
+        mimeType = 'application/xml';
+      } else if (this.elements.formatCsv.checked) {
+        filename = 'data.csv';
+        mimeType = 'text/csv';
+      } else if (this.elements.formatYaml.checked) {
+        filename = 'data.yaml';
+        mimeType = 'application/x-yaml';
+      }
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  updateCharCount() {
+    const text = this.elements.jsonInput.value;
+    this.elements.jsonStatus.textContent = `Characters: ${text.length}`;
+    this.elements.jsonStatus.className = 'status-bar';
+  }
+
+  showError(message) {
+    const elements = this.elements;
+    elements.errorContainer.classList.add('active');
+    elements.errorContent.textContent = message;
+    elements.jsonStatus.textContent = 'Error';
+    elements.jsonStatus.className = 'status-bar error';
+  }
+
+  validateJson() {
+    const elements = this.elements;
+    const jsonText = elements.jsonInput.value.trim();
+    
+    elements.errorContainer.classList.remove('active');
+    
+    if (!jsonText) {
+      elements.jsonOutput.textContent = '';
+      elements.jsonStatus.textContent = 'Empty input';
+      elements.jsonStatus.className = 'status-bar';
+      return;
+    }
+    
+    try {
+      const parsed = JSON.parse(jsonText);
+      this.lastValidJson = parsed;
+      
+      elements.jsonStatus.textContent = 'Valid JSON';
+      elements.jsonStatus.className = 'status-bar valid';
+      elements.jsonOutput.textContent = 'JSON is valid!';
+      
+      this.lastAction = 'validate';
+    } catch (error) {
+      elements.jsonOutput.textContent = '';
+      elements.jsonStatus.textContent = 'Invalid JSON';
+      elements.jsonStatus.className = 'status-bar error';
+      
+      this.showError(`Parse error: ${error.message}`);
+      this.lastValidJson = null;
+    }
+  }
+
+  formatJson() {
+    const elements = this.elements;
+    const jsonText = elements.jsonInput.value.trim();
+    
+    if (!jsonText) {
+      elements.jsonOutput.textContent = 'Input is empty';
+      return;
+    }
+    
+    try {
+      const parsed = JSON.parse(jsonText);
+      // Use pretty print setting to determine formatting
+      const space = elements.prettyPrint.checked ? '\t' : 0;
+      
+      elements.jsonOutput.textContent = JSON.stringify(parsed, null, space);
+      elements.jsonStatus.textContent = 'JSON formatted';
+      elements.jsonStatus.className = 'status-bar valid';
+      elements.errorContainer.classList.remove('active');
+      
+      this.lastValidJson = parsed;
+      this.lastAction = 'format';
+    } catch (error) {
+      this.showError(`Cannot format: ${error.message}`);
+    }
+  }
+
+  minifyJson() {
+    const elements = this.elements;
+    const jsonText = elements.jsonInput.value.trim();
+    
+    if (!jsonText) {
+      elements.jsonOutput.textContent = 'Input is empty';
+      return;
+    }
+    
+    try {
+      const parsed = JSON.parse(jsonText);
+      elements.jsonOutput.textContent = JSON.stringify(parsed);
+      elements.jsonStatus.textContent = 'JSON minified';
+      elements.jsonStatus.className = 'status-bar valid';
+      elements.errorContainer.classList.remove('active');
+      
+      this.lastValidJson = parsed;
+      this.lastAction = 'minify';
+    } catch (error) {
+      this.showError(`Cannot minify: ${error.message}`);
+    }
+  }
+
+  convertJson() {
+    const elements = this.elements;
+    const jsonText = elements.jsonInput.value.trim();
+    
+    if (!jsonText) {
+      elements.jsonOutput.textContent = 'Input is empty';
+      return;
+    }
+    
+    // Determine output format
+    let format = '';
+    if (elements.formatXml.checked) format = 'xml';
+    else if (elements.formatCsv.checked) format = 'csv';
+    else if (elements.formatYaml.checked) format = 'yaml';
+    else {
+      this.showError('Please select an output format');
+      return;
+    }
+    
+    try {
+      const parsed = JSON.parse(jsonText);
+      const prettyPrint = elements.prettyPrint.checked;
+      let output = '';
+      
+      switch (format) {
+        case 'xml':
+          output = this.jsonToXml(parsed, 'root', prettyPrint);
+          break;
+        case 'csv':
+          output = this.jsonToCsv(parsed, prettyPrint);
+          break;
+        case 'yaml':
+          output = this.jsonToYaml(parsed, 0, prettyPrint);
+          break;
+      }
+      
+      elements.jsonOutput.textContent = output;
+      elements.jsonStatus.textContent = `Converted to ${format.toUpperCase()}`;
+      elements.jsonStatus.className = 'status-bar valid';
+      elements.errorContainer.classList.remove('active');
+      
+      this.lastValidJson = parsed;
+      this.lastAction = 'convert';
+    } catch (error) {
+      this.showError(`Cannot convert: ${error.message}`);
+    }
+  }
+
+  // Conversion methods
+  jsonToXml(obj, rootName = 'root', prettyPrint = true) {
+    let xml = '';
+    const EOL = prettyPrint ? '\n' : '';
+    const indent = prettyPrint ? '  ' : ''; // Use prettyPrint setting for indentation
+    
+    function escapeXml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+    
+    function sanitizeTagName(name) {
+      // Clean tag name to be XML-compliant
+      let tag = String(name).replace(/[^a-zA-Z0-9_\.\-]/g, '_');
+      if (tag.match(/^[\d\.\-]/) || !tag) tag = 'item';
+      return tag;
+    }
+    
+    function toXmlRecursive(value, name, depth) {
+      const currentIndent = prettyPrint ? indent.repeat(depth) : '';
+      const tag = sanitizeTagName(name);
+      
+      if (value === null || value === undefined) {
+        xml += currentIndent + `<${tag}${prettyPrint ? ' xsi:nil="true"' : ''}/>` + EOL;
+      } else if (typeof value === 'object' && value !== null) {
+        if (Array.isArray(value)) {
+          if (value.length === 0) {
+            xml += currentIndent + `<${tag}/>` + EOL;
+          } else {
+            xml += currentIndent + `<${tag}>` + EOL;
+            value.forEach((item, index) => {
+              const itemTag = tag.endsWith('s') && tag.length > 1 ? tag.slice(0, -1) : 'item';
+              toXmlRecursive(item, prettyPrint ? `${itemTag}_${index + 1}` : itemTag, depth + 1);
+            });
+            xml += currentIndent + `</${tag}>` + EOL;
+          }
+        } else {
+          const keys = Object.keys(value);
+          if (keys.length === 0) {
+            xml += currentIndent + `<${tag}/>` + EOL;
+          } else {
+            xml += currentIndent + `<${tag}>` + EOL;
+            keys.forEach(key => {
+              toXmlRecursive(value[key], key, depth + 1);
+            });
+            xml += currentIndent + `</${tag}>` + EOL;
+          }
+        }
+      } else {
+        const escaped = escapeXml(value);
+        const typeAttr = prettyPrint ? ` type="${typeof value}"` : '';
+        xml += currentIndent + `<${tag}${typeAttr}>${escaped}</${tag}>` + EOL;
+      }
+    }
+    
+    // Add XML declaration and root element
+    const xmlDeclaration = prettyPrint ? '<?xml version="1.0" encoding="UTF-8"?>' + EOL : '';
+    const xmlNamespace = prettyPrint ? `<${rootName} xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">` : `<${rootName}>`;
+    
+    if (Array.isArray(obj)) {
+      xml += xmlNamespace + EOL;
+      obj.forEach((item, index) => {
+        toXmlRecursive(item, prettyPrint ? `item_${index + 1}` : 'item', 1);
+      });
+      xml += `</${rootName}>` + EOL;
+    } else {
+      toXmlRecursive(obj, rootName, 0);
+    }
+    
+    return xmlDeclaration + (Array.isArray(obj) ? xml : xml.trim());
+  }
+
+  jsonToCsv(obj, prettyPrint = true) {
+    if (obj === null || obj === undefined) {
+      return 'Input is null or undefined';
+    }
+    
+    const array = Array.isArray(obj) ? obj : [obj];
+    if (array.length === 0 || !array.every(item => typeof item === 'object' && item !== null)) {
+      return 'CSV conversion works best with an array of objects';
+    }
+    
+    // Get all unique keys
+    const allKeys = new Set();
+    array.forEach(item => Object.keys(item).forEach(key => allKeys.add(key)));
+    const headers = Array.from(allKeys);
+    
+    // Create CSV with optional spacing for pretty print
+    const separator = prettyPrint ? ', ' : ',';
+    const lineEnding = prettyPrint ? '\n' : '\n';
+    
+    let csv = headers.map(header => `"${String(header).replace(/"/g, '""')}"`).join(separator) + lineEnding;
+    
+    array.forEach(row => {
+      csv += headers.map(header => {
+        let cell = row[header];
+        if (cell === null || cell === undefined) return '""';
+        if (typeof cell === 'object') cell = JSON.stringify(cell);
+        return `"${String(cell).replace(/"/g, '""')}"`;
+      }).join(separator) + lineEnding;
+    });
+    
+    return csv.trim();
+  }
+
+  jsonToYaml(obj, indentLevel = 0, prettyPrint = true) {
+    const indent = prettyPrint ? '  ' : '';
+    const lineBreak = prettyPrint ? '\n' : ' ';
+    
+    const convertValue = (value, currentIndentLevel) => {
+      if (value === null) return 'null';
+      
+      if (typeof value === 'string') {
+        if (prettyPrint && value.includes('\n')) {
+          return '|-\n' + value.split('\n').map(line => 
+            indent.repeat(currentIndentLevel + 1) + line
+          ).join('\n');
+        }
+        if (value.includes(': ') || value.includes('#') || 
+            ['- ', 'true', 'false', 'null', 'yes', 'no', 'on', 'off'].includes(value.toLowerCase()) ||
+            value.match(/^\d+$|^\d*\.\d+$|^[-+]\d/)) {
+          if (value.includes("'")) {
+            return `"${value.replace(/"/g, '\\"')}"`;
+          }
+          return `'${value}'`;
+        }
+        return value;
+      }
+      
+      if (typeof value === 'boolean' || typeof value === 'number') {
+        return String(value);
+      }
+      
+      if (Array.isArray(value)) {
+        if (value.length === 0) return '[]';
+        
+        if (!prettyPrint) {
+          return '[' + value.map(item => convertValue(item, 0)).join(', ') + ']';
+        }
+        
+        let arrYaml = '\n';
+        value.forEach((item, index) => {
+          let itemYaml = convertValue(item, currentIndentLevel + 1);
+          const prefix = indent.repeat(currentIndentLevel) + '- ';
+          if (itemYaml.startsWith('\n')) itemYaml = itemYaml.substring(1);
+          arrYaml += prefix + itemYaml.split('\n').map((line, i) => 
+            i === 0 ? line : indent.repeat(currentIndentLevel + 1) + line
+          ).join('\n') + (index < value.length - 1 ? '\n' : '');
+        });
+        return arrYaml;
+      }
+      
+      if (typeof value === 'object') {
+        if (Object.keys(value).length === 0) return '{}';
+        
+        if (!prettyPrint) {
+          return '{' + Object.keys(value).map(key => 
+            `${key}: ${convertValue(value[key], 0)}`
+          ).join(', ') + '}';
+        }
+        
+        let objYaml = '\n';
+        Object.keys(value).forEach((key, index, arr) => {
+          const valStr = convertValue(value[key], currentIndentLevel + 1);
+          objYaml += indent.repeat(currentIndentLevel) + String(key) + ': ' + 
+                    (valStr.startsWith('\n') ? valStr.substring(1) : valStr) + 
+                    (index < arr.length - 1 ? '\n' : '');
+        });
+        return objYaml;
+      }
+      
+      return String(value);
+    };
+    
+    const yaml = convertValue(obj, indentLevel);
+    return yaml.startsWith('\n') ? yaml.substring(1) : yaml;
+  }
+}
+
+// Export in the pattern expected by the existing router
+export function initTool() {
+  const tool = new JsonFormatterTool({
+    id: 'json-formatter',
+    name: 'JSON Formatter'
+  });
+  
+  return tool.init();
+} 

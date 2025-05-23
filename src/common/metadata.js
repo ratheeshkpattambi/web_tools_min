@@ -174,6 +174,23 @@ export const tools = {
       'Copy the cleaned text to your clipboard'
     ],
     useCase: 'Clean up text by removing unnecessary spaces, making it ready for use in documents, code, or other applications.'
+  },
+  'text/json-formatter': {
+    id: 'json-formatter',
+    category: 'text',
+    name: 'JSON Formatter & Converter',
+    description: 'Validate, format, minify, and convert JSON to XML, CSV, or YAML. All processing happens in your browser, no uploads required.',
+    icon: '⚙️', // Using a gear icon, can be changed
+    keywords: ['json formatter', 'json validator', 'json beautifier', 'json minifier', 'json to xml', 'json to csv', 'json to yaml', 'text tools', 'developer tools'],
+    howToUse: [
+      'Paste your JSON data into the input area or click "Upload Data" to load from a file.',
+      'Click "Validate" to check if the JSON is well-formed.',
+      'Select tab spacing and click "Format / Beautify" for readable JSON.',
+      'Click "Minify / Compact" to get a compact version.',
+      'Choose a target format (XML, CSV, YAML) and click "Convert".',
+      'Click "Download" to save the output.'
+    ],
+    useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.'
   }
 };
 

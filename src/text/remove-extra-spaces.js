@@ -14,12 +14,12 @@ export const template = `
       <button type="button" id="removeSpacesBtn" class="file-select-btn">Remove Extra Spaces</button>
     </div>
 
-    <div class="form-group mt-3">
+    <div class="form-group">
       <label for="outputText" style="font-weight: bold; font-size: 1.2em;">Output Text</label>
       <textarea id="outputText" class="form-control text-editor" rows="10" readonly placeholder="Cleaned text will appear here..."></textarea>
     </div>
 
-    <div class="text-center mt-3">
+    <div class="text-center">
       <button id="copyToClipboardBtn" class="btn btn-secondary mr-2" disabled>Copy To Clipboard</button>
       <button id="downloadBtn" class="btn btn-secondary" disabled>Download Text</button>
     </div>
