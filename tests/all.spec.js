@@ -11,6 +11,12 @@ test.describe('SafeWebTool Tests', () => {
     await expect(page.locator('header h1')).toContainText('SafeWebTool');
     await expect(page.locator('nav a[href="/"]')).toBeVisible();
   });
+
+  test('home alias route works', async ({ page }) => {
+    await page.goto('/home');
+    await expect(page.locator('.tool-container h1')).toContainText('Welcome');
+    await expect(page.locator('nav a[href="/"]')).toHaveClass(/active/);
+  });
   
   // Test dynamic tool loading across all categories
   test('dynamic tool loading across all categories', async ({ page }) => {
