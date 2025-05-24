@@ -44,7 +44,7 @@ export class Tool {
   async init() {
     if (this.initialized) return this;
     
-    // Show logs panel
+    // Initialize logs panel (sets collapsed state and toggle functionality)
     showLogs();
     
     // Get elements from DOM
@@ -90,23 +90,6 @@ export class Tool {
           this.processFile(this.inputFile);
         } else if (!this.inputFile) {
           this.log('Please select a file first', 'error');
-        }
-      });
-    }
-    
-    // Set up log toggle
-    const logHeader = document.getElementById('logHeader');
-    const logContent = document.getElementById('logContent');
-    const logToggle = document.getElementById('logToggle');
-    
-    if (logHeader && logContent && logToggle) {
-      logHeader.addEventListener('click', () => {
-        if (logContent.style.display === 'none') {
-          logContent.style.display = 'block';
-          logToggle.textContent = '▼';
-        } else {
-          logContent.style.display = 'none';
-          logToggle.textContent = '▶';
         }
       });
     }

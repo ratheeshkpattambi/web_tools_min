@@ -28,9 +28,14 @@ export const template = `
       <div id="videoInfoContainer" class="info-container"></div>
       
       <div id="downloadContainer" class="mt-4 hidden">
-        <button id="downloadMetadataBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
-          📄 Download Metadata as JSON
-        </button>
+        <div class="flex gap-2 flex-wrap">
+          <button id="downloadMetadataBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
+            📄 Download Metadata as JSON
+          </button>
+          <button id="resetBtn" class="px-6 py-2 bg-red-600 dark:bg-red-500 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-600 transition-colors text-sm font-medium">
+            🔄 Reset
+          </button>
+        </div>
       </div>
 
       <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
@@ -65,6 +70,7 @@ class VideoInfoTool extends Tool {
       progress: 'videoProgress',
       downloadContainer: 'downloadContainer',
       downloadMetadataBtn: 'downloadMetadataBtn',
+      resetBtn: 'resetBtn',
       logHeader: 'logHeader',
       logContent: 'logContent'
     };
@@ -84,6 +90,13 @@ class VideoInfoTool extends Tool {
     if (this.elements.downloadMetadataBtn) {
       this.elements.downloadMetadataBtn.addEventListener('click', () => {
         this.downloadMetadata();
+      });
+    }
+
+    // Add reset button handler
+    if (this.elements.resetBtn) {
+      this.elements.resetBtn.addEventListener('click', () => {
+        this.resetTool();
       });
     }
   }
@@ -366,6 +379,78 @@ class VideoInfoTool extends Tool {
     } catch (error) {
       this.log(`Error downloading metadata: ${error.message}`, 'error');
       console.error('Download error:', error);
+    }
+  }
+
+  resetTool() {
+    // Show confirmation dialog
+    const confirmed = confirm(
+      'Are you sure you want to reset? This will clear all video information and you will need to select a new video file.'
+    );
+
+    if (!confirmed) {
+      this.log('Reset cancelled by user', 'info');
+      return;
+    }
+
+    try {
+      // Reset video preview
+      if (this.elements.inputVideo) {
+        this.elements.inputVideo.style.display = 'none';
+        this.elements.inputVideo.src = '';
+      }
+
+      // Clear info container
+      if (this.elements.infoContainer) {
+        this.elements.infoContainer.innerHTML = '';
+        this.elements.infoContainer.style.display = 'none';
+      }
+
+      // Hide download container
+      if (this.elements.downloadContainer) {
+        this.elements.downloadContainer.classList.add('hidden');
+      }
+
+      // Hide progress bar
+      this.hideProgress();
+
+      // Clear file input
+      if (this.elements.fileInput) {
+        this.elements.fileInput.value = '';
+      }
+
+      // Ensure drop zone is visible and properly styled
+      if (this.elements.dropZone) {
+        this.elements.dropZone.style.display = 'flex';
+        this.elements.dropZone.classList.remove('hidden');
+      }
+
+      // Reset internal state
+      this.inputFile = null;
+      this.metadata = null;
+      this.ffmpeg = null;
+      this.isProcessing = false;
+
+      // Clear logs
+      if (this.elements.logContent) {
+        this.elements.logContent.value = '';
+      }
+
+      // Scroll to top to show the drop zone
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      this.log('Tool reset successfully. Please select a new video file.', 'success');
+      
+      // Add a brief visual highlight to the drop zone to show it's ready
+      if (this.elements.dropZone) {
+        this.elements.dropZone.classList.add('border-green-500');
+        setTimeout(() => {
+          this.elements.dropZone.classList.remove('border-green-500');
+        }, 2000);
+      }
+    } catch (error) {
+      this.log(`Error during reset: ${error.message}`, 'error');
+      console.error('Reset error:', error);
     }
   }
 }

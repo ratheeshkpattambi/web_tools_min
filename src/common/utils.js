@@ -18,13 +18,18 @@ export function showLogs() {
   const logToggle = document.getElementById('logToggle');
 
   if (logHeader && logContent && logToggle) {
-    // Set initial state
-    logContent.classList.remove('active');
-    logToggle.textContent = '▼';
+    // Set initial collapsed state
+    logContent.style.display = 'none';
+    logToggle.textContent = '▶';
 
     logHeader.addEventListener('click', () => {
-      logContent.classList.toggle('active');
-      logToggle.textContent = logContent.classList.contains('active') ? '▲' : '▼';
+      if (logContent.style.display === 'none') {
+        logContent.style.display = 'block';
+        logToggle.textContent = '▼';
+      } else {
+        logContent.style.display = 'none';
+        logToggle.textContent = '▶';
+      }
     });
   }
 }
