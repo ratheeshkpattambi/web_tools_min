@@ -249,11 +249,11 @@ export class Tool {
     if (container) {
       // Create file info div
       const fileInfoDiv = document.createElement('div');
-      fileInfoDiv.className = 'mt-4 p-3 bg-slate-100 rounded-md text-sm'; // Tailwind classes
+      fileInfoDiv.className = 'mt-4 p-3 bg-slate-100 rounded-md text-sm dark:bg-slate-800 '; // Tailwind classes
       fileInfoDiv.innerHTML = `
-        <p class="text-slate-700"><strong>Filename:</strong> <span class="font-normal text-slate-600">${filename}</span></p>
-        <p class="text-slate-700"><strong>Size:</strong> <span class="font-normal text-slate-600">${formatFileSize(blob.size)}</span></p>
-        <p class="text-slate-700"><strong>Type:</strong> <span class="font-normal text-slate-600">${blob.type}</span></p>
+        <p class="text-slate-700 dark:text-slate-300"><strong>Filename:</strong> <span class="font-normal text-slate-600 dark:text-slate-200">${filename}</span></p>
+        <p class="text-slate-700 dark:text-slate-300"><strong>Size:</strong> <span class="font-normal text-slate-600 dark:text-slate-200">${formatFileSize(blob.size)}</span></p>
+        <p class="text-slate-700 dark:text-slate-300"><strong>Type:</strong> <span class="font-normal text-slate-600 dark:text-slate-200">${blob.type}</span></p>
       `;
       
       // Create download button

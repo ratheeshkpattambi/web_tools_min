@@ -115,12 +115,37 @@ export async function loadFFmpeg() {
       console.warn('Prefetch failed, continuing with normal loading', e);
     }
     
-    // Load from CDN - this is the only working solution, do not change
-    await ffmpeg.load({
-      coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-      wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-      workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
-    });
+    // Load from CDN
+    addLog('Loading FFmpeg from unpkg CDN...', 'info');
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    
+    try {
+      await ffmpeg.load({
+        coreURL: `${baseURL}/ffmpeg-core.js`,
+        wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+        // workerURL: `${baseURL}/ffmpeg-core.worker.js` // Omit initially, FFmpeg might find it or not need it with unpkg
+      });
+      addLog('FFmpeg loaded successfully from unpkg!', 'success');
+    } catch (unpkgError) {
+      addLog(`Failed to load FFmpeg from unpkg: ${unpkgError.message}. Attempting jsDelivr as fallback...`, 'error');
+      console.error('unpkg load failed:', unpkgError);
+      // Fallback to jsDelivr if unpkg fails, but try to find a working worker URL or omit if not strictly needed
+      try {
+        addLog('Attempting to load FFmpeg from jsDelivr (fallback)...', 'info');
+        await ffmpeg.load({
+          coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+          wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+          // workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js' // This was 404ing
+          // If FFmpeg 0.12.6 still requires a worker explicitly and jsDelivr's is 404, this will also fail.
+          // We might need to verify if a worker is needed for this version or find an alternative worker URL.
+        });
+        addLog('FFmpeg loaded successfully from jsDelivr (fallback)!', 'success');
+      } catch (jsdelivrError) {
+        addLog(`Failed to load FFmpeg from jsDelivr as well: ${jsdelivrError.message}`, 'error');
+        console.error('jsDelivr fallback load failed:', jsdelivrError);
+        throw new Error(`Failed to load FFmpeg from all sources: unpkg -> ${unpkgError.message}, jsDelivr -> ${jsdelivrError.message}`);
+      }
+    }
     
     updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
     addLog('FFmpeg loaded successfully!', 'success');
@@ -158,19 +183,27 @@ function updateLoadingIndicator(percent, message, isError = false) {
  * Prefetch FFmpeg resources to improve loading performance
  */
 function prefetchFFmpegResources() {
-  const resources = [
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
+  const unpkgBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+  const resourcesToPrefetch = [
+    { url: `${unpkgBaseURL}/ffmpeg-core.js`, as: 'script' },
+    { url: `${unpkgBaseURL}/ffmpeg-core.wasm`, as: 'fetch' },
+    // { url: `${unpkgBaseURL}/ffmpeg-core.worker.js`, as: 'script' } // unpkg might not have/need this explicitly for v0.12.6
   ];
   
-  resources.forEach(url => {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.href = url;
-    link.as = url.endsWith('.wasm') ? 'fetch' : 'script';
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
+  addLog('Prefetching FFmpeg resources from unpkg...', 'info');
+  resourcesToPrefetch.forEach(resource => {
+    try {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = resource.url;
+      link.as = resource.as;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+      addLog(`Prefetch initiated for: ${resource.url}`, 'info');
+    } catch (error) {
+      // Silently ignore prefetch errors, as this is an optimization
+      console.warn(`Prefetch failed for: ${resource.url}`, error);
+    }
   });
 }
 
@@ -229,4 +262,57 @@ export async function executeFFmpeg(ffmpeg, args) {
  */
 export function getFFmpeg() {
   return ffmpeg;
+}
+
+/**
+ * Clean up FFmpeg virtual filesystem.
+ * Removes files to prevent memory issues or conflicts between operations.
+ * @param {Object} ffmpegInstance - The FFmpeg instance to clean up.
+ */
+export async function cleanupFFmpeg(ffmpegInstance) {
+  if (!ffmpegInstance) {
+    addLog('cleanupFFmpeg: No FFmpeg instance provided.', 'warn');
+    return;
+  }
+
+  if (typeof ffmpegInstance.listDir !== 'function' || typeof ffmpegInstance.deleteFile !== 'function') {
+    addLog('cleanupFFmpeg: Provided instance does not appear to be a valid FFmpeg object with listDir/deleteFile.', 'error');
+    return;
+  }
+
+  addLog('Cleaning up FFmpeg virtual filesystem...', 'info');
+  try {
+    const files = await ffmpegInstance.listDir('/');
+    if (files.length === 0) {
+      addLog('FFmpeg virtual filesystem is already empty.', 'info');
+      return;
+    }
+
+    for (const file of files) {
+      if (file.isFile) {
+        try {
+          await ffmpegInstance.deleteFile(file.name);
+          addLog(`Deleted file: ${file.name}`, 'info');
+        } catch (deleteError) {
+          addLog(`Could not delete file ${file.name} during cleanup: ${deleteError.message}`, 'warn');
+        }
+      }
+    }
+    addLog('FFmpeg filesystem cleanup complete.', 'success');
+  } catch (error) {
+    addLog(`Error during FFmpeg filesystem cleanup: ${error.message}`, 'error');
+    const commonFiles = [
+      'input.mp4', 'output.mp4', 'input.mov', 'output.mov',
+      'input.webm', 'output.webm', 'palette.png', 'output.gif'
+    ];
+    addLog('Attempting fallback cleanup for common files...', 'info');
+    for (const fileName of commonFiles) {
+      try {
+        await ffmpegInstance.deleteFile(fileName);
+        addLog(`Fallback: Deleted ${fileName}`, 'info');
+      } catch (fallbackDeleteError) {
+        // Silently ignore
+      }
+    }
+  }
 } 

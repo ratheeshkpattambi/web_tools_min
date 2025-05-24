@@ -2,7 +2,7 @@
  * Video re-encode module using FFmpeg WASM
  */
 import { Tool } from '../common/base.js';
-import { formatFileSize } from '../common/utils.js';
+import { formatFileSize, resetTool } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
 // Video reencode tool template
@@ -42,6 +42,7 @@ export const template = `
           <input type="number" id="bitrate" value="2000" min="500" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
         </div>
         <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-3" disabled>Re-encode Video</button>
+        <button id="resetBtn" class="w-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors md:col-span-3">🔄 Reset</button>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden transition-colors" style="display: none;">
@@ -86,6 +87,7 @@ class VideoReencodeTool extends Tool {
       inputVideo: 'input-video',
       outputVideo: 'output-video',
       processBtn: 'processBtn',
+      resetBtn: 'resetBtn',
       format: 'format',
       quality: 'quality',
       bitrate: 'bitrate',
@@ -117,6 +119,13 @@ class VideoReencodeTool extends Tool {
         <input type="file" id="fileInput" class="hidden" accept="video/*">
         <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
       `;
+    }
+
+    // Add reset button handler
+    if (this.elements.resetBtn) {
+      this.elements.resetBtn.addEventListener('click', () => {
+        this.resetTool();
+      });
     }
   }
   
@@ -215,6 +224,24 @@ class VideoReencodeTool extends Tool {
       console.error('Processing error:', error);
       this.endProcessing(false);
     }
+  }
+
+  resetTool() {
+    return resetTool({
+      elements: this.elements,
+      defaultValues: {
+        format: 'mp4',
+        quality: 'medium',
+        bitrate: '2000'
+      },
+      internalState: {
+        instance: this,
+        defaults: {
+          ffmpeg: null,
+          outputContainer: null
+        }
+      }
+    });
   }
 }
 

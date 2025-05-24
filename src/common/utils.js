@@ -102,17 +102,52 @@ export function formatFileSize(bytes) {
  * @param {number} percentage - The progress percentage (0-100)
  */
 export function updateProgress(percentage) {
-  const progress = document.querySelector('.progress');
-  if (!progress) return;
-
-  const progressFill = progress.querySelector('.progress-fill');
-  const progressText = progress.querySelector('.progress-text');
-  
-  if (progressFill) {
-    progressFill.style.width = `${percentage}%`;
+  // Handle old-style progress bars (info.js)
+  const oldProgress = document.querySelector('.progress');
+  if (oldProgress) {
+    const progressFill = oldProgress.querySelector('.progress-fill');
+    const progressText = oldProgress.querySelector('.progress-text');
+    
+    if (progressFill) {
+      progressFill.style.width = `${percentage}%`;
+    }
+    if (progressText) {
+      progressText.textContent = `${percentage}%`;
+    }
   }
-  if (progressText) {
-    progressText.textContent = `${percentage}%`;
+
+  // Handle new Tailwind-style progress bars (other video tools)
+  const newProgress = document.getElementById('progress');
+  if (newProgress) {
+    newProgress.style.display = 'block';
+    
+    // Find the progress fill div (first child with bg-blue class)
+    const progressFill = newProgress.querySelector('.bg-blue-600, .bg-blue-500');
+    if (progressFill) {
+      progressFill.style.width = `${percentage}%`;
+    }
+    
+    // Find and update the text element
+    const progressText = newProgress.querySelector('.text-center');
+    if (progressText) {
+      progressText.textContent = `${Math.round(percentage)}%`;
+    }
+  }
+
+  // Also handle specific video progress element
+  const videoProgress = document.getElementById('videoProgress');
+  if (videoProgress) {
+    videoProgress.style.display = 'block';
+    
+    const progressFill = videoProgress.querySelector('.progress-fill');
+    const progressText = videoProgress.querySelector('.progress-text');
+    
+    if (progressFill) {
+      progressFill.style.width = `${percentage}%`;
+    }
+    if (progressText) {
+      progressText.textContent = `${Math.round(percentage)}%`;
+    }
   }
 }
 
@@ -207,15 +242,159 @@ export function createDownloadLink(container, url, filename, text) {
 }
 
 /**
- * Escape HTML special characters in a string
- * @param {string} text - The text to escape
- * @returns {string} - The escaped text
+ * HTML escape function to prevent XSS
  */
 export function escapeHtml(text) {
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * Common reset tool functionality
+ * @param {Object} options - Configuration options for reset
+ * @param {Object} options.elements - Tool elements map
+ * @param {Object} options.defaultValues - Default values for form inputs
+ * @param {Object} options.internalState - Internal state variables to reset
+ * @param {Function} options.customReset - Optional custom reset function
+ * @param {string} options.confirmMessage - Custom confirmation message
+ */
+export function resetTool({
+  elements = {},
+  defaultValues = {},
+  internalState = {},
+  customReset = null,
+  confirmMessage = 'Are you sure you want to reset the tool? This will clear all inputs and outputs.'
+}) {
+  // Show confirmation dialog
+  if (!confirm(confirmMessage)) {
+    return false;
+  }
+  
+  // Clear input video/media
+  if (elements.inputVideo) {
+    elements.inputVideo.src = '';
+    elements.inputVideo.style.display = 'none';
+  }
+  
+  // Clear output video/media
+  if (elements.outputVideo) {
+    elements.outputVideo.src = '';
+    elements.outputVideo.style.display = 'none';
+  }
+  
+  // Clear output gif
+  if (elements.outputGif) {
+    elements.outputGif.src = '';
+    elements.outputGif.style.display = 'none';
+  }
+  
+  // Clear file input
+  if (elements.fileInput) {
+    elements.fileInput.value = '';
+  }
+  
+  // Reset form inputs to default values
+  Object.keys(defaultValues).forEach(key => {
+    const element = elements[key];
+    const defaultValue = defaultValues[key];
+    
+    if (element) {
+      if (element.type === 'checkbox') {
+        element.checked = defaultValue;
+      } else {
+        element.value = defaultValue;
+      }
+      
+      // Disable certain inputs if specified
+      if (defaultValue === null || defaultValue === undefined) {
+        element.disabled = true;
+      }
+    }
+  });
+  
+  // Disable process button
+  if (elements.processBtn) {
+    elements.processBtn.disabled = true;
+  }
+  
+  // Clear download container
+  if (elements.downloadContainer) {
+    elements.downloadContainer.innerHTML = '';
+  }
+  
+  // Hide output containers
+  ['outputContainer', 'infoContainer'].forEach(containerId => {
+    const container = elements[containerId] || document.getElementById(containerId);
+    if (container) {
+      container.style.display = 'none';
+      if (container.classList) {
+        container.classList.add('hidden');
+      }
+    }
+  });
+  
+  // Hide and reset progress bars
+  ['progress', 'videoProgress'].forEach(progressId => {
+    const progress = elements[progressId] || document.getElementById(progressId);
+    if (progress) {
+      progress.style.display = 'none';
+      
+      // Reset progress fill
+      const progressFill = progress.querySelector('div');
+      if (progressFill) {
+        progressFill.style.width = '0%';
+      }
+      
+      // Reset progress text
+      const progressText = progress.querySelector('.text-center, .progress-text, div:last-child');
+      if (progressText) {
+        progressText.textContent = '0%';
+      }
+    }
+  });
+  
+  // Clear logs
+  const logContent = elements.logContent || document.getElementById('logContent');
+  if (logContent) {
+    logContent.value = '';
+  }
+  
+  // Reset internal state variables
+  const resetInstance = internalState.instance;
+  if (resetInstance) {
+    Object.keys(internalState.defaults).forEach(key => {
+      resetInstance[key] = internalState.defaults[key];
+    });
+  }
+  
+  // Run custom reset logic if provided
+  if (customReset && typeof customReset === 'function') {
+    customReset();
+  }
+  
+  // Add visual feedback to drop zone
+  const dropZone = elements.dropZone;
+  if (dropZone) {
+    dropZone.style.border = '2px solid #10b981';
+    dropZone.style.display = 'flex';
+    dropZone.classList.remove('hidden');
+    
+    setTimeout(() => {
+      dropZone.style.border = '';
+    }, 1000);
+  }
+  
+  // Log reset action
+  addLog('Tool reset successfully', 'success');
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  return true;
 }

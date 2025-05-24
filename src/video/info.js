@@ -3,7 +3,7 @@
  */
 import { Tool } from '../common/base.js';
 import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
-import { formatFileSize, escapeHtml } from '../common/utils.js';
+import { formatFileSize, escapeHtml, resetTool } from '../common/utils.js';
 
 // Video info tool template
 export const template = `
@@ -29,10 +29,10 @@ export const template = `
       
       <div id="downloadContainer" class="mt-4 hidden">
         <div class="flex gap-2 flex-wrap">
-          <button id="downloadMetadataBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
-            📄 Download Metadata as JSON
+          <button id="downloadMetadataBtn" class="flex-1 min-w-0 px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
+            📄 Download Metadata
           </button>
-          <button id="resetBtn" class="px-6 py-2 bg-red-600 dark:bg-red-500 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-600 transition-colors text-sm font-medium">
+          <button id="resetBtn" class="flex-1 min-w-0 px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-600 transition-colors text-sm font-medium">
             🔄 Reset
           </button>
         </div>
@@ -383,75 +383,46 @@ class VideoInfoTool extends Tool {
   }
 
   resetTool() {
-    // Show confirmation dialog
-    const confirmed = confirm(
-      'Are you sure you want to reset? This will clear all video information and you will need to select a new video file.'
-    );
+    return resetTool({
+      elements: {
+        ...this.elements,
+        downloadContainer: null // Exclude download container from common reset
+      },
+      defaultValues: {},
+      internalState: {
+        instance: this,
+        defaults: {
+          inputFile: null,
+          metadata: null,
+          ffmpeg: null,
+          isProcessing: false
+        }
+      },
+      confirmMessage: 'Are you sure you want to reset? This will clear all video information and you will need to select a new video file.',
+      customReset: () => {
+        // Clear info container specifically
+        if (this.elements.infoContainer) {
+          this.elements.infoContainer.innerHTML = '';
+          this.elements.infoContainer.style.display = 'none';
+        }
 
-    if (!confirmed) {
-      this.log('Reset cancelled by user', 'info');
-      return;
-    }
+        // Hide download container (but don't clear its innerHTML since it contains the buttons)
+        if (this.elements.downloadContainer) {
+          this.elements.downloadContainer.classList.add('hidden');
+        }
 
-    try {
-      // Reset video preview
-      if (this.elements.inputVideo) {
-        this.elements.inputVideo.style.display = 'none';
-        this.elements.inputVideo.src = '';
+        // Hide progress bar
+        this.hideProgress();
+
+        // Add a brief visual highlight to the drop zone to show it's ready
+        if (this.elements.dropZone) {
+          this.elements.dropZone.classList.add('border-green-500');
+          setTimeout(() => {
+            this.elements.dropZone.classList.remove('border-green-500');
+          }, 2000);
+        }
       }
-
-      // Clear info container
-      if (this.elements.infoContainer) {
-        this.elements.infoContainer.innerHTML = '';
-        this.elements.infoContainer.style.display = 'none';
-      }
-
-      // Hide download container
-      if (this.elements.downloadContainer) {
-        this.elements.downloadContainer.classList.add('hidden');
-      }
-
-      // Hide progress bar
-      this.hideProgress();
-
-      // Clear file input
-      if (this.elements.fileInput) {
-        this.elements.fileInput.value = '';
-      }
-
-      // Ensure drop zone is visible and properly styled
-      if (this.elements.dropZone) {
-        this.elements.dropZone.style.display = 'flex';
-        this.elements.dropZone.classList.remove('hidden');
-      }
-
-      // Reset internal state
-      this.inputFile = null;
-      this.metadata = null;
-      this.ffmpeg = null;
-      this.isProcessing = false;
-
-      // Clear logs
-      if (this.elements.logContent) {
-        this.elements.logContent.value = '';
-      }
-
-      // Scroll to top to show the drop zone
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      this.log('Tool reset successfully. Please select a new video file.', 'success');
-      
-      // Add a brief visual highlight to the drop zone to show it's ready
-      if (this.elements.dropZone) {
-        this.elements.dropZone.classList.add('border-green-500');
-        setTimeout(() => {
-          this.elements.dropZone.classList.remove('border-green-500');
-        }, 2000);
-      }
-    } catch (error) {
-      this.log(`Error during reset: ${error.message}`, 'error');
-      console.error('Reset error:', error);
-    }
+    });
   }
 }
 

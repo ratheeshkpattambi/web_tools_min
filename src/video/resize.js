@@ -2,8 +2,8 @@
  * Video resizing module using FFmpeg WASM
  */
 import { Tool } from '../common/base.js';
-import { formatFileSize } from '../common/utils.js';
-import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import { formatFileSize, resetTool } from '../common/utils.js';
+import { loadFFmpeg, getFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension, cleanupFFmpeg } from './ffmpeg-utils.js';
 
 // Video resize tool template
 export const template = `
@@ -20,7 +20,7 @@ export const template = `
         <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
       </div>
       
-      <div class="my-4 grid gap-4 md:grid-cols-2">
+      <div class="my-4 grid gap-4 md:grid-cols-2 mb-6 relative">
         <div class="flex flex-col gap-2">
           <label for="width" class="font-medium text-slate-700 dark:text-slate-300">Width:</label>
           <input type="number" id="width" placeholder="Width" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
@@ -33,15 +33,21 @@ export const template = `
           <input type="checkbox" id="keepRatio" checked class="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700">
           <label for="keepRatio" class="text-sm text-slate-700 dark:text-slate-300">Keep Aspect Ratio</label>
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-2" disabled>Resize Video</button>
+        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Resize Video</button>
+        <button id="resetBtn" class="w-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors">🔄 Reset</button>
       </div>
 
-      <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden transition-colors" style="display: none;">
-        <div class="h-5 bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300 ease-in-out" style="width: 0%;"></div>
-        <div class="text-center text-xs font-medium text-slate-700 dark:text-slate-300 -mt-4 leading-5">0%</div>
+      <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 overflow-hidden transition-colors" style="display: none;">
+        <div class="h-2 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 transition-all duration-500 ease-out relative" style="width: 0%;">
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+        </div>
+        <div class="flex justify-between items-center mt-2 text-sm">
+          <span id="progressText" class="font-medium text-slate-700 dark:text-slate-300 pl-4">0%</span>
+          <span id="progressStatus" class="text-slate-500 dark:text-slate-400 text-right pr-4"></span>
+        </div>
       </div>
 
-      <div id="outputContainer" class="output-container">
+      <div id="outputContainer" class="output-container bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg p-4 mt-4" style="display: none;">
         <div class="video-wrapper">
           <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
         </div>
@@ -64,13 +70,14 @@ class VideoResizeTool extends Tool {
       needsFileUpload: true,
       hasOutput: true,
       needsProcessButton: true,
-      template // Use the local template
+      template
     });
     
     this.ffmpeg = null;
     this.videoAspectRatio = 1;
     this.originalWidth = 0;
     this.originalHeight = 0;
+    this.previewTimeout = null;
   }
 
   getElementsMap() {
@@ -79,7 +86,9 @@ class VideoResizeTool extends Tool {
       fileInput: 'fileInput',
       inputVideo: 'input-video',
       outputVideo: 'output-video',
+      outputContainer: 'outputContainer',
       processBtn: 'processBtn',
+      resetBtn: 'resetBtn',
       width: 'width',
       height: 'height',
       keepRatio: 'keepRatio',
@@ -91,49 +100,60 @@ class VideoResizeTool extends Tool {
   }
 
   async setup() {
-    // Disable inputs until video is loaded
-    if (this.elements.width) this.elements.width.disabled = true;
-    if (this.elements.height) this.elements.height.disabled = true;
-    if (this.elements.keepRatio) this.elements.keepRatio.checked = true;
-    if (this.elements.processBtn) this.elements.processBtn.disabled = true;
-
+    this.disableInputs();
     this.initFileUpload({
       acceptTypes: 'video/*',
       onFileSelected: (file) => {
         this.displayPreview(file, 'inputVideo');
         this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
-        
-        // Get video dimensions when metadata is loaded
-        if (this.elements.inputVideo) {
-          this.elements.inputVideo.onloadedmetadata = () => {
-            this.originalWidth = this.elements.inputVideo.videoWidth;
-            this.originalHeight = this.elements.inputVideo.videoHeight;
-            this.videoAspectRatio = this.originalWidth / this.originalHeight;
-            
-            // Enable inputs and set initial values
-            this.elements.width.disabled = false;
-            this.elements.height.disabled = false;
-            this.elements.keepRatio.disabled = false;
-            this.elements.processBtn.disabled = false;
-            
-            // Set initial values to original dimensions
-            this.elements.width.value = this.originalWidth;
-            this.elements.height.value = this.originalHeight;
-            
-            // Set placeholders
-            this.elements.width.placeholder = 'Width';
-            this.elements.height.placeholder = 'Height';
-          };
-        }
+        this.handleVideoMetadata();
       }
     });
 
-    // Handle dimension changes
+    this.setupEventListeners();
+  }
+
+  disableInputs() {
+    if (this.elements.width) this.elements.width.disabled = true;
+    if (this.elements.height) this.elements.height.disabled = true;
+    if (this.elements.keepRatio) this.elements.keepRatio.checked = true;
+    if (this.elements.processBtn) this.elements.processBtn.disabled = true;
+  }
+
+  handleVideoMetadata() {
+    if (this.elements.inputVideo) {
+      this.elements.inputVideo.onloadedmetadata = () => {
+        this.originalWidth = this.elements.inputVideo.videoWidth;
+        this.originalHeight = this.elements.inputVideo.videoHeight;
+        this.videoAspectRatio = this.originalWidth / this.originalHeight;
+        
+        this.enableInputs();
+        this.setInitialValues();
+      };
+    }
+  }
+
+  enableInputs() {
+    this.elements.width.disabled = false;
+    this.elements.height.disabled = false;
+    this.elements.keepRatio.disabled = false;
+    this.elements.processBtn.disabled = false;
+  }
+
+  setInitialValues() {
+    this.elements.width.value = this.originalWidth;
+    this.elements.height.value = this.originalHeight;
+    this.elements.width.placeholder = 'Width';
+    this.elements.height.placeholder = 'Height';
+  }
+
+  setupEventListeners() {
     if (this.elements.width) {
       this.elements.width.addEventListener('input', () => {
         if (this.elements.keepRatio && this.elements.keepRatio.checked) {
           this.updateHeight();
         }
+        this.showDimensionPreview();
       });
     }
     
@@ -142,6 +162,22 @@ class VideoResizeTool extends Tool {
         if (this.elements.keepRatio && this.elements.keepRatio.checked) {
           this.updateWidth();
         }
+        this.showDimensionPreview();
+      });
+    }
+    
+    if (this.elements.processBtn) {
+      this.elements.processBtn.addEventListener('click', () => {
+        this.removeDimensionPreview();
+        if (this.inputFile) {
+          this.processFile(this.inputFile);
+        }
+      });
+    }
+    
+    if (this.elements.resetBtn) {
+      this.elements.resetBtn.addEventListener('click', () => {
+        this.resetTool();
       });
     }
   }
@@ -164,19 +200,150 @@ class VideoResizeTool extends Tool {
     this.elements.width.value = Math.round(height * this.videoAspectRatio);
   }
 
+  makeEven(number) {
+    const num = parseInt(number) || 0;
+    return num % 2 === 0 ? num : num + 1;
+  }
+
+  validateDimensions(width, height) {
+    const adjustedWidth = this.makeEven(width);
+    const adjustedHeight = this.makeEven(height);
+    
+    if (adjustedWidth !== width || adjustedHeight !== height) {
+      this.log(`Adjusted dimensions from ${width}x${height} to ${adjustedWidth}x${adjustedHeight} (H.264 requires even numbers)`, 'info');
+    }
+    
+    return { width: adjustedWidth, height: adjustedHeight };
+  }
+
   calculateDimensions() {
     if (!this.elements.width || !this.elements.height) return { width: 0, height: 0 };
     
-    const width = parseInt(this.elements.width.value) || this.originalWidth;
-    const height = parseInt(this.elements.height.value) || this.originalHeight;
+    const inputWidth = parseInt(this.elements.width.value) || this.originalWidth;
+    const inputHeight = parseInt(this.elements.height.value) || this.originalHeight;
 
-    return { width, height };
+    return this.validateDimensions(inputWidth, inputHeight);
+  }
+
+  showDimensionPreview() {
+    if (!this.elements.width || !this.elements.height) return;
+    
+    if (this.previewTimeout) {
+      clearTimeout(this.previewTimeout);
+    }
+    
+    const inputWidth = parseInt(this.elements.width.value) || 0;
+    const inputHeight = parseInt(this.elements.height.value) || 0;
+    
+    if (inputWidth <= 0 || inputHeight <= 0) {
+      this.removeDimensionPreview();
+      return;
+    }
+    
+    const { width: finalWidth, height: finalHeight } = this.validateDimensions(inputWidth, inputHeight);
+    
+    if (finalWidth !== inputWidth || finalHeight !== inputHeight) {
+      this.previewTimeout = setTimeout(() => {
+        this.createDimensionPreview(inputWidth, inputHeight, finalWidth, finalHeight);
+      }, 500);
+    } else {
+      this.removeDimensionPreview();
+    }
+  }
+
+  createDimensionPreview(inputW, inputH, finalW, finalH) {
+    this.removeDimensionPreview();
+    
+    const preview = document.createElement('div');
+    preview.id = 'dimension-preview';
+    preview.className = 'absolute z-10 mt-1 p-2 bg-blue-50 dark:bg-blue-900/90 border border-blue-200 dark:border-blue-600 rounded-md shadow-lg text-sm text-blue-700 dark:text-blue-200 backdrop-blur-sm';
+    preview.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span>📐</span>
+        <span>Will be adjusted to: <strong>${finalW}×${finalH}</strong></span>
+      </div>
+      <div class="text-xs text-blue-600 dark:text-blue-300 mt-1">H.264 requires even dimensions</div>
+    `;
+    
+    const heightInput = this.elements.height;
+    if (heightInput) {
+      const container = heightInput.closest('.grid') || heightInput.closest('.my-4');
+      if (container) {
+        container.appendChild(preview);
+        
+        preview.style.top = '100%';
+        preview.style.left = '0';
+        preview.style.right = '0';
+      }
+    }
+  }
+
+  removeDimensionPreview() {
+    if (this.previewTimeout) {
+      clearTimeout(this.previewTimeout);
+      this.previewTimeout = null;
+    }
+    
+    const existing = document.getElementById('dimension-preview');
+    if (existing) {
+      existing.remove();
+    }
+  }
+
+  updateProgress(percentage, status = '') {
+    const progressContainer = this.elements.progress;
+    if (progressContainer) {
+      const progressFill = progressContainer.querySelector('div.h-2');
+      if (progressFill) {
+        requestAnimationFrame(() => {
+          progressFill.style.setProperty('width', `${percentage}%`, 'important');
+        });
+      }
+    }
+    
+    const progressText = document.getElementById('progressText');
+    if (progressText) {
+      progressText.textContent = `${percentage}%`;
+    }
+    
+    const progressStatus = document.getElementById('progressStatus');
+    if (progressStatus) {
+      progressStatus.textContent = status;
+    }
+    
+    if (this.elements.progress) {
+      if (percentage > 0 && percentage < 100) {
+        requestAnimationFrame(() => {
+          this.elements.progress.style.display = 'block';
+        });
+      } else if (percentage >= 100) {
+        setTimeout(() => {
+          if (this.elements.progress) {
+            requestAnimationFrame(() => {
+              this.elements.progress.style.display = 'none';
+            });
+          }
+        }, 2000); // Keep the delay for hiding
+      } else if (percentage === 0 && this.elements.progress.style.display !== 'none') {
+        // Optionally hide if reset to 0 and not already hidden by timeout
+        // This case might not be strictly needed if processFile always starts > 0
+        requestAnimationFrame(() => {
+           this.elements.progress.style.display = 'none';
+        });
+      }
+    }
   }
 
   async processFile(file) {
+    if (this.isProcessing) {
+      this.log('Processing is already in progress. Please wait.', 'warn');
+      return;
+    }
+    let ffmpegInstance = null; // Keep a reference for potential cleanup in catch block
     try {
+      this.removeDimensionPreview();
       this.startProcessing();
-      this.updateProgress(10);
+      this.updateProgress(10, 'Initializing...');
 
       const dimensions = this.calculateDimensions();
       const { width, height } = dimensions;
@@ -190,48 +357,111 @@ class VideoResizeTool extends Tool {
 
       this.log(`Resizing to ${width}x${height} pixels...`, 'info');
 
-      this.ffmpeg = await loadFFmpeg();
-      this.updateProgress(20);
+      // Ensure loadFFmpeg completes its execution path. 
+      // The actual readiness of the ffmpeg singleton is often the core issue.
+      await loadFFmpeg(); 
+      ffmpegInstance = getFFmpeg(); // Get the singleton instance
+
+      if (!ffmpegInstance) {
+        throw new Error('FFmpeg instance could not be obtained after loading.');
+      }
+      
+      // At this point, we assume loadFFmpeg from utils has ensured the instance is truly ready.
+      // If errors still occur, the problem is likely within loadFFmpeg in ffmpeg-utils.js.
+
+      this.updateProgress(20, 'FFmpeg ready');
+
+      // Clean up virtual filesystem before operation
+      try {
+        await cleanupFFmpeg(ffmpegInstance);
+      } catch (cleanupError) {
+        // This might be normal if it's the first run or if FS is already clean
+        console.warn('Pre-processing cleanup attempt reported:', cleanupError.message);
+      }
 
       const inputFileName = 'input' + getExtension(file.name);
       const outputFileName = 'output' + getExtension(file.name);
 
       this.log('Writing input file...', 'info');
-      await writeInputFile(this.ffmpeg, inputFileName, file);
-      this.updateProgress(30);
+      await writeInputFile(ffmpegInstance, inputFileName, file);
+      this.updateProgress(30, 'Input file processed');
 
       const scaleFilter = `scale=${width}:${height}:flags=lanczos`;
       const qualityArgs = quality === 'high' ? ['-crf', '18'] :
                          quality === 'medium' ? ['-crf', '23'] :
                          ['-crf', '28'];
 
-      await executeFFmpeg(this.ffmpeg, [
+      this.updateProgress(40, 'Starting resize...');
+      await executeFFmpeg(ffmpegInstance, [
         '-i', inputFileName,
         '-vf', scaleFilter,
         ...qualityArgs,
         '-preset', 'medium',
         '-y', outputFileName
       ]);
-      this.updateProgress(80);
+      this.updateProgress(80, 'Resize complete');
 
       this.log('Reading output file...', 'info');
-      const data = await readOutputFile(this.ffmpeg, outputFileName);
+      const data = await readOutputFile(ffmpegInstance, outputFileName);
       
       if (!data || data.byteLength === 0) {
         throw new Error('Generated video is empty. Check video format or try different settings.');
       }
       
       const blob = new Blob([data], { type: file.type });
+      this.updateProgress(90, 'Preparing download...');
+      
+      if (this.elements.outputContainer) {
+        this.elements.outputContainer.style.display = 'block';
+      }
+      
       this.displayOutputMedia(blob, 'outputVideo', `video_${width}x${height}${getExtension(file.name)}`, 'downloadContainer');
       
-      this.updateProgress(100);
+      // Clean up the instance after processing
+      try {
+        await cleanupFFmpeg(ffmpegInstance);
+      } catch (cleanupError) {
+        console.warn('Post-processing cleanup failed:', cleanupError.message);
+      }
+      
+      this.updateProgress(100, 'Complete!');
       this.log('Resizing complete!', 'success');
       this.endProcessing();
     } catch (error) {
       this.log(`Error: ${error.message}`, 'error');
       console.error('Processing error:', error);
+      // Attempt cleanup even on error, if instance was obtained
+      if (ffmpegInstance) {
+        try {
+          await cleanupFFmpeg(ffmpegInstance);
+        } catch (cleanupError) {
+          console.warn('Cleanup after error failed:', cleanupError.message);
+        }
+      }
       this.endProcessing(false);
     }
+  }
+
+  resetTool() {
+    this.removeDimensionPreview();
+    
+    return resetTool({
+      elements: this.elements,
+      defaultValues: {
+        width: null,
+        height: null,
+        keepRatio: true
+      },
+      internalState: {
+        instance: this,
+        defaults: {
+          originalWidth: 0,
+          originalHeight: 0,
+          videoAspectRatio: 1,
+          ffmpeg: null
+        }
+      }
+    });
   }
 }
 
