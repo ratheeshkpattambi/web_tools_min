@@ -7,6 +7,49 @@ import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension
 
 // Video trim tool template
 export const template = `
+    <style>
+      .slider-container {
+        width: 100%;
+        padding: 15px 0;
+      }
+      .trim-slider {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        background-color: #ddd; /* Light grey background for the track */
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .slider-handle {
+        position: absolute;
+        top: -4px; /* Center vertically */
+        width: 16px;
+        height: 16px;
+        background-color: #007bff; /* Blue handle */
+        border-radius: 50%;
+        cursor: grab;
+        z-index: 2;
+        transform: translateX(-50%); /* Center the handle on its position */
+      }
+      .slider-handle:active {
+        cursor: grabbing;
+      }
+      .slider-range {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        background-color: #007bff; /* Blue selected range */
+        z-index: 1;
+        border-radius: 4px;
+      }
+      /* Dark mode adjustments (optional, can be refined) */
+      .dark .trim-slider {
+        background-color: #4a5568; /* Darker grey for dark mode track */
+      }
+      .dark .slider-handle, .dark .slider-range {
+        background-color: #3b82f6; /* Brighter blue for dark mode */
+      }
+    </style>
     <div class="tool-container">
       <h1>Video Trimmer</h1>
       <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
@@ -21,11 +64,11 @@ export const template = `
       </div>
       
       <div class="my-4 flex flex-col gap-4">
-        <div class="slider-container">
-          <div id="trim-slider" class="trim-slider">
-            <div class="slider-handle start-handle"></div>
-            <div class="slider-range"></div>
-            <div class="slider-handle end-handle"></div>
+        <div class="slider-container w-full py-4">
+          <div id="trim-slider" class="trim-slider relative w-full h-2 bg-gray-300 dark:bg-gray-700 rounded cursor-pointer">
+            <div class="slider-handle start-handle absolute -top-1 w-4 h-4 bg-blue-600 dark:bg-blue-500 rounded-full cursor-grab active:cursor-grabbing z-20 -translate-x-1/2"></div>
+            <div class="slider-range absolute top-0 h-full bg-blue-600 dark:bg-blue-500 rounded z-10"></div>
+            <div class="slider-handle end-handle absolute -top-1 w-4 h-4 bg-blue-600 dark:bg-blue-500 rounded-full cursor-grab active:cursor-grabbing z-20 -translate-x-1/2"></div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -38,8 +81,10 @@ export const template = `
             <input type="text" id="endTime" placeholder="0:00" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
           </div>
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Trim Video</button>
-        <button id="resetBtn" class="w-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors">🔄 Reset</button>
+        <div class="flex gap-4">
+          <button id="processBtn" class="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trim Video</button>
+          <button id="resetBtn" class="flex-1 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors">🔄 Reset</button>
+        </div>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden transition-colors" style="display: none;">
@@ -47,9 +92,9 @@ export const template = `
         <div class="text-center text-xs font-medium text-slate-700 dark:text-slate-300 -mt-4 leading-5">0%</div>
       </div>
 
-      <div id="outputContainer" class="output-container">
+      <div id="outputContainer" class="output-container dark:bg-slate-800">
         <div class="video-wrapper">
-          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;" class="video-controls-dark"></video>
+          <video id="output-video" controls style="display: none; max-width: 100%; height: auto;" ></video>
         </div>
         <div id="downloadContainer"></div>
       </div>
