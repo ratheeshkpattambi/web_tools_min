@@ -3,7 +3,7 @@
  */
 import { Tool } from '../common/base.js';
 import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
-import { formatFileSize } from '../common/utils.js';
+import { formatFileSize, escapeHtml } from '../common/utils.js';
 
 // Video info tool template
 export const template = `
@@ -78,7 +78,7 @@ class VideoInfoTool extends Tool {
       <table class="info-table">
         <tr>
           <td>Filename:</td>
-          <td>${file.name}</td>
+          <td>${escapeHtml(file.name)}</td>
         </tr>
         <tr>
           <td>Size:</td>
@@ -86,7 +86,7 @@ class VideoInfoTool extends Tool {
         </tr>
         <tr>
           <td>Type:</td>
-          <td>${file.type}</td>
+          <td>${escapeHtml(file.type)}</td>
         </tr>
       </table>
     `;

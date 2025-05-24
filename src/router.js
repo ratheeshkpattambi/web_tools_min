@@ -11,6 +11,9 @@ import {
   getErrorTemplate
 } from './common/metadata.js';
 
+// Eagerly discover all tool modules
+const toolModules = import.meta.glob('./(video|image|text)/*.js');
+
 /**
  * Updates the active class on navigation links
  * @param {string} path - The current URL path
@@ -167,7 +170,6 @@ export async function handleRoute(path) {
               <h1>${toolInfo.name}</h1>
               <p class="tool-description">${toolInfo.description || ''}</p>
             </div>
-            ${toolTemplate ? toolTemplate.replace(/<div class="tool-container">[\s\S]*?<h1>.*?<\/h1>/, '') : ''}
           </div>
         </div>
       `;
@@ -215,9 +217,23 @@ export async function handleRoute(path) {
             // Import directly from the current directory structure
             let moduleImport;
             try {
-              // Import directly from the current directory structure
-              moduleImport = await import(`./${category}/${toolId}.js`);
-              console.log(`Successfully loaded module from ./${category}/${toolId}.js`);
+              const modulePath = `./${category}/${toolId}.js`;
+              // console.log(`Attempting to load module from path: ${modulePath}`);
+
+              if (toolModules[modulePath]) {
+                moduleImport = await toolModules[modulePath]();
+                console.log(`Successfully loaded module from ${modulePath} using import.meta.glob`);
+              } else {
+                console.error(`Module not found in import.meta.glob cache: ${modulePath}`);
+                // Attempt direct dynamic import as a fallback (might not work in prod if not analyzed)
+                try {
+                    moduleImport = await import(/* @vite-ignore */ modulePath);
+                    console.warn(`Loaded module ${modulePath} via fallback dynamic import.`);
+                } catch (fallbackError) {
+                    console.error(`Fallback dynamic import for ${modulePath} also failed:`, fallbackError);
+                    throw new Error(`Module ${modulePath} not found.`);
+                }
+              }
             } catch (error) {
               console.error(`Failed to load tool module: ${error.message}`);
               main.innerHTML = getErrorTemplate(
@@ -233,12 +249,46 @@ export async function handleRoute(path) {
             
             // Call the initialization function
             if (moduleImport && moduleImport.initTool) {
-              // Check if the module exports a template
               if (moduleImport.template) {
-                // Replace the HTML content with template from module
-                document.querySelector('.tool-container').outerHTML = moduleImport.template;
+                const mainToolContainer = document.querySelector('.tool-page > .tool-container');
+                if (mainToolContainer) {
+                  const tempDiv = document.createElement('div');
+                  tempDiv.innerHTML = moduleImport.template.trim();
+
+                  let contentToInject = '';
+                  let toolOwnContainer = tempDiv.firstChild;
+
+                  // If the first child is a document fragment (e.g. from backticks with multiple root elements, though unlikely for .tool-container)
+                  // or if it's not an element (e.g. text node if template is malformed)
+                  // or if it doesn't have classList (not an element)
+                  // then we might need to be more careful or assume a simpler structure.
+                  // For now, we assume moduleImport.template starts with a single root element, ideally the tool's own .tool-container.
+
+                  if (toolOwnContainer && toolOwnContainer.nodeType === Node.ELEMENT_NODE && toolOwnContainer.classList && toolOwnContainer.classList.contains('tool-container')) {
+                    // Tool's template has its own .tool-container. Extract its children, skipping its H1 and P.
+                    let actualContentStarted = false;
+                    for (const child of toolOwnContainer.childNodes) {
+                        if (child.nodeType === Node.ELEMENT_NODE) {
+                            if (child.tagName === 'H1' || child.classList.contains('tool-description') || child.classList.contains('section-description')) {
+                                // Skip these, as router provides them
+                            } else {
+                                contentToInject += child.outerHTML;
+                            }
+                        } else {
+                           // Append text nodes or comments as well
+                           contentToInject += child.textContent;
+                        }
+                    }
+                  } else {
+                    // Tool template does not start with .tool-container or is structured differently.
+                    // Use the template content as is. This path is taken if the tool template is already "bare".
+                    contentToInject = moduleImport.template;
+                  }
+                  mainToolContainer.insertAdjacentHTML('beforeend', contentToInject);
+                } else {
+                  console.error('CRITICAL: Main .tool-container not found in .tool-page!');
+                }
               }
-              
               moduleImport.initTool();
             } else {
               main.innerHTML = getErrorTemplate(
