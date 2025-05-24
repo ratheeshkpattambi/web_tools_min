@@ -12,8 +12,17 @@ A collection of privacy-focused tools that process your data locally in your bro
 
 ## Features
 - Video processing tools
+  - Video compression
+  - Format conversion
+  - Basic trimming
 - Image editing capabilities
+  - Image resizing
+  - Format conversion
+  - Basic filters
 - Text manipulation utilities
+  - Text formatting
+  - Character/word counting
+  - Case conversion
 
 ## Development
 ```bash
