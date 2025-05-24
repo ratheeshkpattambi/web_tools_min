@@ -305,39 +305,49 @@ export function generateStructuredData(path) {
  * @returns {string} HTML for the home page
  */
 export function getWelcomeContent() {
-  // Convert markdown bold and links to HTML
   const formattedPhilosophy = siteInfo.philosophy
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">$1</a>');
 
   return `
-    <div class="tool-container">
-      <h1>Welcome to ${siteInfo.name}</h1>
-      <p class="section-description">${siteInfo.tagline}</p>
-      
-      <div class="philosophy-section">
-        <h2>Our Philosophy</h2>
-        <p>${formattedPhilosophy}</p>
+    <div class="container mx-auto px-4 py-8">
+      <!-- Main Welcome Card -->
+      <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm mb-8 transition-colors">
+        <div class="px-4 py-5 sm:px-6">
+          <h1 class="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">Welcome to ${siteInfo.name}</h1>
+          <p class="text-lg text-slate-600 dark:text-slate-300 text-center">${siteInfo.tagline}</p>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+          <div class="bg-gradient-to-r from-sky-100 to-blue-100 dark:from-blue-900/20 dark:to-sky-900/20 rounded-xl p-6 md:p-8 shadow-sm transition-colors">
+            <h2 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-3">Our Philosophy</h2>
+            <p class="text-base text-slate-700 dark:text-slate-300 leading-relaxed">${formattedPhilosophy}</p>
+          </div>
+        </div>
       </div>
       
       ${Object.entries(categories).map(([categoryId, config]) => `
-        <section class="tools-section" itemscope itemtype="https://schema.org/SoftwareApplication">
-          <h2 itemprop="applicationCategory">${config.name}</h2>
-          <p class="section-description" itemprop="description">${config.description}</p>
-          <div class="tool-grid">
-            ${Object.entries(tools)
-              .filter(([path]) => path.startsWith(categoryId + '/'))
-              .map(([path, tool]) => {
-                return `
-                  <a href="/${path}" class="tool-card">
-                    <div class="tool-icon">${tool.icon}</div>
-                    <h3 itemprop="name">${tool.name}</h3>
-                    <p itemprop="description">${tool.description}</p>
-                  </a>
-                `;
-              }).join('')}
+        <!-- ${config.name} Tools Card -->
+        <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm mb-8 transition-colors" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-3xl font-semibold text-slate-700 dark:text-slate-200" itemprop="applicationCategory">${config.name}</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-2" itemprop="description">${config.description}</p>
           </div>
-        </section>
+          <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${Object.entries(tools)
+                .filter(([path]) => path.startsWith(categoryId + '/'))
+                .map(([path, tool]) => {
+                  return `
+                    <a href="/${path}" class="bg-slate-50 dark:bg-gray-700 rounded-lg border border-slate-200 dark:border-gray-600 p-5 flex flex-col gap-2 hover:bg-white dark:hover:bg-gray-600 hover:shadow-md hover:border-slate-300 dark:hover:border-gray-500 transition-all duration-200">
+                      <div class="text-3xl mb-1">${tool.icon}</div>
+                      <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200" itemprop="name">${tool.name}</h3>
+                      <p class="text-sm text-slate-500 dark:text-slate-400 flex-grow" itemprop="description">${tool.description}</p>
+                    </a>
+                  `;
+                }).join('')}
+            </div>
+          </div>
+        </div>
       `).join('')}
     </div>
   `;
@@ -350,8 +360,6 @@ export function getWelcomeContent() {
  * @returns {string} The HTML template or null if not found
  */
 export function getToolTemplate(category, toolId) {
-  // All tools now have their templates in their own modules
-  // Return null so the template from the tool's module will be used
   return null;
 }
 
@@ -361,10 +369,16 @@ export function getToolTemplate(category, toolId) {
  */
 export function get404Template() {
   return `
-    <div class="tool-container">
-      <h1>404 - Page Not Found</h1>
-      <p>Sorry, the page you requested does not exist.</p>
-      <a href="/" class="button primary">Back to Home</a>
+    <div class="container mx-auto px-4 py-8">
+      <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-colors">
+        <div class="px-4 py-5 sm:px-6">
+          <h1 class="text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">404 - Page Not Found</h1>
+        </div>
+        <div class="px-4 py-5 sm:p-6 text-center">
+          <p class="text-lg text-slate-600 dark:text-slate-300 mb-6">Sorry, the page you requested does not exist.</p>
+          <a href="/" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Back to Home</a>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -378,11 +392,17 @@ export function get404Template() {
  */
 export function getErrorTemplate(title, message, details = '') {
   return `
-    <div class="tool-container">
-      <h1>Error: ${title}</h1>
-      <p>${message}</p>
-      ${details ? `<pre class="error-details">${details}</pre>` : ''}
-      <a href="/" class="button primary">Back to Home</a>
+    <div class="container mx-auto px-4 py-8">
+      <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-colors">
+        <div class="px-4 py-5 sm:px-6">
+          <h1 class="text-4xl font-bold text-red-600 dark:text-red-400 text-center">Error: ${title}</h1>
+        </div>
+        <div class="px-4 py-5 sm:p-6 text-center">
+          <p class="text-lg text-slate-600 dark:text-slate-300 mb-6">${message}</p>
+          ${details ? `<pre class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 rounded-lg p-4 text-left text-sm text-red-700 dark:text-red-300 mb-6 overflow-auto">${details}</pre>` : ''}
+          <a href="/" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Back to Home</a>
+        </div>
+      </div>
     </div>
   `;
 } 

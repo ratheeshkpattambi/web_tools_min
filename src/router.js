@@ -82,23 +82,29 @@ function findTool(path) {
  */
 function generateCategoryContent(categoryConfig, categoryId) {
   return `
-    <div class="tool-container">
-      <h1>${categoryConfig.name}</h1>
-      <p class="section-description">${categoryConfig.description}</p>
-
-      <div class="tool-grid" itemscope itemtype="https://schema.org/ItemList">
-        ${Object.entries(tools)
-          .filter(([path]) => path.startsWith(categoryId + '/'))
-          .map(([path, tool], index) => {
-            return `
-              <a href="/${path}" class="tool-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <meta itemprop="position" content="${index + 1}">
-                <div class="tool-icon">${tool.icon}</div>
-                <h3 itemprop="name">${tool.name}</h3>
-                <p itemprop="description">${tool.description}</p>
-              </a>
-            `;
-          }).join('')}
+    <div class="container mx-auto px-4 py-8">
+      <!-- Category Header Card -->
+      <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm mb-8 transition-colors">
+        <div class="px-4 py-5 sm:px-6">
+          <h1 class="text-4xl font-bold text-slate-800 dark:text-slate-100">${categoryConfig.name}</h1>
+          <p class="text-lg text-slate-600 dark:text-slate-300 mt-2">${categoryConfig.description}</p>
+        </div>
+        <div class="px-4 py-5 sm:p-6" itemscope itemtype="https://schema.org/ItemList">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${Object.entries(tools)
+              .filter(([path]) => path.startsWith(categoryId + '/'))
+              .map(([path, tool], index) => {
+                return `
+                  <a href="/${path}" class="bg-slate-50 dark:bg-gray-700 rounded-lg border border-slate-200 dark:border-gray-600 p-5 flex flex-col gap-2 hover:bg-white dark:hover:bg-gray-600 hover:shadow-md hover:border-slate-300 dark:hover:border-gray-500 transition-all duration-200" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                    <meta itemprop="position" content="${index + 1}">
+                    <div class="text-3xl mb-1">${tool.icon}</div>
+                    <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200" itemprop="name">${tool.name}</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 flex-grow" itemprop="description">${tool.description}</p>
+                  </a>
+                `;
+              }).join('')}
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -153,22 +159,22 @@ export async function handleRoute(path) {
       // Specific tool page (e.g., /video/resize)
       const [category, toolId] = result.path.split('/');
       
-      // Get the template for this tool
-      const toolTemplate = getToolTemplate(category, toolId);
-      
       // Enhance template with SEO content and tool information
       const toolInfo = result.tool;
       content = `
-        <div class="tool-page" itemscope itemtype="https://schema.org/SoftwareApplication">
+        <div class="tool-page container mx-auto px-4 py-8" itemscope itemtype="https://schema.org/SoftwareApplication">
           <meta itemprop="applicationCategory" content="WebApplication">
           <meta itemprop="offers" itemscope itemtype="https://schema.org/Offer">
           <meta itemprop="price" content="0">
           <meta itemprop="priceCurrency" content="USD">
           
-          <div class="tool-container">
-            <div class="tool-header">
-              <h1>${toolInfo.name}</h1>
-              <p class="tool-description">${toolInfo.description || ''}</p>
+          <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-colors">
+            <div class="px-4 py-5 sm:px-6">
+              <h1 class="text-3xl font-semibold text-slate-800 dark:text-slate-100">${toolInfo.name}</h1>
+              <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-2">${toolInfo.description || ''}</p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+              <div class="tool-content-area"></div>
             </div>
           </div>
         </div>
@@ -211,18 +217,16 @@ export async function handleRoute(path) {
               loadingEl.style.textAlign = 'center';
               loadingEl.style.padding = '20px';
               loadingEl.id = 'ffmpeg-loading';
-              document.querySelector('.tool-container')?.appendChild(loadingEl);
+              document.querySelector('.tool-content-area')?.appendChild(loadingEl);
             }
             
             // Import directly from the current directory structure
             let moduleImport;
             try {
               const modulePath = `./${category}/${toolId}.js`;
-              // console.log(`Attempting to load module from path: ${modulePath}`);
 
               if (toolModules[modulePath]) {
                 moduleImport = await toolModules[modulePath]();
-                console.log(`Successfully loaded module from ${modulePath} using import.meta.glob`);
               } else {
                 console.error(`Module not found in import.meta.glob cache: ${modulePath}`);
                 // Attempt direct dynamic import as a fallback (might not work in prod if not analyzed)
@@ -250,43 +254,12 @@ export async function handleRoute(path) {
             // Call the initialization function
             if (moduleImport && moduleImport.initTool) {
               if (moduleImport.template) {
-                const mainToolContainer = document.querySelector('.tool-page > .tool-container');
-                if (mainToolContainer) {
-                  const tempDiv = document.createElement('div');
-                  tempDiv.innerHTML = moduleImport.template.trim();
-
-                  let contentToInject = '';
-                  let toolOwnContainer = tempDiv.firstChild;
-
-                  // If the first child is a document fragment (e.g. from backticks with multiple root elements, though unlikely for .tool-container)
-                  // or if it's not an element (e.g. text node if template is malformed)
-                  // or if it doesn't have classList (not an element)
-                  // then we might need to be more careful or assume a simpler structure.
-                  // For now, we assume moduleImport.template starts with a single root element, ideally the tool's own .tool-container.
-
-                  if (toolOwnContainer && toolOwnContainer.nodeType === Node.ELEMENT_NODE && toolOwnContainer.classList && toolOwnContainer.classList.contains('tool-container')) {
-                    // Tool's template has its own .tool-container. Extract its children, skipping its H1 and P.
-                    let actualContentStarted = false;
-                    for (const child of toolOwnContainer.childNodes) {
-                        if (child.nodeType === Node.ELEMENT_NODE) {
-                            if (child.tagName === 'H1' || child.classList.contains('tool-description') || child.classList.contains('section-description')) {
-                                // Skip these, as router provides them
-                            } else {
-                                contentToInject += child.outerHTML;
-                            }
-                        } else {
-                           // Append text nodes or comments as well
-                           contentToInject += child.textContent;
-                        }
-                    }
-                  } else {
-                    // Tool template does not start with .tool-container or is structured differently.
-                    // Use the template content as is. This path is taken if the tool template is already "bare".
-                    contentToInject = moduleImport.template;
-                  }
-                  mainToolContainer.insertAdjacentHTML('beforeend', contentToInject);
+                const toolContentArea = document.querySelector('.tool-content-area');
+                if (toolContentArea) {
+                  // Simply inject the entire template
+                  toolContentArea.innerHTML = moduleImport.template;
                 } else {
-                  console.error('CRITICAL: Main .tool-container not found in .tool-page!');
+                  console.error('CRITICAL: .tool-content-area not found in .tool-page!');
                 }
               }
               moduleImport.initTool();
