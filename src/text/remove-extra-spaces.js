@@ -2,33 +2,30 @@ import { Tool } from '../common/base.js';
 
 export const template = `
   <div class="tool-container">
-    <h1>Remove Extra Spaces</h1>
-    <p class="tool-description">Remove extra spaces from text, such as leading/trailing spaces and multiple spaces between words. All processing happens in your browser.</p>
-
-    <div class="form-group">
-      <label for="inputText" style="font-weight: bold; font-size: 1.2em;">Input Text</label>
-      <textarea id="inputText" class="form-control text-editor" rows="10" placeholder="Paste your text here..."></textarea>
+    <div class="mb-4">
+      <label for="inputText" class="block font-bold text-xl mb-1 text-slate-700 dark:text-slate-200">Input Text</label>
+      <textarea id="inputText" class="w-full min-h-[200px] p-3 border border-slate-300 dark:border-gray-600 rounded-md font-sans text-base resize-y focus:outline-none focus:border-slate-500 dark:focus:border-gray-400 focus:ring-1 focus:ring-slate-500 dark:focus:ring-gray-400 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 transition-colors" rows="10" placeholder="Paste your text here..."></textarea>
     </div>
 
     <div class="text-center">
-      <button type="button" id="removeSpacesBtn" class="file-select-btn">Remove Extra Spaces</button>
+      <button type="button" id="removeSpacesBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Remove Extra Spaces</button>
     </div>
 
-    <div class="form-group">
-      <label for="outputText" style="font-weight: bold; font-size: 1.2em;">Output Text</label>
-      <textarea id="outputText" class="form-control text-editor" rows="10" readonly placeholder="Cleaned text will appear here..."></textarea>
+    <div class="my-4">
+      <label for="outputText" class="block font-bold text-xl mb-1 text-slate-700 dark:text-slate-200">Output Text</label>
+      <textarea id="outputText" class="w-full min-h-[200px] p-3 border border-slate-300 dark:border-gray-600 rounded-md font-sans text-base resize-y bg-slate-50 dark:bg-gray-800 focus:outline-none focus:border-slate-500 dark:focus:border-gray-400 focus:ring-1 focus:ring-slate-500 dark:focus:ring-gray-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 transition-colors" rows="10" readonly placeholder="Cleaned text will appear here..."></textarea>
     </div>
 
-    <div class="text-center">
-      <button id="copyToClipboardBtn" class="btn btn-secondary mr-2" disabled>Copy To Clipboard</button>
-      <button id="downloadBtn" class="btn btn-secondary" disabled>Download Text</button>
+    <div class="text-center mt-4 space-x-2">
+      <button id="copyToClipboardBtn" class="px-4 py-2 bg-slate-600 dark:bg-slate-500 hover:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Copy To Clipboard</button>
+      <button id="downloadBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Download Text</button>
     </div>
 
-    <div id="logHeader" class="log-header">
-      <span>Logs</span>
-      <span id="logToggle">▼</span>
+    <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+      <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+      <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
     </div>
-    <div id="logContent" class="log-content"></div>
+    <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
   </div>
 `;
 

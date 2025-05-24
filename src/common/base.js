@@ -1,7 +1,7 @@
 /**
  * Base Tool class
  */
-import { addLog, updateProgress, showLogs } from './utils.js';
+import { addLog, updateProgress, showLogs, formatFileSize } from './utils.js';
 
 export class Tool {
   /**
@@ -213,29 +213,6 @@ export class Tool {
   }
   
   /**
-   * Create a download link
-   * @param {Blob} blob - The data blob
-   * @param {string} filename - The filename for download
-   * @param {string} containerKey - Key of container element in this.elements
-   * @returns {string} The blob URL
-   */
-  createDownloadLink(blob, filename, containerKey = 'downloadContainer') {
-    const url = URL.createObjectURL(blob);
-    const container = this.elements[containerKey];
-    
-    if (container) {
-      container.innerHTML = `
-        <a href="${url}" download="${filename}" class="btn">
-          Download ${this.name} Result
-        </a>
-      `;
-      container.style.display = 'block';
-    }
-    
-    return url;
-  }
-  
-  /**
    * Display a preview for different file types
    * @param {Blob|File} file - The file to preview
    * @param {string} elementKey - Key of preview element in this.elements
@@ -278,12 +255,36 @@ export class Tool {
    */
   displayOutputMedia(blob, mediaKey, filename, containerKey = 'downloadContainer') {
     const url = URL.createObjectURL(blob);
-    const mediaEl = this.elements[mediaKey];
-    if (mediaEl && ['VIDEO', 'IMG', 'AUDIO'].includes(mediaEl.tagName)) {
-      mediaEl.src = url;
-      mediaEl.style.display = 'block';
+    const mediaElement = this.elements[mediaKey];
+    const container = this.elements[containerKey];
+
+    if (mediaElement) {
+      mediaElement.src = url;
+      mediaElement.style.display = 'block';
     }
-    this.createDownloadLink(blob, filename, containerKey);
+
+    if (container) {
+      // Create file info div
+      const fileInfoDiv = document.createElement('div');
+      fileInfoDiv.className = 'mt-4 p-3 bg-slate-100 rounded-md text-sm'; // Tailwind classes
+      fileInfoDiv.innerHTML = `
+        <p class="text-slate-700"><strong>Filename:</strong> <span class="font-normal text-slate-600">${filename}</span></p>
+        <p class="text-slate-700"><strong>Size:</strong> <span class="font-normal text-slate-600">${formatFileSize(blob.size)}</span></p>
+        <p class="text-slate-700"><strong>Type:</strong> <span class="font-normal text-slate-600">${blob.type}</span></p>
+      `;
+      
+      // Create download button
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = filename;
+      downloadLink.className = 'mt-3 inline-block px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium'; // Green for download actions
+      downloadLink.textContent = `Download ${this.name} Result`;
+      
+      container.innerHTML = ''; // Clear previous content
+      container.appendChild(fileInfoDiv);
+      container.appendChild(downloadLink);
+      container.style.display = 'block';
+    }
     return url;
   }
   

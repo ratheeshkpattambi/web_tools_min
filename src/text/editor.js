@@ -7,27 +7,24 @@ import { Tool } from '../common/base.js';
 // Text editor tool template
 export const template = `
     <div class="tool-container">
-      <h1>Text Editor</h1>
-      <p class="tool-description">The plainest text editor - just type and download</p>
+      <textarea id="editor" class="w-full min-h-[300px] my-4 p-4 border border-slate-300 dark:border-gray-600 rounded-md font-sans text-base leading-relaxed resize-y focus:outline-none focus:border-slate-500 dark:focus:border-gray-400 focus:ring-1 focus:ring-slate-500 dark:focus:ring-gray-400 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 transition-colors" placeholder="Start typing..."></textarea>
 
-      <textarea id="editor" class="text-editor" placeholder="Start typing..."></textarea>
-
-      <div class="editor-footer">
-        <div class="word-count">
-          Words: <span id="wordCount">0</span>
+      <div class="sticky bottom-0 z-10 flex justify-between p-4 bg-slate-100 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-md my-4 text-sm text-slate-600 dark:text-slate-300 transition-colors">
+        <div class="flex items-center gap-2 py-1 px-3 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-colors">
+          Words: <span id="wordCount" class="text-slate-800 dark:text-slate-100 font-semibold text-lg">0</span>
         </div>
-        <div class="char-count">
-          Characters: <span id="charCount">0</span>
+        <div class="flex items-center gap-2 py-1 px-3 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-colors">
+          Characters: <span id="charCount" class="text-slate-800 dark:text-slate-100 font-semibold text-lg">0</span>
         </div>
       </div>
 
       <div id="downloadContainer"></div>
 
-      <div id="logHeader" class="log-header">
-        <span>Logs</span>
-        <span id="logToggle">▼</span>
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+        <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
       </div>
-      <div id="logContent" class="log-content"></div>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
     </div>
 `;
 
@@ -64,7 +61,7 @@ class TextEditorTool extends Tool {
       
       // Add download button after editor
       const downloadBtn = document.createElement('button');
-      downloadBtn.className = 'btn';
+      downloadBtn.className = 'w-full bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-4';
       downloadBtn.textContent = 'Download Text';
       downloadBtn.addEventListener('click', () => this.downloadText());
       this.elements.downloadContainer.appendChild(downloadBtn);

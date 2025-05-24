@@ -8,13 +8,13 @@ import { formatFileSize, escapeHtml } from '../common/utils.js';
 // Video info tool template
 export const template = `
     <div class="tool-container">
-      <h1>Extract Video Metadata</h1>
-      <div id="videoDropZone" class="drop-zone">
-        <div class="drop-icon">📁</div>
-        <p>Drop video here</p>
-        <p class="drop-subtitle">or</p>
-        <button type="button" class="file-select-btn">Select Video</button>
-        <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+      <h1>Video Info</h1>
+      <div id="videoDropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+        <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
+        <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
+        <input type="file" id="fileInput" class="hidden" accept="video/*">
+        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
       </div>
       <div class="video-wrapper">
         <video id="video-preview" controls style="display: none; max-width: 100%; height: auto;"></video>
@@ -26,12 +26,18 @@ export const template = `
       </div>
 
       <div id="videoInfoContainer" class="info-container"></div>
-
-      <div id="logHeader" class="log-header">
-        <span>Logs</span>
-        <span id="logToggle">▼</span>
+      
+      <div id="downloadContainer" class="mt-4 hidden">
+        <button id="downloadMetadataBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
+          📄 Download Metadata as JSON
+        </button>
       </div>
-      <div id="logContent" class="log-content"></div>
+
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+        <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
+      </div>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
     </div>
 `;
 
@@ -47,15 +53,20 @@ class VideoInfoTool extends Tool {
     });
     
     this.ffmpeg = null;
+    this.metadata = null; // Store extracted metadata for download
   }
 
   getElementsMap() {
     return {
       dropZone: 'videoDropZone',
-      fileInput: 'videoFileInput',
+      fileInput: 'fileInput',
       inputVideo: 'video-preview',
       infoContainer: 'videoInfoContainer',
-      progress: 'videoProgress'
+      progress: 'videoProgress',
+      downloadContainer: 'downloadContainer',
+      downloadMetadataBtn: 'downloadMetadataBtn',
+      logHeader: 'logHeader',
+      logContent: 'logContent'
     };
   }
 
@@ -68,29 +79,30 @@ class VideoInfoTool extends Tool {
         this.processFile(file);
       }
     });
+
+    // Add download button handler
+    if (this.elements.downloadMetadataBtn) {
+      this.elements.downloadMetadataBtn.addEventListener('click', () => {
+        this.downloadMetadata();
+      });
+    }
   }
 
   displayBasicInfo(file) {
     const basicInfo = document.createElement('div');
-    basicInfo.className = 'info-section';
+    basicInfo.className = 'mb-6'; // Tailwind classes for info-section
     basicInfo.innerHTML = `
-      <h3>Basic Info</h3>
-      <table class="info-table">
-        <tr>
-          <td>Filename:</td>
-          <td>${escapeHtml(file.name)}</td>
-        </tr>
-        <tr>
-          <td>Size:</td>
-          <td>${formatFileSize(file.size)}</td>
-        </tr>
-        <tr>
-          <td>Type:</td>
-          <td>${escapeHtml(file.type)}</td>
-        </tr>
+      <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2 pb-1 border-b border-slate-300 dark:border-gray-600">Basic Info</h3>
+      <table class="w-full text-sm">
+        <tbody>
+          <tr class="border-b border-slate-200 dark:border-gray-600"><td class="py-1.5 pr-2 font-medium text-slate-600 dark:text-slate-400 w-1/3">Filename:</td><td class="py-1.5 text-slate-800 dark:text-slate-100">${escapeHtml(file.name)}</td></tr>
+          <tr class="border-b border-slate-200 dark:border-gray-600"><td class="py-1.5 pr-2 font-medium text-slate-600 dark:text-slate-400">Size:</td><td class="py-1.5 text-slate-800 dark:text-slate-100">${formatFileSize(file.size)}</td></tr>
+          <tr><td class="py-1.5 pr-2 font-medium text-slate-600 dark:text-slate-400">Type:</td><td class="py-1.5 text-slate-800 dark:text-slate-100">${escapeHtml(file.type)}</td></tr>
+        </tbody>
       </table>
     `;
-    this.elements.infoContainer.innerHTML = '';
+    this.elements.infoContainer.innerHTML = ''; // Clear previous
+    this.elements.infoContainer.className = 'mt-4 p-4 bg-slate-50 dark:bg-gray-800 rounded-lg shadow transition-colors'; // Tailwind for info-container
     this.elements.infoContainer.appendChild(basicInfo);
     this.elements.infoContainer.style.display = 'block';
   }
@@ -99,6 +111,15 @@ class VideoInfoTool extends Tool {
     try {
       this.startProcessing();
       this.updateProgress(10);
+
+      // Store basic file info
+      const basicInfo = {
+        filename: file.name,
+        size: file.size,
+        sizeFormatted: formatFileSize(file.size),
+        type: file.type,
+        lastModified: new Date(file.lastModified).toISOString()
+      };
 
       this.ffmpeg = await loadFFmpeg();
       this.updateProgress(30);
@@ -135,7 +156,21 @@ class VideoInfoTool extends Tool {
       const videoInfo = this.extractVideoInfo(this.elements.inputVideo, ffmpegLogs);
       const audioInfo = this.extractAudioInfo(ffmpegLogs);
       
+      // Store complete metadata
+      this.metadata = {
+        file: basicInfo,
+        video: videoInfo,
+        audio: audioInfo,
+        analysis: {
+          timestamp: new Date().toISOString(),
+          toolVersion: '1.0.0'
+        }
+      };
+      
       this.displayVideoInfo(videoInfo, audioInfo);
+      
+      // Show download button
+      this.elements.downloadContainer.classList.remove('hidden');
       
       this.updateProgress(100);
       this.endProcessing();
@@ -226,45 +261,38 @@ class VideoInfoTool extends Tool {
   
   displayVideoInfo(videoInfo, audioInfo) {
     const videoInfoSection = document.createElement('div');
-    videoInfoSection.className = 'info-section';
+    videoInfoSection.className = 'mb-6'; // Tailwind classes for info-section
     videoInfoSection.innerHTML = `
-      <h3>Video Information</h3>
-      <table class="info-table">
-        ${this.createInfoRows(videoInfo)}
+      <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2 pb-1 border-b border-slate-300 dark:border-gray-600">Video Information</h3>
+      <table class="w-full text-sm">
+        <tbody>
+          ${this.createInfoRows(videoInfo)}
+        </tbody>
       </table>
     `;
     
     const audioInfoSection = document.createElement('div');
-    audioInfoSection.className = 'info-section';
-    
-    if (Object.keys(audioInfo).length > 0) {
-      audioInfoSection.innerHTML = `
-        <h3>Audio Information</h3>
-        <table class="info-table">
+    audioInfoSection.className = 'mb-0'; // Tailwind classes for info-section (last one)
+    audioInfoSection.innerHTML = `
+      <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2 pb-1 border-b border-slate-300 dark:border-gray-600">Audio Information</h3>
+      <table class="w-full text-sm">
+        <tbody>
           ${this.createInfoRows(audioInfo)}
-        </table>
-      `;
-    } else {
-      audioInfoSection.innerHTML = `
-        <h3>Audio Information</h3>
-        <p>No audio track detected.</p>
-      `;
-    }
+        </tbody>
+      </table>
+    `;
     
+    // Append to the main container, assuming it's already styled
     this.elements.infoContainer.appendChild(videoInfoSection);
     this.elements.infoContainer.appendChild(audioInfoSection);
   }
   
   createInfoRows(info) {
     return Object.entries(info)
+      .filter(([, value]) => value !== null && value !== undefined && value !== '')
       .map(([key, value]) => {
-        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-        return `
-          <tr>
-            <td>${label}:</td>
-            <td>${value}</td>
-          </tr>
-        `;
+        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        return `<tr class="border-b border-slate-200 dark:border-gray-600 last:border-b-0"><td class="py-1.5 pr-2 font-medium text-slate-600 dark:text-slate-400 w-1/3">${escapeHtml(formattedKey)}:</td><td class="py-1.5 text-slate-800 dark:text-slate-100">${escapeHtml(String(value))}</td></tr>`;
       })
       .join('');
   }
@@ -291,6 +319,54 @@ class VideoInfoTool extends Tool {
       m.toString().padStart(2, '0'),
       s.toString().padStart(2, '0')
     ].join(':');
+  }
+
+  downloadMetadata() {
+    if (!this.metadata) {
+      this.log('No metadata available to download', 'error');
+      return;
+    }
+
+    try {
+      // Create a clean copy of metadata with better formatting
+      const cleanMetadata = {
+        ...this.metadata,
+        // Remove null/undefined values for cleaner JSON
+        video: Object.fromEntries(
+          Object.entries(this.metadata.video).filter(([, value]) => 
+            value !== null && value !== undefined && value !== ''
+          )
+        ),
+        audio: Object.fromEntries(
+          Object.entries(this.metadata.audio).filter(([, value]) => 
+            value !== null && value !== undefined && value !== ''
+          )
+        )
+      };
+
+      const jsonString = JSON.stringify(cleanMetadata, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      
+      // Create filename based on original video filename
+      const originalName = this.metadata.file.filename;
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+      const filename = `${nameWithoutExt}_metadata.json`;
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      this.log(`Metadata downloaded as ${filename}`, 'success');
+    } catch (error) {
+      this.log(`Error downloading metadata: ${error.message}`, 'error');
+      console.error('Download error:', error);
+    }
   }
 }
 

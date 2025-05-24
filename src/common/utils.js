@@ -38,10 +38,44 @@ export function addLog(message, type = 'info') {
   const logContent = document.getElementById('logContent');
   if (!logContent) return;
 
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${type}`;
-  entry.textContent = message;
-  logContent.appendChild(entry);
+  // Convert logContent to textarea if it's not already
+  if (!logContent.tagName || logContent.tagName !== 'TEXTAREA') {
+    const textarea = document.createElement('textarea');
+    textarea.id = 'logContent';
+    textarea.className = 'w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors';
+    textarea.readOnly = true;
+    textarea.placeholder = 'Logs will appear here...';
+    
+    // Copy any existing content
+    const existingContent = logContent.textContent || '';
+    textarea.value = existingContent;
+    
+    // Replace the old element
+    logContent.parentNode.replaceChild(textarea, logContent);
+    
+    // Update reference
+    const newLogContent = document.getElementById('logContent');
+    if (newLogContent) {
+      logContent = newLogContent;
+    }
+  }
+
+  // Get the type prefix and add the message
+  let prefix = '';
+  if (type === 'success') {
+    prefix = '✓ SUCCESS: ';
+  } else if (type === 'error') {
+    prefix = '✗ ERROR: ';
+  } else if (type === 'warning') {
+    prefix = '⚠ WARNING: ';
+  } else {
+    prefix = 'ℹ INFO: ';
+  }
+
+  const timestamp = new Date().toLocaleTimeString();
+  const logEntry = `[${timestamp}] ${prefix}${message}\n`;
+  
+  logContent.value += logEntry;
   logContent.scrollTop = logContent.scrollHeight;
 }
 

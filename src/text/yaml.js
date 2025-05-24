@@ -8,75 +8,184 @@ import jsyaml from 'js-yaml';
 // YAML validator tool template
 export const template = `
     <div class="tool-container">
-      <h1>YAML Validator</h1>
-      <p class="section-description">Validate YAML and convert it to JSON or Python dictionary with interactive view</p>
+      <style>
+        /* JSON Tree View styles for syntax highlighting */
+        .json-tree {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+        }
+        .json-tree ul {
+          margin-left: 1.5rem;
+          padding: 0;
+          list-style-type: none;
+        }
+        .json-tree-item {
+          margin: 0.25rem 0;
+          position: relative;
+        }
+        .json-key {
+          color: #2563eb;
+          font-weight: 500;
+        }
+        .dark .json-key {
+          color: #60a5fa;
+        }
+        .json-string {
+          color: #16a34a;
+        }
+        .dark .json-string {
+          color: #4ade80;
+        }
+        .json-number {
+          color: #9333ea;
+        }
+        .dark .json-number {
+          color: #c084fc;
+        }
+        .json-boolean {
+          color: #f59e0b;
+        }
+        .dark .json-boolean {
+          color: #fbbf24;
+        }
+        .json-null {
+          color: #94a3b8;
+          font-style: italic;
+        }
+        .dark .json-null {
+          color: #64748b;
+        }
+        .collapsible-marker {
+          cursor: pointer;
+          user-select: none;
+          color: #64748b;
+          margin-right: 0.25rem;
+        }
+        .dark .collapsible-marker {
+          color: #94a3b8;
+        }
+        .python-dict {
+          color: #0f172a;
+        }
+        .dark .python-dict {
+          color: #f1f5f9;
+        }
+        .python-key {
+          color: #1e40af;
+          font-weight: 500;
+        }
+        .dark .python-key {
+          color: #60a5fa;
+        }
+        .python-string {
+          color: #16a34a;
+        }
+        .dark .python-string {
+          color: #4ade80;
+        }
+        .python-number {
+          color: #9333ea;
+        }
+        .dark .python-number {
+          color: #c084fc;
+        }
+        .python-boolean {
+          color: #f59e0b;
+        }
+        .dark .python-boolean {
+          color: #fbbf24;
+        }
+        .python-none {
+          color: #6c757d;
+        }
+        .dark .python-none {
+          color: #9ca3af;
+        }
+        .status-bar.valid {
+          color: #16a34a;
+        }
+        .dark .status-bar.valid {
+          color: #4ade80;
+        }
+        .status-bar.error {
+          color: #dc2626;
+        }
+        .dark .status-bar.error {
+          color: #f87171;
+        }
+      </style>
       
-      <div class="yaml-editor-container">
-        <div class="editor-panel">
-          <div class="panel-header">
-            <h3>YAML Input</h3>
-            <div class="panel-actions">
-              <button id="clearYamlBtn" class="btn-icon" title="Clear">
-                <span class="icon">❌</span>
+      <p class="text-slate-600 dark:text-slate-300 mb-6">Validate YAML and convert it to JSON or Python dictionary with interactive view</p>
+      
+      <div class="grid md:grid-cols-2 gap-6 mb-6 min-h-[500px] h-[60vh]">
+        <div class="flex flex-col bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg overflow-hidden transition-colors">
+          <div class="flex justify-between items-center bg-slate-100 dark:bg-gray-700 py-3 px-4 border-b border-slate-200 dark:border-gray-600 transition-colors">
+            <h3 class="m-0 text-base font-medium text-slate-700 dark:text-slate-300">YAML Input</h3>
+            <div class="flex space-x-1">
+              <button id="clearYamlBtn" class="p-1.5 rounded bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white transition-colors" title="Clear">
+                <span class="text-sm">❌</span>
               </button>
-              <button id="loadSampleBtn" class="btn-icon" title="Load Sample">
-                <span class="icon">📋</span>
+              <button id="loadSampleBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Load Sample">
+                <span class="text-sm">📋</span>
               </button>
             </div>
           </div>
-          <textarea id="yamlInput" class="yaml-editor" placeholder="Paste your YAML here..."></textarea>
-          <div id="yamlStatus" class="status-bar"></div>
+          <textarea id="yamlInput" class="flex-grow p-4 font-mono text-sm leading-normal resize-none border-none focus:outline-none focus:ring-0 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 transition-colors" placeholder="Paste your YAML here..."></textarea>
+          <div id="yamlStatus" class="p-2 bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-gray-600 text-xs transition-colors">Ready</div>
         </div>
         
-        <div class="output-panel">
-          <div class="panel-header">
-            <h3>Output</h3>
-            <div class="panel-actions">
-              <button id="expandAllBtn" class="btn-icon" title="Expand All">
-                <span class="icon">🔽</span>
+        <div class="flex flex-col bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg overflow-hidden transition-colors">
+          <div class="flex justify-between items-center bg-slate-100 dark:bg-gray-700 py-3 px-4 border-b border-slate-200 dark:border-gray-600 transition-colors">
+            <h3 class="m-0 text-base font-medium text-slate-700 dark:text-slate-300">Output</h3>
+            <div class="flex space-x-1">
+              <button id="expandAllBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Expand All">
+                <span class="text-sm">🔽</span>
               </button>
-              <button id="collapseAllBtn" class="btn-icon" title="Collapse All">
-                <span class="icon">◀</span>
+              <button id="collapseAllBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Collapse All">
+                <span class="text-sm">◀</span>
               </button>
-              <button id="copyOutputBtn" class="btn-icon" title="Copy">
-                <span class="icon">📋</span>
+              <button id="copyOutputBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Copy">
+                <span class="text-sm">📋</span>
               </button>
             </div>
           </div>
-          <div id="jsonOutput" class="json-output"></div>
+          <div id="jsonOutput" class="flex-grow p-4 font-mono text-sm leading-normal overflow-auto bg-slate-50 dark:bg-gray-750 text-slate-900 dark:text-slate-100 whitespace-pre-wrap min-h-[300px] transition-colors"></div>
         </div>
       </div>
       
-      <div id="errorContainer" class="error-container">
-        <div class="error-header">Error</div>
-        <div id="errorContent" class="error-content"></div>
+      <div id="errorContainer" class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 rounded-lg mb-6 overflow-hidden hidden transition-colors">
+        <div class="bg-red-500 dark:bg-red-600 text-white py-2 px-4 font-medium">Error</div>
+        <div id="errorContent" class="p-4 text-red-700 dark:text-red-300 font-mono whitespace-pre-wrap"></div>
       </div>
       
-      <div class="tool-options">
-        <div class="option-group">
-          <label>
-            <input type="checkbox" id="autoValidate" checked>
-            Auto-validate
-          </label>
+      <div class="flex flex-wrap gap-x-6 gap-y-3 bg-slate-100 dark:bg-gray-700 p-4 rounded-lg mb-6 items-center transition-colors">
+        <div class="flex items-center">
+          <input type="checkbox" id="autoValidate" checked class="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700">
+          <label for="autoValidate" class="ml-2 text-sm text-slate-700 dark:text-slate-300">Auto-validate</label>
         </div>
-        <div class="option-group">
-          <label>
-            <input type="checkbox" id="prettyPrint">
-            Pretty print
-          </label>
+        <div class="flex items-center">
+          <input type="checkbox" id="prettyPrint" class="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700">
+          <label for="prettyPrint" class="ml-2 text-sm text-slate-700 dark:text-slate-300">Pretty print</label>
         </div>
-        <div class="option-group format-selector">
-          <span>Format:</span>
-          <label class="radio-label">
-            <input type="radio" name="outputFormat" id="formatJson" checked>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-700 dark:text-slate-300">Format:</span>
+          <label class="flex items-center gap-1 cursor-pointer px-2 py-1 bg-slate-200 dark:bg-gray-600 rounded-md hover:bg-slate-300 dark:hover:bg-gray-500 text-sm text-slate-700 dark:text-slate-300 transition-colors">
+            <input type="radio" name="outputFormat" id="formatJson" checked class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             JSON
           </label>
-          <label class="radio-label">
-            <input type="radio" name="outputFormat" id="formatPython">
+          <label class="flex items-center gap-1 cursor-pointer px-2 py-1 bg-slate-200 dark:bg-gray-600 rounded-md hover:bg-slate-300 dark:hover:bg-gray-500 text-sm text-slate-700 dark:text-slate-300 transition-colors">
+            <input type="radio" name="outputFormat" id="formatPython" class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             Python Dict
           </label>
         </div>
       </div>
+
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+        <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
+      </div>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
     </div>
 `;
 
@@ -272,10 +381,11 @@ class YamlValidatorTool extends Tool {
     }
       
     navigator.clipboard.writeText(outputString).then(() => {
-      const originalText = this.elements.copyOutputBtn.querySelector('.icon').textContent;
-      this.elements.copyOutputBtn.querySelector('.icon').textContent = '✓';
+      const iconSpan = this.elements.copyOutputBtn.querySelector('span');
+      const originalText = iconSpan.textContent;
+      iconSpan.textContent = '✓';
       setTimeout(() => {
-        this.elements.copyOutputBtn.querySelector('.icon').textContent = originalText;
+        iconSpan.textContent = originalText;
       }, 1000);
     });
   }
@@ -283,27 +393,29 @@ class YamlValidatorTool extends Tool {
   updateCharCount() {
     const text = this.elements.yamlInput.value;
     this.elements.yamlStatus.textContent = `Characters: ${text.length}`;
-    this.elements.yamlStatus.className = 'status-bar';
+    this.elements.yamlStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
   }
 
   showError(message) {
     const elements = this.elements;
-    elements.errorContainer.classList.add('active');
+    elements.errorContainer.classList.remove('hidden');
+    elements.errorContainer.classList.add('block');
     elements.errorContent.textContent = message;
     elements.yamlStatus.textContent = 'Error';
-    elements.yamlStatus.className = 'status-bar error';
+    elements.yamlStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
   }
 
   async validateYaml() {
     const elements = this.elements;
     const yamlText = elements.yamlInput.value.trim();
     
-    elements.errorContainer.classList.remove('active');
+    elements.errorContainer.classList.remove('block');
+    elements.errorContainer.classList.add('hidden');
     
     if (!yamlText) {
       elements.jsonOutput.innerHTML = '';
       elements.yamlStatus.textContent = 'Empty input';
-      elements.yamlStatus.className = 'status-bar';
+      elements.yamlStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
       return;
     }
     
@@ -312,13 +424,13 @@ class YamlValidatorTool extends Tool {
       this.lastValidJson = json;
       
       elements.yamlStatus.textContent = 'Valid YAML';
-      elements.yamlStatus.className = 'status-bar valid';
+      elements.yamlStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
       
       this.renderOutput(json);
     } catch (error) {
       elements.jsonOutput.innerHTML = '';
       elements.yamlStatus.textContent = 'Invalid YAML';
-      elements.yamlStatus.className = 'status-bar error';
+      elements.yamlStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
       
       if (error.mark) {
         this.showError(this.formatYamlError(error, yamlText));

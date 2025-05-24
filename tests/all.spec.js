@@ -7,14 +7,14 @@ test.describe('SafeWebTool Tests', () => {
   test('homepage navigation and elements', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle('SafeWebTool');
-    await expect(page.locator('.logo')).toBeVisible();
+    await expect(page.locator('header img[alt*="Logo"]')).toBeVisible();
     await expect(page.locator('header h1')).toContainText('SafeWebTool');
     await expect(page.locator('nav a[href="/"]')).toBeVisible();
   });
 
   test('home alias route works', async ({ page }) => {
     await page.goto('/home');
-    await expect(page.locator('.tool-container h1')).toContainText('Welcome');
+    await expect(page.locator('main h1')).toContainText('Welcome');
     await expect(page.locator('nav a[href="/"]')).toHaveClass(/active/);
   });
   
@@ -41,9 +41,9 @@ test.describe('SafeWebTool Tests', () => {
         
         await page.goto(`/${testTool.path}`);
         
-        // Check that tool container loads
-        await expect(page.locator('.tool-container')).toBeVisible();
-        await expect(page.locator('.tool-container h1')).toContainText(testTool.info.name);
+        // Check that tool page loads with new structure
+        await expect(page.locator('.tool-page')).toBeVisible();
+        await expect(page.locator('.tool-page h1').first()).toContainText(testTool.info.name);
         
         // Just verify that the tool UI loaded - different tools may have different UI elements
         // The most essential check is that the container and heading loaded
@@ -133,11 +133,13 @@ test.describe('SafeWebTool Tests', () => {
   for (const [toolPath, toolInfo] of Object.entries(tools)) {
     test(`tool: ${toolInfo.name}`, async ({ page }) => {
       await page.goto(`/${toolPath}`);
-      await expect(page.locator('.tool-container')).toBeVisible();
-      await expect(page.locator('.tool-container h1')).toContainText(toolInfo.name);
+      await expect(page.locator('.tool-page')).toBeVisible();
+      await expect(page.locator('.tool-page h1').first()).toContainText(toolInfo.name);
       
       if (toolPath.startsWith('video/') || toolPath.startsWith('image/')) {
-        await expect(page.locator('.file-select-btn')).toBeVisible();
+        // Check for file selection button - different tools use different selectors
+        const fileSelectBtn = page.locator('.file-select-btn, #selectFileBtn');
+        await expect(fileSelectBtn.first()).toBeVisible();
       }
       
       if (toolPath.startsWith('text/')) {
@@ -150,8 +152,8 @@ test.describe('SafeWebTool Tests', () => {
   for (const [categoryId, categoryInfo] of Object.entries(categories)) {
     test(`category: ${categoryInfo.name}`, async ({ page }) => {
       await page.goto(`/${categoryId}`);
-      await expect(page.locator('.tool-container')).toBeVisible();
-      await expect(page.locator('.tool-container h1')).toContainText(categoryInfo.name);
+      await expect(page.locator('main')).toBeVisible();
+      await expect(page.locator('main h1').first()).toContainText(categoryInfo.name);
     });
   }
   
@@ -161,20 +163,20 @@ test.describe('SafeWebTool Tests', () => {
     await page.goto('/');
     await expect(page.locator('header')).toBeVisible();
     await expect(page.locator('nav')).toBeVisible();
-    await expect(page.locator('.tool-container')).toBeVisible();
+    await expect(page.locator('main')).toBeVisible();
     
     // Test a tool page on mobile
     const firstToolPath = Object.keys(tools)[0];
     await page.goto(`/${firstToolPath}`);
-    await expect(page.locator('.tool-container')).toBeVisible();
+    await expect(page.locator('.tool-page')).toBeVisible();
     await expect(page.locator('footer')).toBeVisible();
   });
   
   // Error pages
   test('404 page', async ({ page }) => {
     await page.goto('/invalid-route');
-    await expect(page.locator('.tool-container h1')).toContainText('Not Found');
-    await expect(page.locator('.tool-container a[href="/"]')).toBeVisible();
+    await expect(page.locator('main h1')).toContainText('Not Found');
+    await expect(page.locator('main a[href="/"]')).toBeVisible();
   });
   
   // Console error test - check for JavaScript errors

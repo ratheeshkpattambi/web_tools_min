@@ -3,79 +3,146 @@ import { Tool } from '../common/base.js';
 // JSON Formatter tool template - following YAML tool patterns
 export const template = `
     <div class="tool-container">
-      <h1>JSON Formatter & Converter</h1>
-      <p class="section-description">Format, validate, and convert JSON data with multiple output options</p>
+      <style>
+        /* JSON Tree View styles for syntax highlighting */
+        .json-tree {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+        }
+        .json-tree ul {
+          margin-left: 1.5rem;
+          padding: 0;
+          list-style-type: none;
+        }
+        .json-tree-item {
+          margin: 0.25rem 0;
+          position: relative;
+        }
+        .json-key {
+          color: #2563eb;
+          font-weight: 500;
+        }
+        .dark .json-key {
+          color: #60a5fa;
+        }
+        .json-string {
+          color: #16a34a;
+        }
+        .dark .json-string {
+          color: #4ade80;
+        }
+        .json-number {
+          color: #9333ea;
+        }
+        .dark .json-number {
+          color: #c084fc;
+        }
+        .json-boolean {
+          color: #f59e0b;
+        }
+        .dark .json-boolean {
+          color: #fbbf24;
+        }
+        .json-null {
+          color: #94a3b8;
+          font-style: italic;
+        }
+        .dark .json-null {
+          color: #64748b;
+        }
+        .status-bar.valid {
+          color: #16a34a;
+        }
+        .dark .status-bar.valid {
+          color: #4ade80;
+        }
+        .status-bar.error {
+          color: #dc2626;
+        }
+        .dark .status-bar.error {
+          color: #f87171;
+        }
+      </style>
       
-      <div class="yaml-editor-container">
-        <div class="editor-panel">
-          <div class="panel-header">
-            <h3>JSON Input</h3>
-            <div class="panel-actions">
-              <button id="clearJsonBtn" class="btn-icon" title="Clear">
-                <span class="icon">❌</span>
+      <p class="text-slate-600 dark:text-slate-300 mb-6">Format, validate, and convert JSON data with multiple output options</p>
+      
+      <div class="grid md:grid-cols-2 gap-6 mb-6 min-h-[500px] h-[60vh]">
+        <div class="flex flex-col bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg overflow-hidden transition-colors">
+          <div class="flex justify-between items-center bg-slate-100 dark:bg-gray-700 py-3 px-4 border-b border-slate-200 dark:border-gray-600 transition-colors">
+            <h3 class="m-0 text-base font-medium text-slate-700 dark:text-slate-300">JSON Input</h3>
+            <div class="flex space-x-1">
+              <button id="clearJsonBtn" class="p-1.5 rounded bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white transition-colors" title="Clear">
+                <span class="text-sm">❌</span>
               </button>
-              <button id="uploadDataBtn" class="btn-icon" title="Upload File">
-                <span class="icon">📁</span>
+              <button id="uploadDataBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Upload File">
+                <span class="text-sm">📁</span>
               </button>
-              <button id="loadSampleBtn" class="btn-icon" title="Load Sample">
-                <span class="icon">📋</span>
+              <button id="loadSampleBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Load Sample">
+                <span class="text-sm">📋</span>
               </button>
             </div>
           </div>
-          <textarea id="jsonInput" class="yaml-editor" placeholder="Paste your JSON here or upload a file..."></textarea>
-          <div id="jsonStatus" class="status-bar"></div>
+          <textarea id="jsonInput" class="flex-grow p-4 font-mono text-sm leading-normal resize-none border-none focus:outline-none focus:ring-0 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 transition-colors" placeholder="Paste your JSON here or upload a file..."></textarea>
+          <div id="jsonStatus" class="p-2 bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-gray-600 text-xs transition-colors">Ready</div>
         </div>
         
-        <div class="output-panel">
-          <div class="panel-header">
-            <h3>Output</h3>
-            <div class="panel-actions">
-              <button id="copyOutputBtn" class="btn-icon" title="Copy Output">
-                <span class="icon">📋</span>
+        <div class="flex flex-col bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg overflow-hidden transition-colors">
+          <div class="flex justify-between items-center bg-slate-100 dark:bg-gray-700 py-3 px-4 border-b border-slate-200 dark:border-gray-600 transition-colors">
+            <h3 class="m-0 text-base font-medium text-slate-700 dark:text-slate-300">Output</h3>
+            <div class="flex space-x-1">
+              <button id="copyOutputBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Copy Output">
+                <span class="text-sm">📋</span>
               </button>
-              <button id="downloadBtn" class="btn-icon" title="Download">
-                <span class="icon">💾</span>
+              <button id="downloadBtn" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-slate-400 transition-colors" title="Download">
+                <span class="text-sm">💾</span>
               </button>
             </div>
           </div>
-          <div id="jsonOutput" class="json-output"></div>
+          <div id="jsonOutput" class="flex-grow p-4 font-mono text-sm leading-normal overflow-auto bg-slate-50 dark:bg-gray-750 text-slate-900 dark:text-slate-100 whitespace-pre-wrap min-h-[300px] transition-colors"></div>
         </div>
       </div>
       
-      <div id="errorContainer" class="error-container">
-        <div class="error-header">Error</div>
-        <div id="errorContent" class="error-content"></div>
+      <div id="errorContainer" class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 rounded-lg mb-6 overflow-hidden hidden transition-colors">
+        <div class="bg-red-500 dark:bg-red-600 text-white py-2 px-4 font-medium">Error</div>
+        <div id="errorContent" class="p-4 text-red-700 dark:text-red-300 font-mono whitespace-pre-wrap"></div>
       </div>
       
-      <div class="tool-options">
-        <div class="option-group">
-          <label>
-            <input type="checkbox" id="prettyPrint" checked>
-            Pretty Print
-          </label>
+      <div class="flex flex-wrap gap-4 bg-slate-100 dark:bg-gray-700 p-4 rounded-lg mb-6 items-center transition-colors">
+        <div class="flex items-center">
+          <input type="checkbox" id="prettyPrint" checked class="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700">
+          <label for="prettyPrint" class="ml-2 text-sm text-slate-700 dark:text-slate-300">Pretty Print</label>
         </div>
-        <div class="option-group">
-          <button id="validateBtn" class="file-select-btn" style="margin-right: 0.5rem;">Validate</button>
-          <button id="formatBtn" class="file-select-btn" style="margin-right: 0.5rem;">Format / Beautify</button>
-          <button id="minifyBtn" class="file-select-btn">Minify / Compact</button>
+        
+        <div class="flex gap-2">
+          <button id="validateBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Validate</button>
+          <button id="formatBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Format / Beautify</button>
+          <button id="minifyBtn" class="px-4 py-2 bg-yellow-600 dark:bg-yellow-500 text-white rounded-md hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors text-sm font-medium">Minify / Compact</button>
         </div>
-        <div class="option-group format-selector">
-          <span>Convert to:</span>
-          <label class="radio-label">
-            <input type="radio" name="outputFormat" id="formatXml">
+        
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-700 dark:text-slate-300">Convert to:</span>
+          <label class="flex items-center gap-1 cursor-pointer px-2 py-1 bg-slate-200 dark:bg-gray-600 rounded-md hover:bg-slate-300 dark:hover:bg-gray-500 text-sm text-slate-700 dark:text-slate-300 transition-colors">
+            <input type="radio" name="outputFormat" id="formatXml" class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             XML
           </label>
-          <label class="radio-label">
-            <input type="radio" name="outputFormat" id="formatCsv">
+          <label class="flex items-center gap-1 cursor-pointer px-2 py-1 bg-slate-200 dark:bg-gray-600 rounded-md hover:bg-slate-300 dark:hover:bg-gray-500 text-sm text-slate-700 dark:text-slate-300 transition-colors">
+            <input type="radio" name="outputFormat" id="formatCsv" class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             CSV
           </label>
-          <label class="radio-label">
-            <input type="radio" name="outputFormat" id="formatYaml">
+          <label class="flex items-center gap-1 cursor-pointer px-2 py-1 bg-slate-200 dark:bg-gray-600 rounded-md hover:bg-slate-300 dark:hover:bg-gray-500 text-sm text-slate-700 dark:text-slate-300 transition-colors">
+            <input type="radio" name="outputFormat" id="formatYaml" class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             YAML
           </label>
-          <button id="convertBtn" class="file-select-btn">Convert</button>
+          <button id="convertBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">Convert</button>
         </div>
       </div>
+      
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+        <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
+      </div>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
       
       <input type="file" id="fileInput" accept=".json" style="display: none;">
     </div>
@@ -144,7 +211,9 @@ class JsonFormatterTool extends Tool {
       formatXml: 'formatXml',
       formatCsv: 'formatCsv',
       formatYaml: 'formatYaml',
-      convertBtn: 'convertBtn'
+      convertBtn: 'convertBtn',
+      logHeader: 'logHeader',
+      logContent: 'logContent'
     };
   }
 
@@ -168,7 +237,6 @@ class JsonFormatterTool extends Tool {
         clearTimeout(this.validationTimeout);
         this.updateCharCount();
         
-        // Always auto-validate (removed checkbox)
         this.validationTimeout = setTimeout(() => {
           this.validateJson();
         }, 300);
@@ -195,7 +263,6 @@ class JsonFormatterTool extends Tool {
           reader.onload = (e) => {
             elements.jsonInput.value = e.target.result;
             this.updateCharCount();
-            // Always auto-validate (removed checkbox)
             this.validateJson();
             this.lastAction = 'upload';
           };
@@ -243,8 +310,9 @@ class JsonFormatterTool extends Tool {
     elements.jsonInput.value = '';
     elements.jsonOutput.textContent = '';
     elements.jsonStatus.textContent = '';
-    elements.jsonStatus.className = 'status-bar';
-    elements.errorContainer.classList.remove('active');
+    elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
+    elements.errorContainer.classList.remove('block');
+    elements.errorContainer.classList.add('hidden');
     this.lastValidJson = null;
     this.lastAction = 'clear';
     this.updateCharCount();
@@ -253,7 +321,6 @@ class JsonFormatterTool extends Tool {
   loadSample() {
     this.elements.jsonInput.value = SAMPLE_JSON;
     this.updateCharCount();
-    // Always auto-validate (removed checkbox)
     this.validateJson();
     this.lastAction = 'sample';
   }
@@ -263,10 +330,11 @@ class JsonFormatterTool extends Tool {
     if (!output) return;
     
     navigator.clipboard.writeText(output).then(() => {
-      const originalIcon = this.elements.copyOutputBtn.querySelector('.icon').textContent;
-      this.elements.copyOutputBtn.querySelector('.icon').textContent = '✓';
+      const iconSpan = this.elements.copyOutputBtn.querySelector('.text-sm');
+      const originalIcon = iconSpan.textContent;
+      iconSpan.textContent = '✓';
       setTimeout(() => {
-        this.elements.copyOutputBtn.querySelector('.icon').textContent = originalIcon;
+        iconSpan.textContent = originalIcon;
       }, 1000);
     });
   }
@@ -309,27 +377,29 @@ class JsonFormatterTool extends Tool {
   updateCharCount() {
     const text = this.elements.jsonInput.value;
     this.elements.jsonStatus.textContent = `Characters: ${text.length}`;
-    this.elements.jsonStatus.className = 'status-bar';
+    this.elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
   }
 
   showError(message) {
     const elements = this.elements;
-    elements.errorContainer.classList.add('active');
+    elements.errorContainer.classList.remove('hidden');
+    elements.errorContainer.classList.add('block');
     elements.errorContent.textContent = message;
     elements.jsonStatus.textContent = 'Error';
-    elements.jsonStatus.className = 'status-bar error';
+    elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
   }
 
   validateJson() {
     const elements = this.elements;
     const jsonText = elements.jsonInput.value.trim();
     
-    elements.errorContainer.classList.remove('active');
+    elements.errorContainer.classList.remove('block');
+    elements.errorContainer.classList.add('hidden');
     
     if (!jsonText) {
       elements.jsonOutput.textContent = '';
       elements.jsonStatus.textContent = 'Empty input';
-      elements.jsonStatus.className = 'status-bar';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
       return;
     }
     
@@ -338,14 +408,14 @@ class JsonFormatterTool extends Tool {
       this.lastValidJson = parsed;
       
       elements.jsonStatus.textContent = 'Valid JSON';
-      elements.jsonStatus.className = 'status-bar valid';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
       elements.jsonOutput.textContent = 'JSON is valid!';
       
       this.lastAction = 'validate';
     } catch (error) {
       elements.jsonOutput.textContent = '';
       elements.jsonStatus.textContent = 'Invalid JSON';
-      elements.jsonStatus.className = 'status-bar error';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
       
       this.showError(`Parse error: ${error.message}`);
       this.lastValidJson = null;
@@ -368,8 +438,9 @@ class JsonFormatterTool extends Tool {
       
       elements.jsonOutput.textContent = JSON.stringify(parsed, null, space);
       elements.jsonStatus.textContent = 'JSON formatted';
-      elements.jsonStatus.className = 'status-bar valid';
-      elements.errorContainer.classList.remove('active');
+      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.errorContainer.classList.remove('block');
+      elements.errorContainer.classList.add('hidden');
       
       this.lastValidJson = parsed;
       this.lastAction = 'format';
@@ -391,8 +462,9 @@ class JsonFormatterTool extends Tool {
       const parsed = JSON.parse(jsonText);
       elements.jsonOutput.textContent = JSON.stringify(parsed);
       elements.jsonStatus.textContent = 'JSON minified';
-      elements.jsonStatus.className = 'status-bar valid';
-      elements.errorContainer.classList.remove('active');
+      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.errorContainer.classList.remove('block');
+      elements.errorContainer.classList.add('hidden');
       
       this.lastValidJson = parsed;
       this.lastAction = 'minify';
@@ -439,8 +511,9 @@ class JsonFormatterTool extends Tool {
       
       elements.jsonOutput.textContent = output;
       elements.jsonStatus.textContent = `Converted to ${format.toUpperCase()}`;
-      elements.jsonStatus.className = 'status-bar valid';
-      elements.errorContainer.classList.remove('active');
+      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.errorContainer.classList.remove('block');
+      elements.errorContainer.classList.add('hidden');
       
       this.lastValidJson = parsed;
       this.lastAction = 'convert';
