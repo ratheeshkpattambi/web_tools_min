@@ -5,53 +5,6 @@ import { JAMSHEED_FOOTER } from '../common/author-config.js';
 export const template = `
     <div class="tool-container">
       <style>
-        /* JSON Tree View styles for syntax highlighting */
-        .json-tree {
-          margin: 0;
-          padding: 0;
-          list-style-type: none;
-        }
-        .json-tree ul {
-          margin-left: 1.5rem;
-          padding: 0;
-          list-style-type: none;
-        }
-        .json-tree-item {
-          margin: 0.25rem 0;
-          position: relative;
-        }
-        .json-key {
-          color: #2563eb;
-          font-weight: 500;
-        }
-        .dark .json-key {
-          color: #60a5fa;
-        }
-        .json-string {
-          color: #16a34a;
-        }
-        .dark .json-string {
-          color: #4ade80;
-        }
-        .json-number {
-          color: #9333ea;
-        }
-        .dark .json-number {
-          color: #c084fc;
-        }
-        .json-boolean {
-          color: #f59e0b;
-        }
-        .dark .json-boolean {
-          color: #fbbf24;
-        }
-        .json-null {
-          color: #94a3b8;
-          font-style: italic;
-        }
-        .dark .json-null {
-          color: #64748b;
-        }
         .status-bar.valid {
           color: #16a34a;
         }
@@ -100,7 +53,7 @@ export const template = `
               </button>
             </div>
           </div>
-          <div id="jsonOutput" class="flex-grow p-4 font-mono text-sm leading-normal overflow-auto bg-slate-50 dark:bg-gray-750 text-slate-900 dark:text-slate-100 whitespace-pre-wrap min-h-[300px] transition-colors"></div>
+          <div id="jsonOutput" class="flex-grow p-4 font-mono text-sm leading-normal overflow-auto bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-slate-100 whitespace-pre-wrap min-h-[300px] transition-colors"></div>
         </div>
       </div>
       
@@ -312,7 +265,7 @@ class JsonFormatterTool extends Tool {
     elements.jsonInput.value = '';
     elements.jsonOutput.textContent = '';
     elements.jsonStatus.textContent = '';
-    elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
+    elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-gray-600 text-xs transition-colors';
     elements.errorContainer.classList.remove('block');
     elements.errorContainer.classList.add('hidden');
     this.lastValidJson = null;
@@ -379,7 +332,7 @@ class JsonFormatterTool extends Tool {
   updateCharCount() {
     const text = this.elements.jsonInput.value;
     this.elements.jsonStatus.textContent = `Characters: ${text.length}`;
-    this.elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
+    this.elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-gray-600 text-xs transition-colors';
   }
 
   showError(message) {
@@ -388,7 +341,7 @@ class JsonFormatterTool extends Tool {
     elements.errorContainer.classList.add('block');
     elements.errorContent.textContent = message;
     elements.jsonStatus.textContent = 'Error';
-    elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
+    elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar error transition-colors';
   }
 
   validateJson() {
@@ -401,7 +354,7 @@ class JsonFormatterTool extends Tool {
     if (!jsonText) {
       elements.jsonOutput.textContent = '';
       elements.jsonStatus.textContent = 'Empty input';
-      elements.jsonStatus.className = 'p-2 bg-slate-50 text-slate-600 border-t border-slate-200 text-xs';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-gray-600 text-xs transition-colors';
       return;
     }
     
@@ -410,14 +363,14 @@ class JsonFormatterTool extends Tool {
       this.lastValidJson = parsed;
       
       elements.jsonStatus.textContent = 'Valid JSON';
-      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar valid transition-colors';
       elements.jsonOutput.textContent = 'JSON is valid!';
       
       this.lastAction = 'validate';
     } catch (error) {
       elements.jsonOutput.textContent = '';
       elements.jsonStatus.textContent = 'Invalid JSON';
-      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar error';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar error transition-colors';
       
       this.showError(`Parse error: ${error.message}`);
       this.lastValidJson = null;
@@ -440,7 +393,7 @@ class JsonFormatterTool extends Tool {
       
       elements.jsonOutput.textContent = JSON.stringify(parsed, null, space);
       elements.jsonStatus.textContent = 'JSON formatted';
-      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar valid transition-colors';
       elements.errorContainer.classList.remove('block');
       elements.errorContainer.classList.add('hidden');
       
@@ -464,7 +417,7 @@ class JsonFormatterTool extends Tool {
       const parsed = JSON.parse(jsonText);
       elements.jsonOutput.textContent = JSON.stringify(parsed);
       elements.jsonStatus.textContent = 'JSON minified';
-      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar valid transition-colors';
       elements.errorContainer.classList.remove('block');
       elements.errorContainer.classList.add('hidden');
       
@@ -513,7 +466,7 @@ class JsonFormatterTool extends Tool {
       
       elements.jsonOutput.textContent = output;
       elements.jsonStatus.textContent = `Converted to ${format.toUpperCase()}`;
-      elements.jsonStatus.className = 'p-2 bg-slate-50 border-t border-slate-200 text-xs status-bar valid';
+      elements.jsonStatus.className = 'p-2 bg-slate-50 dark:bg-gray-700 border-t border-slate-200 dark:border-gray-600 text-xs status-bar valid transition-colors';
       elements.errorContainer.classList.remove('block');
       elements.errorContainer.classList.add('hidden');
       
