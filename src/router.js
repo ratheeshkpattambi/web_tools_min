@@ -12,7 +12,7 @@ import {
 } from './common/metadata.js';
 
 // Eagerly discover all tool modules
-const toolModules = import.meta.glob('./(video|image|text)/*.js');
+const toolModules = import.meta.glob('./(video|image|text|ml)/*.js');
 
 /**
  * Updates the active class on navigation links
