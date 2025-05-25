@@ -10,6 +10,7 @@ import {
   get404Template,
   getErrorTemplate
 } from './common/metadata.js';
+import { footerManager } from './common/footer-manager.js';
 
 // Eagerly discover all tool modules
 const toolModules = import.meta.glob('./(video|image|text|ml)/*.js');
@@ -115,6 +116,9 @@ function generateCategoryContent(categoryConfig, categoryId) {
  * @param {string} path - The URL path
  */
 export async function handleRoute(path) {
+  // Restore original footer when navigating (tools can override it later)
+  footerManager.restoreOriginalFooter();
+  
   // Update active navigation
   updateActiveNavigation(path);
   

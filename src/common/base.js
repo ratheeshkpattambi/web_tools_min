@@ -2,6 +2,7 @@
  * Base Tool class
  */
 import { addLog, updateProgress, showLogs, formatFileSize } from './utils.js';
+import { footerManager } from './footer-manager.js';
 
 export class Tool {
   /**
@@ -14,6 +15,14 @@ export class Tool {
    * @param {boolean} config.hasOutput - Whether this tool produces downloadable output (default: false)
    * @param {boolean} config.needsProcessButton - Whether this tool needs a process button (default: false)
    * @param {string} config.template - Optional HTML template for this tool
+   * @param {Object} config.customFooter - Optional custom footer configuration
+   * @param {string} config.customFooter.author - Tool author name (required)
+   * @param {string} config.customFooter.authorUrl - Author's website/profile URL
+   * @param {string} config.customFooter.version - Tool version
+   * @param {Array} config.customFooter.links - Additional links [{text, url, icon, external}]
+   * @param {string} config.customFooter.description - Brief description
+   * @param {boolean} config.customFooter.showBackLink - Show "Back to SafeWebTool" link (default: true)
+   * @param {string} config.customFooter.icon - Icon URL or emoji for the footer
    */
   constructor(config = {}) {
     this.id = config.id || '';
@@ -23,6 +32,7 @@ export class Tool {
     this.hasOutput = config.hasOwnProperty('hasOutput') ? config.hasOutput : false;
     this.needsProcessButton = config.hasOwnProperty('needsProcessButton') ? config.needsProcessButton : false;
     this.template = config.template || null; // Store the tool's template
+    this.customFooter = config.customFooter || null; // Store custom footer configuration
     
     this.elements = {};
     this.initialized = false;
@@ -52,6 +62,9 @@ export class Tool {
     
     // Set up common event listeners
     this._setupCommonListeners();
+    
+    // Set up custom footer if configured
+    this._setupCustomFooter();
     
     // Tool-specific initialization
     await this.setup();
@@ -299,5 +312,25 @@ export class Tool {
     if (success) {
       this.log('Processing complete!', 'success');
     }
+  }
+
+  /**
+   * Set up custom footer if configured
+   * @private
+   */
+  _setupCustomFooter() {
+    if (!this.customFooter) return;
+    
+    // Ensure we have the required fields
+    if (!this.customFooter.author) {
+      console.warn(`Tool "${this.name}" has customFooter but missing required 'author' field`);
+      return;
+    }
+    
+    // Set the tool footer with the configuration
+    footerManager.setToolFooter({
+      toolName: this.name,
+      ...this.customFooter
+    });
   }
 } 

@@ -1,4 +1,5 @@
 import { Tool } from '../common/base.js';
+import { JAMSHEED_FOOTER } from '../common/author-config.js';
 
 export const template = `
   <div class="tool-container">
@@ -38,7 +39,8 @@ class RemoveExtraSpacesTool extends Tool {
       needsFileUpload: false,
       hasOutput: true,
       needsProcessButton: false,
-      template
+      template,
+      customFooter: JAMSHEED_FOOTER
     });
   }
 

@@ -1,4 +1,5 @@
 import { Tool } from '../common/base.js';
+import { JAMSHEED_FOOTER } from '../common/author-config.js';
 
 // JSON Formatter tool template - following YAML tool patterns
 export const template = `
@@ -183,7 +184,8 @@ class JsonFormatterTool extends Tool {
       needsFileUpload: true,
       hasOutput: true,
       needsProcessButton: false,
-      template
+      template,
+      customFooter: JAMSHEED_FOOTER
     });
 
     this.lastValidJson = null;
