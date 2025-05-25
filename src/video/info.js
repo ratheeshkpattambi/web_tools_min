@@ -3,7 +3,7 @@
  */
 import { Tool } from '../common/base.js';
 import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
-import { formatFileSize, escapeHtml, resetTool } from '../common/utils.js';
+import { formatFileSize, escapeHtml } from '../common/utils.js';
 
 // Video info tool template
 export const template = `
@@ -28,14 +28,9 @@ export const template = `
       <div id="videoInfoContainer" class="info-container"></div>
       
       <div id="downloadContainer" class="mt-4 hidden">
-        <div class="flex gap-2 flex-wrap">
-          <button id="downloadMetadataBtn" class="flex-1 min-w-0 px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
-            📄 Download Metadata
-          </button>
-          <button id="resetBtn" class="flex-1 min-w-0 px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-600 transition-colors text-sm font-medium">
-            🔄 Reset
-          </button>
-        </div>
+        <button id="downloadMetadataBtn" class="w-full px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">
+          📄 Download Metadata
+        </button>
       </div>
 
       <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
@@ -70,7 +65,6 @@ class VideoInfoTool extends Tool {
       progress: 'videoProgress',
       downloadContainer: 'downloadContainer',
       downloadMetadataBtn: 'downloadMetadataBtn',
-      resetBtn: 'resetBtn',
       logHeader: 'logHeader',
       logContent: 'logContent'
     };
@@ -90,13 +84,6 @@ class VideoInfoTool extends Tool {
     if (this.elements.downloadMetadataBtn) {
       this.elements.downloadMetadataBtn.addEventListener('click', () => {
         this.downloadMetadata();
-      });
-    }
-
-    // Add reset button handler
-    if (this.elements.resetBtn) {
-      this.elements.resetBtn.addEventListener('click', () => {
-        this.resetTool();
       });
     }
   }
@@ -380,49 +367,6 @@ class VideoInfoTool extends Tool {
       this.log(`Error downloading metadata: ${error.message}`, 'error');
       console.error('Download error:', error);
     }
-  }
-
-  resetTool() {
-    return resetTool({
-      elements: {
-        ...this.elements,
-        downloadContainer: null // Exclude download container from common reset
-      },
-      defaultValues: {},
-      internalState: {
-        instance: this,
-        defaults: {
-          inputFile: null,
-          metadata: null,
-          ffmpeg: null,
-          isProcessing: false
-        }
-      },
-      confirmMessage: 'Are you sure you want to reset? This will clear all video information and you will need to select a new video file.',
-      customReset: () => {
-        // Clear info container specifically
-        if (this.elements.infoContainer) {
-          this.elements.infoContainer.innerHTML = '';
-          this.elements.infoContainer.style.display = 'none';
-        }
-
-        // Hide download container (but don't clear its innerHTML since it contains the buttons)
-        if (this.elements.downloadContainer) {
-          this.elements.downloadContainer.classList.add('hidden');
-        }
-
-        // Hide progress bar
-        this.hideProgress();
-
-        // Add a brief visual highlight to the drop zone to show it's ready
-        if (this.elements.dropZone) {
-          this.elements.dropZone.classList.add('border-green-500');
-          setTimeout(() => {
-            this.elements.dropZone.classList.remove('border-green-500');
-          }, 2000);
-        }
-      }
-    });
   }
 }
 

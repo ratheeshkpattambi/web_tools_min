@@ -2,7 +2,7 @@
  * Video to GIF conversion module using FFmpeg WASM
  */
 import { Tool } from '../common/base.js';
-import { formatFileSize, resetTool } from '../common/utils.js';
+import { formatFileSize } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
 // Video to GIF tool template
@@ -62,8 +62,7 @@ export const template = `
             </div>
           </div>
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-2" disabled>Create GIF</button>
-        <button id="resetBtn" class="w-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors md:col-span-2">🔄 Reset</button>
+        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-2">Convert to GIF</button>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden transition-colors" style="display: none;">
@@ -108,7 +107,6 @@ class VideoGifTool extends Tool {
       inputVideo: 'input-video',
       outputGif: 'output-gif',
       processBtn: 'processBtn',
-      resetBtn: 'resetBtn',
       width: 'width',
       height: 'height',
       keepRatio: 'keepRatio',
@@ -153,13 +151,6 @@ class VideoGifTool extends Tool {
     this.elements.width.addEventListener('input', () => this.updateHeight());
     this.elements.height.addEventListener('input', () => this.updateWidth());
 
-    // Add reset button handler
-    if (this.elements.resetBtn) {
-      this.elements.resetBtn.addEventListener('click', () => {
-        this.resetTool();
-      });
-    }
-
     if (this.elements.dropZone) {
       this.elements.dropZone.innerHTML = `
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
@@ -192,28 +183,6 @@ class VideoGifTool extends Tool {
     if (parts.length === 2) return parts[0] * 60 + parts[1];
     if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
     return 0;
-  }
-
-  resetTool() {
-    return resetTool({
-      elements: this.elements,
-      defaultValues: {
-        width: '320',
-        height: '240',
-        keepRatio: true,
-        fps: '10',
-        quality: 'medium',
-        startTime: '0:00',
-        duration: '5.0'
-      },
-      internalState: {
-        instance: this,
-        defaults: {
-          videoAspectRatio: 1,
-          ffmpeg: null
-        }
-      }
-    });
   }
 
   async processFile(file) {

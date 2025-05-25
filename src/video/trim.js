@@ -2,7 +2,7 @@
  * Video trimming module using FFmpeg WASM
  */
 import { Tool } from '../common/base.js';
-import { formatFileSize, formatTime, resetTool } from '../common/utils.js';
+import { formatFileSize, formatTime } from '../common/utils.js';
 import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
 
 // Video trim tool template
@@ -83,7 +83,6 @@ export const template = `
         </div>
         <div class="flex gap-4">
           <button id="processBtn" class="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trim Video</button>
-          <button id="resetBtn" class="flex-1 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors">🔄 Reset</button>
         </div>
       </div>
 
@@ -133,7 +132,6 @@ class VideoTrimTool extends Tool {
       inputVideo: 'input-video',
       outputVideo: 'output-video',
       processBtn: 'processBtn',
-      resetBtn: 'resetBtn',
       startTime: 'startTime',
       endTime: 'endTime',
       trimSlider: 'trim-slider',
@@ -189,13 +187,6 @@ class VideoTrimTool extends Tool {
     if (this.elements.endTime) {
       this.elements.endTime.addEventListener('change', () => {
         this.updateEndTimeFromInput();
-      });
-    }
-
-    // Add reset button handler
-    if (this.elements.resetBtn) {
-      this.elements.resetBtn.addEventListener('click', () => {
-        this.resetTool();
       });
     }
 
@@ -425,42 +416,6 @@ class VideoTrimTool extends Tool {
       console.error('Processing error:', error);
       this.endProcessing(false);
     }
-  }
-
-  resetTool() {
-    return resetTool({
-      elements: this.elements,
-      defaultValues: {
-        startTime: null,
-        endTime: null
-      },
-      internalState: {
-        instance: this,
-        defaults: {
-          videoDuration: 0,
-          startTime: 0,
-          endTime: 0,
-          isDragging: false,
-          activeDragHandle: null,
-          ffmpeg: null
-        }
-      },
-      customReset: () => {
-        // Reset slider positions
-        if (this.elements.trimSlider) {
-          const startHandle = this.elements.trimSlider.querySelector('.start-handle');
-          const endHandle = this.elements.trimSlider.querySelector('.end-handle');
-          const sliderRange = this.elements.trimSlider.querySelector('.slider-range');
-          
-          if (startHandle) startHandle.style.left = '0%';
-          if (endHandle) endHandle.style.left = '100%';
-          if (sliderRange) {
-            sliderRange.style.left = '0%';
-            sliderRange.style.right = '0%';
-          }
-        }
-      }
-    });
   }
 }
 

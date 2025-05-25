@@ -2,7 +2,7 @@
  * Video resizing module using FFmpeg WASM
  */
 import { Tool } from '../common/base.js';
-import { formatFileSize, resetTool } from '../common/utils.js';
+import { formatFileSize } from '../common/utils.js';
 import { loadFFmpeg, getFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension, cleanupFFmpeg } from './ffmpeg-utils.js';
 
 // Video resize tool template
@@ -29,12 +29,11 @@ export const template = `
           <label for="height" class="font-medium text-slate-700 dark:text-slate-300">Height:</label>
           <input type="number" id="height" placeholder="Height" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
         </div>
-        <div class="flex items-center gap-2 md:col-span-2">
+        <div class="flex items-center gap-2 md:col-span-1">
           <input type="checkbox" id="keepRatio" checked class="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700">
           <label for="keepRatio" class="text-sm text-slate-700 dark:text-slate-300">Keep Aspect Ratio</label>
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Resize Video</button>
-        <button id="resetBtn" class="w-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors">🔄 Reset</button>
+        <button id="processBtn" class="w-full md:col-span-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Resize Video</button>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 overflow-hidden transition-colors" style="display: none;">
@@ -88,7 +87,6 @@ class VideoResizeTool extends Tool {
       outputVideo: 'output-video',
       outputContainer: 'outputContainer',
       processBtn: 'processBtn',
-      resetBtn: 'resetBtn',
       width: 'width',
       height: 'height',
       keepRatio: 'keepRatio',
@@ -172,12 +170,6 @@ class VideoResizeTool extends Tool {
         if (this.inputFile) {
           this.processFile(this.inputFile);
         }
-      });
-    }
-    
-    if (this.elements.resetBtn) {
-      this.elements.resetBtn.addEventListener('click', () => {
-        this.resetTool();
       });
     }
   }
@@ -440,28 +432,6 @@ class VideoResizeTool extends Tool {
       }
       this.endProcessing(false);
     }
-  }
-
-  resetTool() {
-    this.removeDimensionPreview();
-    
-    return resetTool({
-      elements: this.elements,
-      defaultValues: {
-        width: null,
-        height: null,
-        keepRatio: true
-      },
-      internalState: {
-        instance: this,
-        defaults: {
-          originalWidth: 0,
-          originalHeight: 0,
-          videoAspectRatio: 1,
-          ffmpeg: null
-        }
-      }
-    });
   }
 }
 

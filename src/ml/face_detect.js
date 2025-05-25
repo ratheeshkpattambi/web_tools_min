@@ -1,5 +1,5 @@
 import * as vision from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js';
-import { addLog, resetTool } from '../common/utils.js';
+import { addLog } from '../common/utils.js';
 
 export const template = `
   <div class="tool-container">
@@ -10,7 +10,12 @@ export const template = `
     </div>
     <div id="previewContainer" class="mb-4"></div>
     <div id="resultContainer" class="mb-4"></div>
-    <button id="resetBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-5 rounded-md shadow-sm transition-colors mb-4">🔄 Reset</button>
+    <div id="dropZone" class="drop-zone">
+      <p>Drop an image here or click to select</p>
+      <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="result"></div>
     <div id="logHeader" class="mt-2 bg-slate-100 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
       <span class="font-medium text-slate-700">Logs</span>
       <span id="logToggle" class="text-slate-500 transform transition-transform">▼</span>
@@ -33,7 +38,6 @@ export function initTool() {
   const input = document.getElementById('imageInput');
   const preview = document.getElementById('previewContainer');
   const result = document.getElementById('resultContainer');
-  const resetBtn = document.getElementById('resetBtn');
 
   let faceDetector = null;
 
@@ -102,13 +106,5 @@ export function initTool() {
       result.innerHTML = '<span style="color:#c00">Failed to load image.</span>';
       addLog('Failed to load image', 'error');
     };
-  });
-
-  resetBtn.addEventListener('click', () => {
-    logContent.value = '';
-    result.innerHTML = '';
-    preview.innerHTML = '';
-    input.value = '';
-    addLog('Tool reset.');
   });
 } 
