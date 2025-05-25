@@ -594,13 +594,16 @@ class JsonFormatterTool extends Tool {
       if (value === null) return 'null';
       
       if (typeof value === 'string') {
+        // Handle multiline strings
         if (prettyPrint && value.includes('\n')) {
           return '|-\n' + value.split('\n').map(line => 
             indent.repeat(currentIndentLevel + 1) + line
           ).join('\n');
         }
+        // Quote strings that need quoting
         if (value.includes(': ') || value.includes('#') || 
-            ['- ', 'true', 'false', 'null', 'yes', 'no', 'on', 'off'].includes(value.toLowerCase()) ||
+            value.startsWith('- ') || value.startsWith(' ') || value.endsWith(' ') ||
+            ['true', 'false', 'null', 'yes', 'no', 'on', 'off'].includes(value.toLowerCase()) ||
             value.match(/^\d+$|^\d*\.\d+$|^[-+]\d/)) {
           if (value.includes("'")) {
             return `"${value.replace(/"/g, '\\"')}"`;
@@ -621,19 +624,35 @@ class JsonFormatterTool extends Tool {
           return '[' + value.map(item => convertValue(item, 0)).join(', ') + ']';
         }
         
-        let arrYaml = '\n';
-        value.forEach((item, index) => {
-          let itemYaml = convertValue(item, currentIndentLevel + 1);
-          const prefix = indent.repeat(currentIndentLevel) + '- ';
-          if (itemYaml.startsWith('\n')) itemYaml = itemYaml.substring(1);
-          arrYaml += prefix + itemYaml.split('\n').map((line, i) => 
-            i === 0 ? line : indent.repeat(currentIndentLevel + 1) + line
-          ).join('\n') + (index < value.length - 1 ? '\n' : '');
+        let arrYaml = '';
+        value.forEach((item) => {
+          arrYaml += '\n' + indent.repeat(currentIndentLevel) + '- ';
+          
+          if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+            // For objects in arrays, put first key on same line as dash
+            const keys = Object.keys(item);
+            if (keys.length > 0) {
+              const firstKey = keys[0];
+              const firstValue = convertValue(item[firstKey], currentIndentLevel + 1);
+              arrYaml += `${firstKey}: ${firstValue}`;
+              
+              // Add remaining keys with proper indentation
+              for (let i = 1; i < keys.length; i++) {
+                const key = keys[i];
+                const val = convertValue(item[key], currentIndentLevel + 1);
+                arrYaml += '\n' + indent.repeat(currentIndentLevel + 1) + `${key}: ${val}`;
+              }
+            }
+          } else {
+            // For non-objects, just add the value
+            const itemYaml = convertValue(item, currentIndentLevel + 1);
+            arrYaml += itemYaml;
+          }
         });
         return arrYaml;
       }
       
-      if (typeof value === 'object') {
+      if (typeof value === 'object' && value !== null) {
         if (Object.keys(value).length === 0) return '{}';
         
         if (!prettyPrint) {
@@ -642,12 +661,17 @@ class JsonFormatterTool extends Tool {
           ).join(', ') + '}';
         }
         
-        let objYaml = '\n';
-        Object.keys(value).forEach((key, index, arr) => {
-          const valStr = convertValue(value[key], currentIndentLevel + 1);
-          objYaml += indent.repeat(currentIndentLevel) + String(key) + ': ' + 
-                    (valStr.startsWith('\n') ? valStr.substring(1) : valStr) + 
-                    (index < arr.length - 1 ? '\n' : '');
+        let objYaml = '';
+        Object.keys(value).forEach((key) => {
+          const val = convertValue(value[key], currentIndentLevel + 1);
+          
+          if (val.startsWith('\n')) {
+            // If value starts with newline (like arrays), append directly
+            objYaml += '\n' + indent.repeat(currentIndentLevel) + `${key}:${val}`;
+          } else {
+            // Otherwise add space after colon
+            objYaml += '\n' + indent.repeat(currentIndentLevel) + `${key}: ${val}`;
+          }
         });
         return objYaml;
       }
