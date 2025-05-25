@@ -112,6 +112,42 @@ function generateCategoryContent(categoryConfig, categoryId) {
 }
 
 /**
+ * Initialize collapsible sections on the home page
+ */
+function initializeCollapsibleSections() {
+  const toggles = document.querySelectorAll('.category-toggle');
+  
+  // Set initial state
+  document.querySelectorAll('.category-content').forEach(content => {
+    content.style.maxHeight = content.scrollHeight + 'px';
+  });
+  
+  toggles.forEach(toggle => {
+    toggle.addEventListener('click', function() {
+      const categoryId = this.getAttribute('data-category');
+      const content = document.querySelector('[data-category-content="' + categoryId + '"]');
+      const chevron = this.querySelector('svg');
+      
+      if (content && chevron) {
+        const isCollapsed = content.style.maxHeight === '0px';
+        
+        if (isCollapsed) {
+          // Expand
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.style.opacity = '1';
+          chevron.classList.remove('-rotate-90');
+        } else {
+          // Collapse
+          content.style.maxHeight = '0px';
+          content.style.opacity = '0';
+          chevron.classList.add('-rotate-90');
+        }
+      }
+    });
+  });
+}
+
+/**
  * Main route handler
  * @param {string} path - The URL path
  */
@@ -188,6 +224,13 @@ export async function handleRoute(path) {
   
   // Update page content
   main.innerHTML = content;
+  
+  // Initialize collapsible sections if on home page
+  if (path === '/' || path === '/home') {
+    setTimeout(() => {
+      initializeCollapsibleSections();
+    }, 50);
+  }
   
   // Initialize tool AFTER DOM elements are available
   if (path !== '/' && path !== '/home') {

@@ -330,7 +330,7 @@ export function getWelcomeContent() {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">$1</a>');
 
-  return `
+  const content = `
     <div class="container mx-auto px-4 py-8">
       <!-- Main Welcome Card -->
       <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm mb-8 transition-colors">
@@ -346,32 +346,44 @@ export function getWelcomeContent() {
         </div>
       </div>
       
-      ${Object.entries(categories).map(([categoryId, config]) => `
+      ${Object.entries(categories).map(([categoryId, config], index) => `
         <!-- ${config.name} Tools Card -->
         <div class="divide-y divide-gray-200 dark:divide-gray-600 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm mb-8 transition-colors" itemscope itemtype="https://schema.org/SoftwareApplication">
-          <div class="px-4 py-5 sm:px-6">
-            <h2 class="text-3xl font-semibold text-slate-700 dark:text-slate-200" itemprop="applicationCategory">${config.name}</h2>
-            <p class="text-slate-600 dark:text-slate-400 mt-2" itemprop="description">${config.description}</p>
+          <div class="category-toggle px-4 py-5 sm:px-6 flex items-center justify-between cursor-pointer select-none hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors" data-category="${categoryId}">
+            <div class="flex-1">
+              <h2 class="text-3xl font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-3" itemprop="applicationCategory">
+                <span class="text-4xl">${config.icon}</span>
+                ${config.name}
+              </h2>
+              <p class="text-slate-600 dark:text-slate-400 mt-2" itemprop="description">${config.description}</p>
+            </div>
+            <svg class="ml-4 h-6 w-6 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
           </div>
-          <div class="px-4 py-5 sm:p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              ${Object.entries(tools)
-                .filter(([path]) => path.startsWith(categoryId + '/'))
-                .map(([path, tool]) => {
-                  return `
-                    <a href="/${path}" class="bg-slate-50 dark:bg-gray-700 rounded-lg border border-slate-200 dark:border-gray-600 p-5 flex flex-col gap-2 hover:bg-white dark:hover:bg-gray-600 hover:shadow-md hover:border-slate-300 dark:hover:border-gray-500 transition-all duration-200">
-                      <div class="text-3xl mb-1">${tool.icon}</div>
-                      <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200" itemprop="name">${tool.name}</h3>
-                      <p class="text-sm text-slate-500 dark:text-slate-400 flex-grow" itemprop="description">${tool.description}</p>
-                    </a>
-                  `;
-                }).join('')}
+          <div class="category-content overflow-hidden transition-all duration-300 ease-in-out" data-category-content="${categoryId}">
+            <div class="px-4 py-5 sm:p-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${Object.entries(tools)
+                  .filter(([path]) => path.startsWith(categoryId + '/'))
+                  .map(([path, tool]) => {
+                    return `
+                      <a href="/${path}" class="bg-slate-50 dark:bg-gray-700 rounded-lg border border-slate-200 dark:border-gray-600 p-5 flex flex-col gap-2 hover:bg-white dark:hover:bg-gray-600 hover:shadow-md hover:border-slate-300 dark:hover:border-gray-500 transition-all duration-200">
+                        <div class="text-3xl mb-1">${tool.icon}</div>
+                        <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200" itemprop="name">${tool.name}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 flex-grow" itemprop="description">${tool.description}</p>
+                      </a>
+                    `;
+                  }).join('')}
+              </div>
             </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
+
+  return content;
 }
 
 /**
