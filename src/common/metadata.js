@@ -34,6 +34,13 @@ export const categories = {
     description: 'Free online text editing and formatting tools. Edit, validate, and convert text and code formats in your browser.',
     icon: '📝',
     keywords: ['text tools', 'text editor', 'text formatter', 'code validator']
+  },
+  ml: {
+    id: 'ml',
+    name: 'ML Tools',
+    description: 'Run machine learning models locally in your browser. No uploads, no server-side processing.',
+    icon: '🤖',
+    keywords: ['machine learning', 'ml', 'ai', 'face detection', 'local ml']
   }
 };
 
@@ -191,6 +198,20 @@ export const tools = {
       'Click "Download" to save the output.'
     ],
     useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.'
+  },
+  'ml/face_detect': {
+    id: 'face_detect',
+    category: 'ml',
+    name: 'Face Detection',
+    description: 'Detect faces in images using a MediaPipe model, all in your browser. No uploads, no server-side processing.',
+    icon: '🧑‍💻',
+    keywords: ['face detection', 'mediapipe', 'ml', 'ai', 'local ml'],
+    howToUse: [
+      'Upload an image with faces.',
+      'The tool will highlight detected faces on the image.',
+      'No data leaves your browser.'
+    ],
+    useCase: 'Quickly detect faces in images for privacy, fun, or research.'
   }
 };
 

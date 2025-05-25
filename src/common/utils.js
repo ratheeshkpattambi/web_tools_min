@@ -40,7 +40,7 @@ export function showLogs() {
  * @param {string} type - The type of log (info, success, error)
  */
 export function addLog(message, type = 'info') {
-  const logContent = document.getElementById('logContent');
+  let logContent = document.getElementById('logContent');
   if (!logContent) return;
 
   // Convert logContent to textarea if it's not already
